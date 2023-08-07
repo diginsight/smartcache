@@ -11,7 +11,7 @@
 	  <RepositoryUrl>https://github.com/diginsight/telemetry.git</RepositoryUrl>
 	  <RepositoryType>git</RepositoryType>
 	  <PackageTags>telemetry diginsight diagnostic insight</PackageTags>
-	  <PackageIcon>TelemetryBig.png</PackageIcon>
+	  <PackageIcon>SmartCache.png</PackageIcon>
 	  <Authors>diginsight</Authors>
 	  <Description>Common.Cache is a .Net component that provides MultiLayer, Hybrid, Distributed Cache capability with dynamic entries lifetime management and automatic preload capability.</Description>
 	  <SignAssembly>true</SignAssembly>
@@ -38,7 +38,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<None Include="..\images\01. Project image\Telemetry\TelemetryBig.png">
+		<None Include="..\images\01. Project image\SmartCache\SmartCache.png">
 			<Pack>True</Pack>
 			<PackagePath></PackagePath>
 		</None>
