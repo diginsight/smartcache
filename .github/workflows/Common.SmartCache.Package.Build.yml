@@ -28,7 +28,7 @@ jobs:
       with:
         # sample-secret: ${{ secrets.SAMPLESECRET }}
         # sample-secret1: ${{ secrets.SampleSecret }}
-        # nuget-api-key: ${{ secrets.NUGET_API_KEY }}
+        nuget-api-key: ${{ secrets.NUGET_API_KEY }}
         nuget-version: 'latest'
         # Source to scope the NuGet API Key to.
         # nuget-api-key-source: # optional
