@@ -39,7 +39,7 @@ jobs:
       run: |
         $env:ASSEMBLY_VERSION="1.0.$env:BUILD_NUMBER"
         Write-Host "Setting assembly version to: $env:ASSEMBLY_VERSION"
-        (Get-Content Common.SmartCache/Common.SmartCache.csproj) -replace '<Version>.*<\/Version>', "<Version>$env:ASSEMBLY_VERSION<\/Version>" | Set-Content Common.SmartCache/Common.SmartCache.csproj
+        (Get-Content Common.SmartCache/Common.SmartCache.csproj) -replace '<Version>.*<\/Version>', "<Version>$env:ASSEMBLY_VERSION</Version>" | Set-Content Common.SmartCache/Common.SmartCache.csproj
     #- name: Set Assembly Version
     #  run: |
     #    ASSEMBLY_VERSION="1.0.$BUILD_NUMBER"
