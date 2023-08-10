@@ -7,13 +7,13 @@
 	  <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
 	  <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
 	  <PackageLicenseFile>LICENSE.md</PackageLicenseFile>
-	  <PackageProjectUrl>https://github.com/diginsight/telemetry</PackageProjectUrl>
-	  <RepositoryUrl>https://github.com/diginsight/telemetry.git</RepositoryUrl>
+	  <PackageProjectUrl>https://github.com/diginsight/smartcache</PackageProjectUrl>
+	  <RepositoryUrl>https://github.com/diginsight/smartcache.git</RepositoryUrl>
 	  <RepositoryType>git</RepositoryType>
-	  <PackageTags>telemetry diginsight diagnostic insight</PackageTags>
+	  <PackageTags>cache diginsight smart ai preload</PackageTags>
 	  <PackageIcon>SmartCache.png</PackageIcon>
 	  <Authors>diginsight</Authors>
-	  <Description>Common.Cache is a .Net component that provides MultiLayer, Hybrid, Distributed Cache capability with dynamic entries lifetime management and automatic preload capability.</Description>
+	  <Description>Common.Cache is a .Net component that provides hybrid, distributed cache capability with dynamic entries lifetime management and automatic preload support.</Description>
 	  <SignAssembly>true</SignAssembly>
 	  <AssemblyOriginatorKeyFile>diginsight.snk</AssemblyOriginatorKeyFile>
 	  <UserSecretsId>ea6bafb2-fe5a-4acb-820e-78ff096f00c7</UserSecretsId>
@@ -47,4 +47,8 @@
 			<PackagePath></PackagePath>
 		</None>
 	</ItemGroup>
+
+	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
+	  <Exec Command="set OutDir=$(OutDir)&#xD;&#xA;set ConfigurationName=$(ConfigurationName)&#xD;&#xA;set ProjectName=$(ProjectName)&#xD;&#xA;set TargetName=$(TargetName)&#xD;&#xA;set TargetPath=$(TargetPath)&#xD;&#xA;set ProjectPath=$(ProjectPath)&#xD;&#xA;set ProjectFileName=$(ProjectFileName)&#xD;&#xA;set TargetExt=$(TargetExt)&#xD;&#xA;set TargetFileName=$(TargetFileName)&#xD;&#xA;set DevEnvDir=$(DevEnvDir)&#xD;&#xA;set TargetDir=$(TargetDir)&#xD;&#xA;set ProjectDir=$(ProjectDir)&#xD;&#xA;set SolutionFileName=$(SolutionFileName)&#xD;&#xA;set SolutionPath=$(SolutionPath)&#xD;&#xA;set SolutionDir=$(SolutionDir)&#xD;&#xA;set SolutionName=$(SolutionName)&#xD;&#xA;set PlatformName=$(PlatformName)&#xD;&#xA;set ProjectExt=$(ProjectExt)&#xD;&#xA;set SolutionExt=$(SolutionExt)&#xD;&#xA;.\postbuild.cmd" />
+	</Target>
 </Project>
