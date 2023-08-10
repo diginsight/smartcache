@@ -39,21 +39,21 @@ jobs:
       run: |
         $env:ASSEMBLY_VERSION="1.0.$env:BUILD_NUMBER"
         Write-Host "Setting assembly version to: $env:ASSEMBLY_VERSION"
-        (Get-Content src/SmartCache/SmartCache.csproj) -replace '<Version>.*<\/Version>', "<Version>$env:ASSEMBLY_VERSION<\/Version>" | Set-Content src/SmartCache/SmartCache.csproj
+        (Get-Content Common.SmartCache/SmartCache.csproj) -replace '<Version>.*<\/Version>', "<Version>$env:ASSEMBLY_VERSION<\/Version>" | Set-Content Common.SmartCache/SmartCache.csproj
     #- name: Set Assembly Version
     #  run: |
     #    ASSEMBLY_VERSION="1.0.$BUILD_NUMBER"
     #    echo "Setting assembly version to: $ASSEMBLY_VERSION"
-    #    sed -i "s/<Version>.*<\/Version>/<Version>$ASSEMBLY_VERSION<\/Version>/" src/SmartCache/SmartCache.csproj
+    #    sed -i "s/<Version>.*<\/Version>/<Version>$ASSEMBLY_VERSION<\/Version>/" Common.SmartCache/SmartCache.csproj
 
     - name: Restore dependencies
       run: dotnet restore
       
     - name: Build DLL
-      run: dotnet build src/SmartCache/SmartCache.csproj --configuration Release --no-restore
+      run: dotnet build Common.SmartCache/SmartCache.csproj --configuration Release --no-restore
       
     - name: Publish DLL
-      run: dotnet publish src/SmartCache/SmartCache.csproj --configuration Release --output ./publish --no-build
+      run: dotnet publish Common.SmartCache/SmartCache.csproj --configuration Release --output ./publish --no-build
       
     #- name: Upload Artifact
     #  uses: actions/upload-artifact@v2
