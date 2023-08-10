@@ -30,12 +30,12 @@ jobs:
       id: setup_nuget
       uses: NuGet/setup-nuget@v1.2.0
     
-    - name: Install PowerShell Core
-      id: install_powershell_core
-      run: |
-        Invoke-WebRequest -Uri https://github.com/PowerShell/PowerShell/releases/download/v7.1.3/PowerShell-7.1.3-win-x64.msi -OutFile powershell.msi
-        Start-Process msiexec.exe -Wait -ArgumentList '/i powershell.msi /quiet /norestart'
-        Write-Host "powershell.msi install completed"
+    # - name: Install PowerShell Core
+    #   id: install_powershell_core
+    #   run: |
+    #     Invoke-WebRequest -Uri https://github.com/PowerShell/PowerShell/releases/download/v7.1.3/PowerShell-7.1.3-win-x64.msi -OutFile powershell.msi
+    #     Start-Process msiexec.exe -Wait -ArgumentList '/i powershell.msi /quiet /norestart'
+    #     Write-Host "powershell.msi install completed"
 
     - name: Run PowerShell Dump
       run: |
