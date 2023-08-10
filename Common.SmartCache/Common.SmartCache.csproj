@@ -3,7 +3,7 @@
   <PropertyGroup>
 	  <TargetFrameworks>netstandard2.0;net6.0</TargetFrameworks>
 	  <!--<TargetFramework>netstandard2.0</TargetFramework>-->
-	  <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+	  <GenerateAssemblyInfo>True</GenerateAssemblyInfo>
 	  <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
 	  <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
 	  <PackageLicenseFile>LICENSE.md</PackageLicenseFile>
@@ -17,9 +17,11 @@
 	  <SignAssembly>true</SignAssembly>
 	  <AssemblyOriginatorKeyFile>diginsight.snk</AssemblyOriginatorKeyFile>
 	  <UserSecretsId>ea6bafb2-fe5a-4acb-820e-78ff096f00c7</UserSecretsId>
+	  <Version>1.0.0.2</Version>
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Properties\AssemblyInfo.cs" />
   </ItemGroup>
 
 	<ItemGroup>
@@ -46,6 +48,10 @@
 			<Pack>True</Pack>
 			<PackagePath></PackagePath>
 		</None>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Folder Include="Properties\" />
 	</ItemGroup>
 
 	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
