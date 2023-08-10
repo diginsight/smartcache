@@ -54,7 +54,7 @@ jobs:
       run: dotnet restore
       
     - name: Build DLL
-      run: dotnet build Common.SmartCache/Common.SmartCache.csproj --configuration Release --no-restore
+      run: dotnet build Common.SmartCache/Common.SmartCache.csproj --configuration Release --no-restore --verbosity detailed
       
     # - name: Publish DLL
     #   run: dotnet publish Common.SmartCache/Common.SmartCache.csproj --configuration Release --output ./publish --no-build
