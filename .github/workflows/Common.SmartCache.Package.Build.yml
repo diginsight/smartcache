@@ -27,9 +27,13 @@ jobs:
         dotnet-version: 6.0.x
 
     - name: Install PowerShell Core
-      run: | 
-        sudo apt-get update
-        sudo apt-get install -y powershell
+      run: |
+        Invoke-WebRequest -Uri https://github.com/PowerShell/PowerShell/releases/download/v7.1.3/PowerShell-7.1.3-win-x64.msi -OutFile powershell.msi
+        Start-Process msiexec.exe -Wait -ArgumentList '/i powershell.msi /quiet /norestart'
+    # - name: Install PowerShell Core
+    #   run: | 
+    #     sudo apt-get update
+    #     sudo apt-get install -y powershell
 
     - name: Setup NuGet.exe for use with actions
       id: setup_nuget
