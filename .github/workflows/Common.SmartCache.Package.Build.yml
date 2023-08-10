@@ -26,6 +26,11 @@ jobs:
       with:
         dotnet-version: 6.0.x
 
+    - name: Install PowerShell Core
+      run: | 
+        sudo apt-get update
+        sudo apt-get install -y powershell
+
     - name: Setup NuGet.exe for use with actions
       id: setup_nuget
       uses: NuGet/setup-nuget@v1.2.0
