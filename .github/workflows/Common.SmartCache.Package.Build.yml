@@ -32,7 +32,9 @@ jobs:
         # nuget-api-key-source: # optional
     
     - name: Set build number
-      run: echo "BUILD_NUMBER=${{ github.run_number }}" >> $GITHUB_ENV
+      run: |
+        Write-Host "github.run_number: ${{ github.run_number }}"
+        echo "BUILD_NUMBER=${{ github.run_number }}" >> $GITHUB_ENV
     #- name: Get build number
     #  id: get_build_number
     #  run: echo "BUILD_NUMBER=$GITHUB_RUN_NUMBER" >> $GITHUB_ENV
