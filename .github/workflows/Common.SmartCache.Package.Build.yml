@@ -22,11 +22,12 @@ jobs:
         dotnet-version: 6.0.x
 
     - name: Setup NuGet.exe for use with actions
-      # You may pin to the exact commit or the version.
-      # uses: NuGet/setup-nuget@296fd3ccf8528660c91106efefe2364482f86d6f
+      id: setup_nuget
       uses: NuGet/setup-nuget@v1.2.0
-      # with:
-      #   sample-secret: ${{ secrets.SAMPLESECRET }}
+      with:
+        sample-secret: ${{ secrets.SAMPLESECRET }}
+      env:
+        sample-secret: ${{ steps.setup_nuget.outputs.sample-secret }}
       #   sample-secret1: ${{ secrets.SampleSecret }}
       #   nuget-api-key: ${{ secrets.NUGET_API_KEY }}
       #   nuget-version: 'latest'
@@ -39,7 +40,6 @@ jobs:
         Write-Host "github.run_number: ${{ github.run_number }}"
         $env:BUILD_NUMBER="${{ github.run_number }}"
         Write-Host "BUILD_NUMBER=$env:BUILD_NUMBER"
-        Write-Host "env:sample-secret=${{ secrets.SampleSecret }}"
         Write-Host "env:sample-secret=$env:sample-secret"
         Write-Host "sample-secret=$sample-secret"
         Write-Host "sample-secret1=$sample-secret1"
