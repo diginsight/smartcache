@@ -26,9 +26,9 @@ jobs:
       # uses: NuGet/setup-nuget@296fd3ccf8528660c91106efefe2364482f86d6f
       uses: NuGet/setup-nuget@v1.2.0
       with:
-        sample-secret: ${{ secrets.SAMPLESECRET }}
-        sample-secret1: ${{ secrets.SampleSecret }}
-        nuget-api-key: ${{ secrets.NUGET_API_KEY }}
+        # sample-secret: ${{ secrets.SAMPLESECRET }}
+        # sample-secret1: ${{ secrets.SampleSecret }}
+        # nuget-api-key: ${{ secrets.NUGET_API_KEY }}
         nuget-version: 'latest'
         # Source to scope the NuGet API Key to.
         # nuget-api-key-source: # optional
