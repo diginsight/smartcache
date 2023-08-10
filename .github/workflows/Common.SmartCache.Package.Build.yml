@@ -34,7 +34,8 @@ jobs:
     - name: Set build number
       run: |
         Write-Host "github.run_number: ${{ github.run_number }}"
-        echo "BUILD_NUMBER=${{ github.run_number }}" >> $GITHUB_ENV
+        $env:BUILD_NUMBER="1.0.${{ github.run_number }}"
+        # echo "BUILD_NUMBER=${{ github.run_number }}" >> $GITHUB_ENV
     #- name: Get build number
     #  id: get_build_number
     #  run: echo "BUILD_NUMBER=$GITHUB_RUN_NUMBER" >> $GITHUB_ENV
