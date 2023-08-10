@@ -30,6 +30,10 @@ jobs:
       id: setup_nuget
       uses: NuGet/setup-nuget@v1.2.0
     
+    - name: Run PowerShell Dump
+      run: |
+        pwsh -File "scripts/v1/00. DumpVariables.ps1"
+
     - name: Set build number
       id: set_build_number
       run: |
