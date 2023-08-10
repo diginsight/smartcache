@@ -14,8 +14,13 @@ jobs:
 
     runs-on: self-hosted
 
+    env:  # Define environment variables here
+      NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+      SAMPLE_SECRET: ${{ secrets.SAMPLESECRET }}
+
     steps:
     - uses: actions/checkout@v3
+
     - name: Setup .NET
       uses: actions/setup-dotnet@v3
       with:
@@ -24,10 +29,10 @@ jobs:
     - name: Setup NuGet.exe for use with actions
       id: setup_nuget
       uses: NuGet/setup-nuget@v1.2.0
-      with:
-        sample-secret: ${{ secrets.SAMPLESECRET }}
-      env:
-        sample-secret: ${{ steps.setup_nuget.outputs.sample-secret }}
+      # with:
+      #   sample-secret: ${{ secrets.SAMPLESECRET }}
+      # env:
+        # sample-secret: ${{ steps.setup_nuget.outputs.sample-secret }}
       #   sample-secret1: ${{ secrets.SampleSecret }}
       #   nuget-api-key: ${{ secrets.NUGET_API_KEY }}
       #   nuget-version: 'latest'
@@ -40,8 +45,7 @@ jobs:
         Write-Host "github.run_number: ${{ github.run_number }}"
         $env:BUILD_NUMBER="${{ github.run_number }}"
         Write-Host "BUILD_NUMBER=$env:BUILD_NUMBER"
-        Write-Host "env:sample-secret=${{ env:sample-secret }}"
-        Write-Host "env:SAMPLE-SECRET=${{ env:SAMPLE-SECRET }}"
+        Write-Host "env:SAMPLE-SECRET=${{ env:SAMPLE_SECRET }}"
         Write-Host "sample-secret=$sample-secret"
         Write-Host "sample-secret1=$sample-secret1"
         echo "SampleSecret=${{ secrets.SampleSecret }}" >> SECRETS.txt
