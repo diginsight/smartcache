@@ -241,5 +241,5 @@ jobs:
           Write-Host "env:BUILD_NUMBER: $env:BUILD_NUMBER"
           $env:ASSEMBLY_VERSION="1.0.0.$env:BUILD_NUMBER"
           Write-Host "Setting assembly version to: $env:ASSEMBLY_VERSION"
-          dotnet nuget push artifactFolder1/Release/*.$env:ASSEMBLY_VERSION.nupkg --source https://api.nuget.org/v3/index.json --api-key ${{ secrets.NUGET_API_KEY }}
+          dotnet nuget push artifactFolder1/Release/Common.SmartCache.$env:ASSEMBLY_VERSION.nupkg --source https://api.nuget.org/v3/index.json --api-key ${{ secrets.NUGET_API_KEY }}
           
