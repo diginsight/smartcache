@@ -44,7 +44,7 @@ jobs:
 
     - name: Run pwsh Dump github context
       run: |
-        pwsh -File "scripts/v2/01. DumpContext.ps1" -context ${{ github }}
+        pwsh -File "scripts/v2/01. DumpContext.ps1" -context $github
 
 
     ################################
