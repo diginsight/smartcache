@@ -41,13 +41,3 @@ __Common.SmartCache__ will provide automatic caching based on payload size, retr
 __Common.SmartCache__ component is supported on .Net Framework 4.6.2+ and .Net Core 3.0+.<br>
 For more information visi:.
 [smartcache]: https://github.com/diginsight/smartcache/
-
-
-# Contribute
-Contribute to the repository with your pull requests. 
-
-- [SmartCache](https://github.com/diginsight/smartcache)
-- [Diagnostics](https://github.com/diginsight/telemetry)
-
-# License
-See the [LICENSE](LICENSE.md) file for license rights and limitations (MIT).
