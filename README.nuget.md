@@ -1,14 +1,15 @@
 # INTRODUCTION 
-Common.SmartCache provides intelligent loading for data providers such as __external api__ or __databases__.
-__Age conscious data management__ is applied to cache or preload data automatically.<br>
+`Common.SmartCache` provides intelligent loading for data providers such as __external api__ or __databases__.
+__Age conscious data management__ is applied to cache or preload data automatically.
 __AI assisted algorithms__ can be used to ensure data preloading, based on application use.
 
 Articles:
-- [HOWTO - Leverage age conscious data management to boost application performance.md]<br>
-(TODO): explores how to use Common.SmartCache to boost application performance by means age conscious data magagement.
-- [HOWTO - Enable data preloading by means of Artificial Intelligence.md]<br> (TODO): explores how to enable AI assisted preloading to improve data preloading efficiency.<br><br>
+- [HOWTO - Leverage age conscious data management to boost application performance.md]
+  (TODO): explores how to use Common.SmartCache to boost application performance by means age conscious data magagement.
+- [HOWTO - Enable data preloading by means of Artificial Intelligence.md]
+  (TODO): explores how to enable AI assisted preloading to improve data preloading efficiency.
 
-NB: __Common.SmartCache is currently under development and use ov versions 0.x.x.x is not supported__<br><br>
+NB: __Common.SmartCache is currently under development and use ov versions 0.x.x.x is not supported__
 
 # STEPS TO USE SMARTCACHE:
 - add Common.SmartCache to your application 
