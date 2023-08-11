@@ -163,7 +163,7 @@ jobs:
       run: |
         $source = "Common.SmartCache/bin"
         $destination = "artifactFolder"
-        Copy-Item -Path $source\* -Destination $destination -Recurse 
+        Copy-Item -Path $source -Destination $destination -Recurse 
           
     #- name: Cache bin folder
     #  uses: actions/cache@v1.2.1
