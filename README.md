@@ -1,5 +1,5 @@
 # INTRODUCTION 
-Common.SmartCache provides intelligent loading for data providers such as __external api__ or __databases__.
+Common.SmartCache provides intelligent loading for data providers such as __external api__ or __databases__.<br>
 __Age conscious data management__ is applied to cache or preload data automatically.<br>
 __AI assisted algorithms__ can be used to ensure data preloading, based on application use.
 
@@ -8,7 +8,7 @@ Articles:
 (TODO): explores how to use Common.SmartCache to boost application performance by means age conscious data magagement.
 - [HOWTO - Enable data preloading by means of Artificial Intelligence.md]<br> (TODO): explores how to enable AI assisted preloading to improve data preloading efficiency.<br><br>
 
-NB: __Common.SmartCache is currently under development and use is not supported__
+NB: __Common.SmartCache is currently under development and use is not supported__<br><br>
 
 # STEPS TO USE SMARTCACHE:
 - add Common.SmartCache to your application 
@@ -36,7 +36,8 @@ var cacheContext = new CacheContext() { Enabled = true, MaxAge = 300 };
 var userProfile = await userProfileService.FindUserByEmailAddressAsync(context.Account.Email, cacheContext).ConfigureAwait(false);
 ```
 
-__Common.SmartCache__ will provide automatic caching based on payload size, retrieval latency etc.
+__Common.SmartCache__ will provide automatic caching based on payload size, retrieval latency etc.<br>
+Common.SmartCache will support data preloading based on application use.
 
 __Common.SmartCache__ component is supported on .Net Framework 4.6.2+ and .Net Core 3.0+.<br>
 For more information visi:.
