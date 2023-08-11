@@ -81,6 +81,12 @@ jobs:
       run: |
         echo "$MATRIX_CONTEXT"
         echo "$env:MATRIX_CONTEXT" >> 06.MATRIX_CONTEXT.txt
+    - name: Dump env context
+      env:
+        ENV_CONTEXT: ${{ toJson(env) }}
+      run: |
+        echo "$ENV_CONTEXT"
+        echo "$env:ENV_CONTEXT" >> 07.ENV_CONTEXT.txt
 
     ################################
     # build number and version
