@@ -11,6 +11,9 @@ on:
 
 jobs:
   build:
+    strategy:
+      matrix:
+        configuration: [Debug, Release]
     runs-on: self-hosted
 
     env:  # Define environment variables here
@@ -143,7 +146,7 @@ jobs:
       run: dotnet restore
       
     - name: Build DLL
-      run: dotnet build Common.SmartCache/Common.SmartCache.csproj --configuration Release --no-restore #--verbosity detailed
+      run: dotnet build Common.SmartCache/Common.SmartCache.csproj --configuration $configuration --no-restore #--verbosity detailed
       
     ################################
     # upload artifacts
@@ -158,7 +161,7 @@ jobs:
         retention-days: 1
     
     # - name: Publish DLL
-      #   run: dotnet publish Common.SmartCache/Common.SmartCache.csproj --configuration Release --output ./publish --no-build
+      #   run: dotnet publish Common.SmartCache/Common.SmartCache.csproj --configuration $configuration --output ./publish --no-build
 
       #- name: Upload Artifact
       #  uses: actions/upload-artifact@v2
