@@ -1,5 +1,5 @@
 # INTRODUCTION 
-Common.SmartCache provides __intelligent loading for data providers__ such as __external api__ or __databases__.<br>
+`Common.SmartCache` provides __intelligent loading for data providers__ such as __external api__ or __databases__.<br>
 __Age conscious data management__ is applied to cache or preload data automatically.<br>
 __AI assisted algorithms__ can be used to ensure data preloading, based on application use.
 
