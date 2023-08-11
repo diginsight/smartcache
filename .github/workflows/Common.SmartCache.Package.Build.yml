@@ -50,13 +50,13 @@ jobs:
         GITHUB_CONTEXT: ${{ toJson(github) }}
       run: |
         echo "$GITHUB_CONTEXT"
-        echo "$env:GITHUB_CONTEXT" >> 01.GITHUB_CONTEXT.txt
+        echo "$env:GITHUB_CONTEXT" >> 01.GITHUB_CONTEXT.log
     - name: Dump job context
       env:
         JOB_CONTEXT: ${{ toJson(job) }}
       run: |
         echo "$JOB_CONTEXT"
-        echo "$env:JOB_CONTEXT" >> 02.JOB_CONTEXT.txt
+        echo "$env:JOB_CONTEXT" >> 02.JOB_CONTEXT.log
     - name: Dump steps context
       env:
         STEPS_CONTEXT: ${{ toJson(steps) }}
