@@ -37,20 +37,15 @@ jobs:
     #     Start-Process msiexec.exe -Wait -ArgumentList '/i powershell.msi /quiet /norestart'
     #     Write-Host "powershell.msi install completed"
 
-    - name: Run PowerShell Dump
+    - name: Run pwsh Dump
       run: |
         pwsh -File "scripts/v2/00. DumpVariables.ps1"
 
     - name: Set build number
       id: set_build_number
       run: |
-        Write-Host "github.run_number: ${{ github.run_number }}"
         $env:BUILD_NUMBER="${{ github.run_number }}"
         Write-Host "BUILD_NUMBER=$env:BUILD_NUMBER"
-        Write-Host "env:SAMPLE-SECRET=$env:SAMPLE_SECRET"
-        Write-Host "sample-secret=$sample-secret"
-        Write-Host "sample-secret1=$sample-secret1"
-        echo "SampleSecret=${{ secrets['SampleSecret'] }}" >> SECRETS.txt
         echo "SampleSecret=${{ secrets['SampleSecret'] }}" >> SECRETS.txt
         echo "BUILD_NUMBER=$env:BUILD_NUMBER" >> $GITHUB_ENV
         echo "::set-output name=BUILD_NUMBER::$env:BUILD_NUMBER"
@@ -58,7 +53,6 @@ jobs:
     - name: Set Assembly Version
       run: |
         Write-Host "set_build_number.outputs.BUILD_NUMBER: ${{ steps.set_build_number.outputs.BUILD_NUMBER }}"
-        Write-Host "env:BUILD_NUMBER: $env:BUILD_NUMBER"
         $env:BUILD_NUMBER="${{ steps.set_build_number.outputs.BUILD_NUMBER }}"
         Write-Host "env:BUILD_NUMBER: $env:BUILD_NUMBER"
         $env:ASSEMBLY_VERSION="1.0.0.$env:BUILD_NUMBER"
@@ -69,13 +63,9 @@ jobs:
       run: dotnet restore
       
     - name: Build DLL
-      run: dotnet build Common.SmartCache/Common.SmartCache.csproj --configuration Release --no-restore --verbosity detailed
+      run: dotnet build Common.SmartCache/Common.SmartCache.csproj --configuration Release --no-restore #--verbosity detailed
       
-    - run: mkdir -p artifactFolder
-
-    - run: echo hello > artifactFolder/world.txt
-
-    - name: Upload a Build Artifact
+    - name: Upload bin folder as an Artifact
       uses: actions/upload-artifact@v3.1.2
       with:
         name: artifact
