@@ -71,24 +71,38 @@ jobs:
     - name: Build DLL
       run: dotnet build Common.SmartCache/Common.SmartCache.csproj --configuration Release --no-restore --verbosity detailed
       
-    # - name: Publish DLL
-    #   run: dotnet publish Common.SmartCache/Common.SmartCache.csproj --configuration Release --output ./publish --no-build
-      
-    #- name: Upload Artifact
-    #  uses: actions/upload-artifact@v2
-    #  with:
-    #    name: dll-artifact
-    #    path: ./publish
+    - run: mkdir -p artifactFolder
 
-    #- name: Create NuGet package
-    #  run: dotnet pack --no-build --include-symbols -o ./nupkg
-    #  working-directory: ./Common.SmartCache/bin/Debug
-      
-    # - name: Publish NuGet package
-    #   uses: nuget/publish@1.0.0
-    #   with:
-    #     nuget-api-key: ${{ secrets.NUGET_API_KEY }}
-    #     nuget-version: 'latest'
+    - run: echo hello > artifactFolder/world.txt
+
+    - name: Upload a Build Artifact
+      uses: actions/upload-artifact@v3.1.2
+      with:
+        name: artifact
+        path: |
+          Common.SmartCache/bin/
+          !Common.SmartCache/bin/**/*.tmp
+        if-no-files-found: warn
+        retention-days: 1
+    
+    # - name: Publish DLL
+      #   run: dotnet publish Common.SmartCache/Common.SmartCache.csproj --configuration Release --output ./publish --no-build
+
+      #- name: Upload Artifact
+      #  uses: actions/upload-artifact@v2
+      #  with:
+      #    name: dll-artifact
+      #    path: ./publish
+
+      #- name: Create NuGet package
+      #  run: dotnet pack --no-build --include-symbols -o ./nupkg
+      #  working-directory: ./Common.SmartCache/bin/Debug
+
+      # - name: Publish NuGet package
+      #   uses: nuget/publish@1.0.0
+      #   with:
+      #     nuget-api-key: ${{ secrets.NUGET_API_KEY }}
+      #     nuget-version: 'latest'
 
     - name: Test
       run: dotnet test --no-build --verbosity normal
