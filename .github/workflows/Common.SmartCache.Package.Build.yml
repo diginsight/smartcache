@@ -18,7 +18,6 @@ jobs:
 
     env:  # Define environment variables here
       NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
-      SAMPLE_SECRET: ${{ secrets.SAMPLESECRET }}
 
     steps:
     - uses: actions/checkout@v3
