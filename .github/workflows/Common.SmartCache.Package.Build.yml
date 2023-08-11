@@ -11,9 +11,9 @@ on:
 
 jobs:
   build:
-    strategy:
-      matrix:
-        configuration: [Debug, Release]
+    # strategy:
+    #   matrix:
+    #     configuration: [Debug, Release]
     runs-on: self-hosted
 
     env:  # Define environment variables here
@@ -146,8 +146,14 @@ jobs:
       run: dotnet restore
       
     - name: Build DLL
-      run: dotnet build Common.SmartCache/Common.SmartCache.csproj --configuration $configuration --no-restore --verbosity detailed
+      run: dotnet build Common.SmartCache/Common.SmartCache.csproj --configuration Debug Release --no-restore --verbosity detailed
       
+    - name: Cache bin folder
+      uses: actions/cache@v1.2.1
+      with:
+        path: cache
+        key: bin 
+        
     - name: Copy bin folder to _temp
       run: |
         # Copy the contents of the bin folder to _temp
