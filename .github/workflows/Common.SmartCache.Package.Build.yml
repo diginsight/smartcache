@@ -87,6 +87,24 @@ jobs:
       run: |
         echo "$ENV_CONTEXT"
         echo "$env:ENV_CONTEXT" >> 07.ENV_CONTEXT.txt
+    - name: Dump vars context
+      env:
+        VARS_CONTEXT: ${{ toJson(vars) }}
+      run: |
+        echo "$VARS_CONTEXT"
+        echo "$env:VARS_CONTEXT" >> 08.VARS_CONTEXT.txt
+    - name: Dump jobs context
+      env:
+        JOBS_CONTEXT: ${{ toJson(jobs) }}
+      run: |
+        echo "$JOBS_CONTEXT"
+        echo "$env:JOBS_CONTEXT" >> 09.JOBS_CONTEXT.txt
+    - name: Dump secrets context
+      env:
+        SECRETS_CONTEXT: ${{ toJson(secrets) }}
+      run: |
+        echo "$SECRETS_CONTEXT"
+        echo "$env:SECRETS_CONTEXT" >> 10.SECRETS_CONTEXT.txt
 
     ################################
     # build number and version
