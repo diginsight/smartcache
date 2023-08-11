@@ -1,6 +1,6 @@
 [CmdletBinding()]
 param (
-    $context
+    [object] $context
 )
 
 Get-Module | Remove-Module
