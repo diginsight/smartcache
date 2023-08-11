@@ -1,6 +1,6 @@
 [CmdletBinding()]
 param (
-    [string] $context
+    $context
 )
 
 Get-Module | Remove-Module
@@ -17,8 +17,7 @@ Set-Location $scriptFolder
 $scriptName = $MyInvocation.MyCommand.Name
 Start-Transcript -Path "\Logs\$scriptName.log" -Append
 
-
-    Write-Host "$context"
+    Write-Host "$context" & $context
 
 Stop-Transcript
 
