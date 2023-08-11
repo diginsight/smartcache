@@ -105,6 +105,18 @@ jobs:
       run: |
         echo "$SECRETS_CONTEXT"
         echo "$env:SECRETS_CONTEXT" >> 10.SECRETS_CONTEXT.log
+    - name: Dump needs context
+      env:
+        NEEDS_CONTEXT: ${{ toJson(needs) }}
+      run: |
+        echo "$NEEDS_CONTEXT"
+        echo "$env:NEEDS_CONTEXT" >> 11.NEEDS_CONTEXT.log
+    - name: Dump input context
+      env:
+        INPUT_CONTEXT: ${{ toJson(input) }}
+      run: |
+        echo "$INPUT_CONTEXT"
+        echo "$env:INPUT_CONTEXT" >> 12.INPUT_CONTEXT.log
 
     ################################
     # build number and version
