@@ -151,8 +151,8 @@ jobs:
       
     - name: Copy bin folder to artifactFolder
       run: |
-        $source = "Common.SmartCache/bin/Debug"
-        $destination = "artifactFolder/Debug"
+        $source = "Common.SmartCache/bin"
+        $destination = "artifactFolder"
         Copy-Item -Path $source\* -Destination $destination -Recurse
           
     - name: Build DLL Release
@@ -161,8 +161,8 @@ jobs:
       
     - name: Copy bin folder to artifactFolder
       run: |
-        $source = "Common.SmartCache/bin/Release"
-        $destination = "artifactFolder/Release"
+        $source = "Common.SmartCache/bin"
+        $destination = "artifactFolder"
         Copy-Item -Path $source\* -Destination $destination -Recurse
           
     #- name: Cache bin folder
