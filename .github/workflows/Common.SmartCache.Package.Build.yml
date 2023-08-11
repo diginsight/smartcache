@@ -148,6 +148,13 @@ jobs:
     - name: Build DLL
       run: dotnet build Common.SmartCache/Common.SmartCache.csproj --configuration $configuration --no-restore --verbosity detailed
       
+    - name: Copy bin folder to _temp
+      run: |
+        # Copy the contents of the bin folder to _temp
+        $source = "Common.SmartCache/bin"
+        $destination = "${{ runner.temp }}"
+        Copy-Item -Path $source\* -Destination $destination -Recurse
+          
     ################################
     # upload artifacts
     - name: Upload bin folder as an Artifact
