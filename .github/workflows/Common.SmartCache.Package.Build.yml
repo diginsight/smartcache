@@ -149,11 +149,11 @@ jobs:
       run: dotnet build Common.SmartCache/Common.SmartCache.csproj --configuration Debug --no-restore 
       # --verbosity detailed
       
-    - name: Copy bin folder to artifactFolder
-      run: |
-        $source = "Common.SmartCache/bin"
-        $destination = "artifactFolder"
-        Copy-Item -Path $source -Destination $destination -Recurse 
+    #- name: Copy bin folder to artifactFolder
+    #  run: |
+    #    $source = "Common.SmartCache/bin"
+    #    $destination = "artifactFolder"
+    #    Copy-Item -Path $source -Destination $destination -Recurse 
           
     - name: Build DLL Release
       run: dotnet build Common.SmartCache/Common.SmartCache.csproj --configuration Release --no-restore 
