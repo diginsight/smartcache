@@ -146,7 +146,7 @@ jobs:
       run: dotnet restore
       
     - name: Build DLL
-      run: dotnet build Common.SmartCache/Common.SmartCache.csproj --configuration $configuration --no-restore #--verbosity detailed
+      run: dotnet build Common.SmartCache/Common.SmartCache.csproj --configuration $configuration --no-restore --verbosity detailed
       
     ################################
     # upload artifacts
@@ -183,3 +183,19 @@ jobs:
     # test
     - name: Test
       run: dotnet test --no-build --verbosity normal
+
+  deploy:
+    needs: build
+    strategy:
+      matrix:
+        configuration: [Release]
+    runs-on: self-hosted
+
+    env:  # Define environment variables here
+      NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+      SAMPLE_SECRET: ${{ secrets.SAMPLESECRET }}
+
+    steps:
+    - uses: actions/checkout@v3
+    ################################
+    # setup steps
