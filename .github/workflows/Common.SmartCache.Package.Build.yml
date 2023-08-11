@@ -221,9 +221,9 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: artifact  # Name of the uploaded artifact
-          path: artifactFolder
+          path: artifactFolder1
 
       - name: Publish NuGet package
         run: |
-          dotnet nuget push artifactFolder/Release/*.nupkg --source https://api.nuget.org/v3/index.json --api-key ${{ secrets.NUGET_API_KEY }}
+          dotnet nuget push artifactFolder1/Release/.*.nupkg --source https://api.nuget.org/v3/index.json --api-key ${{ secrets.NUGET_API_KEY }}
           
