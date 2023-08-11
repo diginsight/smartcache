@@ -17,7 +17,9 @@ Set-Location $scriptFolder
 $scriptName = $MyInvocation.MyCommand.Name
 Start-Transcript -Path "\Logs\$scriptName.log" -Append
 
-    Write-Host "$context" & $context
+    Write-Host "dumping context information - start" # & $context
+    Write-Host "$context" # & $context
+    Write-Host "dumping context information - completed" # & $context
 
 Stop-Transcript
 
