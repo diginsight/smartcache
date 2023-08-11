@@ -153,7 +153,7 @@ jobs:
       run: |
         $source = "Common.SmartCache/bin"
         $destination = "artifactFolder"
-        Copy-Item -Path $source -Destination $destination -Recurse -Container
+        Copy-Item -Path $source -Destination $destination -Recurse 
           
     - name: Build DLL Release
       run: dotnet build Common.SmartCache/Common.SmartCache.csproj --configuration Release --no-restore 
