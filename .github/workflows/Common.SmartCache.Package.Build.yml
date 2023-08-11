@@ -206,18 +206,24 @@ jobs:
     - name: Test
       run: dotnet test --no-build --verbosity normal
 
-#  deploy:
-#    needs: build
-#    strategy:
-#      matrix:
-#        configuration: [Release]
-#    runs-on: self-hosted
-#
-#    env:  # Define environment variables here
-#      NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
-#      SAMPLE_SECRET: ${{ secrets.SAMPLESECRET }}
-#
-#    steps:
-#    - uses: actions/checkout@v3
-#    ################################
-    # setup steps
+  publish:
+    needs: build
+    strategy:
+      matrix:
+        configuration: [Release]
+    runs-on: self-hosted
+
+    env:
+      NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: artifact  # Name of the uploaded artifact
+          path: artifactFolder
+
+      - name: Publish NuGet package
+        run: |
+          dotnet nuget push artifactFolder/Release/*.nupkg --source https://api.nuget.org/v3/index.json --api-key ${{ secrets.NUGET_API_KEY }}
+          
