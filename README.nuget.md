@@ -37,6 +37,7 @@ var userProfile = await userProfileService.FindUserByEmailAddressAsync(context.A
 ```
 
 __Common.SmartCache__ will provide automatic caching based on payload size, retrieval latency etc.
+Common.SmartCache will support data preloading based on application use and age required for the loaded data.
 
 __Common.SmartCache__ component is supported on .Net Framework 4.6.2+ and .Net Core 3.0+.<br>
 For more information visi:.
