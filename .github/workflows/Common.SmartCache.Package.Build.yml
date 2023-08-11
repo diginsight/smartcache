@@ -42,7 +42,7 @@ jobs:
       run: |
         pwsh -File "scripts/v2/00. DumpVariables.ps1"
 
-    - name: Run pwsh Dump github context
+    - name: Run pwsh Dump github context1
       run: |
         pwsh -File "scripts/v2/01. DumpContext.ps1" -context ${{ github.GetType() }}
 
