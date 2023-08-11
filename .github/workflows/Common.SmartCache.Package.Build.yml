@@ -152,7 +152,7 @@ jobs:
       run: |
         # Copy the contents of the bin folder to _temp
         $source = "Common.SmartCache/bin"
-        $destination = "${{ runner.temp }}"
+        $destination = "artifactFolder"
         Copy-Item -Path $source\* -Destination $destination -Recurse
           
     ################################
@@ -162,7 +162,7 @@ jobs:
       with:
         name: artifact
         path: |
-          Common.SmartCache/bin/
+          artifactFolder/
           !Common.SmartCache/bin/**/*.tmp
         if-no-files-found: warn
         retention-days: 1
