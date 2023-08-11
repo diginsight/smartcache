@@ -172,16 +172,16 @@ jobs:
     #    key: bin 
         
     ################################
-    # upload artifacts
-    - name: Upload bin folder as an Artifact
-      uses: actions/upload-artifact@v3.1.2
-      with:
-        name: artifact
-        path: |
-          artifactFolder/
-          !Common.SmartCache/bin/**/*.tmp
-        if-no-files-found: warn
-        retention-days: 1
+    ## upload artifacts
+    #- name: Upload bin folder as an Artifact
+    #  uses: actions/upload-artifact@v3.1.2
+    #  with:
+    #    name: artifact
+    #    path: |
+    #      artifactFolder/
+    #      !Common.SmartCache/bin/**/*.tmp
+    #    if-no-files-found: warn
+   #    retention-days: 1
     
     # - name: Publish DLL
       #   run: dotnet publish Common.SmartCache/Common.SmartCache.csproj --configuration $configuration --output ./publish --no-build
