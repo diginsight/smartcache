@@ -151,8 +151,8 @@ jobs:
       
     - name: Copy bin folder to artifactFolder
       run: |
-        $source = "Common.SmartCache/bin"
-        $destination = "artifactFolder"
+        $source = "Common.SmartCache/bin/Debug"
+        $destination = "artifactFolder/Debug"
         Copy-Item -Path $source\* -Destination $destination -Recurse
           
     - name: Build DLL Release
@@ -161,8 +161,8 @@ jobs:
       
     - name: Copy bin folder to artifactFolder
       run: |
-        $source = "Common.SmartCache/bin"
-        $destination = "artifactFolder"
+        $source = "Common.SmartCache/bin/Release"
+        $destination = "artifactFolder/Release"
         Copy-Item -Path $source\* -Destination $destination -Recurse
           
     #- name: Cache bin folder
@@ -172,16 +172,15 @@ jobs:
     #    key: bin 
         
     ################################
-    ## upload artifacts
-    #- name: Upload bin folder as an Artifact
-    #  uses: actions/upload-artifact@v3.1.2
-    #  with:
-    #    name: artifact
-    #    path: |
-    #      artifactFolder/
-    #      !Common.SmartCache/bin/**/*.tmp
-    #    if-no-files-found: warn
-   #    retention-days: 1
+    # upload artifacts
+    - name: Upload bin folder as an Artifact
+      uses: actions/upload-artifact@v3.1.2
+      with:
+        name: artifact
+        path: |
+          artifactFolder
+        if-no-files-found: warn
+        retention-days: 1
     
     # - name: Publish DLL
       #   run: dotnet publish Common.SmartCache/Common.SmartCache.csproj --configuration $configuration --output ./publish --no-build
