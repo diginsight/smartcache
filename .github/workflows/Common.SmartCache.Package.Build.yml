@@ -48,27 +48,39 @@ jobs:
     - name: Dump GitHub context
       env:
         GITHUB_CONTEXT: ${{ toJson(github) }}
-      run: echo "$GITHUB_CONTEXT"
+      run: |
+        echo "$GITHUB_CONTEXT"
+        echo "$GITHUB_CONTEXT" >> 01.GITHUB_CONTEXT.txt
     - name: Dump job context
       env:
         JOB_CONTEXT: ${{ toJson(job) }}
-      run: echo "$JOB_CONTEXT"
+      run: |
+        echo "$JOB_CONTEXT"
+        echo "$JOB_CONTEXT" >> 02.JOB_CONTEXT.txt
     - name: Dump steps context
       env:
         STEPS_CONTEXT: ${{ toJson(steps) }}
-      run: echo "$STEPS_CONTEXT"
+      run: |
+        echo "$STEPS_CONTEXT"
+        echo "$STEPS_CONTEXT" >> 03.STEPS_CONTEXT.txt
     - name: Dump runner context
       env:
         RUNNER_CONTEXT: ${{ toJson(runner) }}
-      run: echo "$RUNNER_CONTEXT"
+      run: |
+        echo "$RUNNER_CONTEXT"
+        echo "$RUNNER_CONTEXT" >> 04.RUNNER_CONTEXT.txt
     - name: Dump strategy context
       env:
         STRATEGY_CONTEXT: ${{ toJson(strategy) }}
-      run: echo "$STRATEGY_CONTEXT"
+      run: |
+        echo "$STRATEGY_CONTEXT"
+        echo "$STRATEGY_CONTEXT" >> 05.STRATEGY_CONTEXT.txt
     - name: Dump matrix context
       env:
         MATRIX_CONTEXT: ${{ toJson(matrix) }}
-      run: echo "$MATRIX_CONTEXT"
+      run: |
+        echo "$MATRIX_CONTEXT"
+        echo "$MATRIX_CONTEXT" >> 06.MATRIX_CONTEXT.txt
 
     ################################
     # build number and version
