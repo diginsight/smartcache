@@ -111,12 +111,12 @@ jobs:
       run: |
         echo "$NEEDS_CONTEXT"
         echo "$env:NEEDS_CONTEXT" >> 11.NEEDS_CONTEXT.log
-    #- name: Dump input context
-    #  env:
-    #    INPUT_CONTEXT: ${{ toJson(input) }}
-    #  run: |
-    #    echo "$INPUT_CONTEXT"
-    #    echo "$env:INPUT_CONTEXT" >> 12.INPUT_CONTEXT.log
+    - name: Dump input context
+      env:
+        INPUTS_CONTEXT: ${{ toJson(inputs) }}
+      run: |
+        echo "$INPUTS_CONTEXT"
+        echo "$env:INPUTS_CONTEXT" >> 12.INPUTS_CONTEXT.log
 
     ################################
     # build number and version
