@@ -1,5 +1,5 @@
 # INTRODUCTION 
-Common.SmartCache provides intelligent loading for data providers such as __external api__ or __databases__.<br>
+Common.SmartCache provides __intelligent loading for data providers__ such as __external api__ or __databases__.<br>
 __Age conscious data management__ is applied to cache or preload data automatically.<br>
 __AI assisted algorithms__ can be used to ensure data preloading, based on application use.
 
@@ -8,12 +8,12 @@ Articles:
 (TODO): explores how to use Common.SmartCache to boost application performance by means age conscious data magagement.
 - [HOWTO - Enable data preloading by means of Artificial Intelligence.md]<br> (TODO): explores how to enable AI assisted preloading to improve data preloading efficiency.<br><br>
 
-NB: __Common.SmartCache is currently under development and use is not supported__<br><br>
+NB: __Common.SmartCache is currently under development and use ov versions 0.x.x.x is not supported__<br><br>
 
 # STEPS TO USE SMARTCACHE:
 - add Common.SmartCache to your application 
 
-- load your data by means of Common.SmartCache cacheService
+- load your data by means of Common.SmartCache `cacheService`
 ```c#
 public async Task<UserProfileResponse> GetUserByEmailAddressAsync(string emailAddress, CacheContext cacheContext)
 {
@@ -32,7 +32,7 @@ public async Task<UserProfileResponse> GetUserByEmailAddressAsync(string emailAd
 - load your data expressing the required age for it:
 
 ```c#
-var cacheContext = new CacheContext() { Enabled = true, MaxAge = 300 }; 
+var cacheContext = new CacheContext() { Enabled = true, MaxAge = 300 }; // required age is expressed in seconds
 var userProfile = await userProfileService.FindUserByEmailAddressAsync(context.Account.Email, cacheContext).ConfigureAwait(false);
 ```
 
