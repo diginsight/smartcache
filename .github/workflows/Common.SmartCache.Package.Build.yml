@@ -145,22 +145,32 @@ jobs:
     - name: Restore dependencies
       run: dotnet restore
       
-    - name: Build DLL
-      run: dotnet build Common.SmartCache/Common.SmartCache.csproj --configuration Debug Release --no-restore --verbosity detailed
+    - name: Build DLL Debug
+      run: dotnet build Common.SmartCache/Common.SmartCache.csproj --configuration Debug --no-restore --verbosity detailed
       
-    - name: Cache bin folder
-      uses: actions/cache@v1.2.1
-      with:
-        path: cache
-        key: bin 
-        
-    - name: Copy bin folder to _temp
+    - name: Copy bin folder to artifactFolder
       run: |
         # Copy the contents of the bin folder to _temp
         $source = "Common.SmartCache/bin"
         $destination = "artifactFolder"
         Copy-Item -Path $source\* -Destination $destination -Recurse
           
+    - name: Build DLL Release
+      run: dotnet build Common.SmartCache/Common.SmartCache.csproj --configuration Release --no-restore --verbosity detailed
+      
+    - name: Copy bin folder to artifactFolder
+      run: |
+        # Copy the contents of the bin folder to _temp
+        $source = "Common.SmartCache/bin"
+        $destination = "artifactFolder"
+        Copy-Item -Path $source\* -Destination $destination -Recurse
+          
+    #- name: Cache bin folder
+    #  uses: actions/cache@v1.2.1
+    #  with:
+    #    path: cache
+    #    key: bin 
+        
     ################################
     # upload artifacts
     - name: Upload bin folder as an Artifact
