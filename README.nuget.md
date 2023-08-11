@@ -8,7 +8,7 @@ Articles:
 (TODO): explores how to use Common.SmartCache to boost application performance by means age conscious data magagement.
 - [HOWTO - Enable data preloading by means of Artificial Intelligence.md]<br> (TODO): explores how to enable AI assisted preloading to improve data preloading efficiency.<br><br>
 
-NB: __Common.SmartCache is currently under development and use is not supported__
+NB: __Common.SmartCache is currently under development and use ov versions 0.x.x.x is not supported__<br><br>
 
 # STEPS TO USE SMARTCACHE:
 - add Common.SmartCache to your application 
