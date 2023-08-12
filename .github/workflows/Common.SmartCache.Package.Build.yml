@@ -20,6 +20,18 @@ jobs:
       NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
 
     steps:
+    ################################
+    # dump steps
+    - &dump_steps
+      - name: Run pwsh Dump Variables
+        run: pwsh -File "scripts/v2/00. DumpVariables.ps1"
+      - name: Dump GitHub context1
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github) }}
+        run: |
+          echo "$GITHUB_CONTEXT"
+          echo "$env:GITHUB_CONTEXT" >> 01.GITHUB_CONTEXT.log
+    
     - uses: actions/checkout@v3
     ################################
     # setup steps
@@ -38,21 +50,10 @@ jobs:
     #     Start-Process msiexec.exe -Wait -ArgumentList '/i powershell.msi /quiet /norestart'
     #     Write-Host "powershell.msi install completed"
     
-    ################################
-    # dump steps
-    - name: Run pwsh Dump Variables
-      run: |
-        pwsh -File "scripts/v2/00. DumpVariables.ps1"
-
+    - *dump_steps
     #- name: Run pwsh Dump github context1
     #  run: |
     #    pwsh -File "scripts/v2/01. DumpContext.ps1" -context ${{ github.GetType() }}
-    - name: Dump GitHub context
-      env:
-        GITHUB_CONTEXT: ${{ toJson(github) }}
-      run: |
-        echo "$GITHUB_CONTEXT"
-        echo "$env:GITHUB_CONTEXT" >> 01.GITHUB_CONTEXT.log
     - name: Dump job context
       env:
         JOB_CONTEXT: ${{ toJson(job) }}
