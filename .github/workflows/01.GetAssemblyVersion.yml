@@ -36,10 +36,9 @@ jobs:
       run: |
         $env:BUILD_NUMBER="${{ github.run_number }}"
         Write-Host "BUILD_NUMBER=$env:BUILD_NUMBER"
-        if (-not [string]::IsNullOrEmpty("${{ vars.BUILD_NUMBER }}")) {
-            $env:BUILD_NUMBER="${{ vars.BUILD_NUMBER }}"
-            $env:BUILD_NUMBER=$(( [int]$env:BUILD_NUMBER + 1))
-            echo "vars.BUILD_NUMBER=$env:BUILD_NUMBER" >> $GITHUB_ENV
+        if (-not [string]::IsNullOrEmpty("${{ vars.BUILD_NUMBER_OFFSET }}")) {
+            $env:BUILD_NUMBER=$(( [int]$env:BUILD_NUMBER + [int]${{ vars.BUILD_NUMBER_OFFSET }}))
+            # echo "vars.BUILD_NUMBER=$env:BUILD_NUMBER" >> $GITHUB_ENV
         }
         Write-Host "BUILD_NUMBER=$env:BUILD_NUMBER"
         echo "BUILD_NUMBER=$env:BUILD_NUMBER" >> $GITHUB_ENV
