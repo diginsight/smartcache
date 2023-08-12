@@ -103,10 +103,3 @@ jobs:
         echo "$env:NEEDS_CONTEXT" >> 11.NEEDS_CONTEXT.log
         echo "$INPUTS_CONTEXT"
         echo "$env:INPUTS_CONTEXT" >> 12.INPUTS_CONTEXT.log
-    #- name: Dump jobs context
-    #  env:
-    #    JOBS_CONTEXT: ${{ toJson(jobs) }}
-    #  run: |
-    #    echo "$JOBS_CONTEXT"
-    #    echo "$env:JOBS_CONTEXT" >> 09.JOBS_CONTEXT.log
-    

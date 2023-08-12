@@ -74,9 +74,6 @@ jobs:
         echo "$env:NEEDS_CONTEXT" >> 11.NEEDS_CONTEXT.log
         echo "$INPUTS_CONTEXT"
         echo "$env:INPUTS_CONTEXT" >> 12.INPUTS_CONTEXT.log
-        #    JOBS_CONTEXT: ${{ toJson(jobs) }}
-        #    echo "$JOBS_CONTEXT"
-        #    echo "$env:JOBS_CONTEXT" >> 09.JOBS_CONTEXT.log
 
     - name: Set Assemblies Version
       run: |
