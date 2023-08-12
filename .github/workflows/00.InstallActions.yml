@@ -16,7 +16,7 @@ on:
       #   required: true
 
 jobs:
-  build:
+  main:
     runs-on: self-hosted
 
     env:  # Define environment variables here
