@@ -46,6 +46,7 @@ jobs:
         $env:BUILD_NUMBER="${{ steps.set_build_number.outputs.BUILD_NUMBER }}"
         Write-Host "env:BUILD_NUMBER: $env:BUILD_NUMBER"
         $env:ASSEMBLY_VERSION="0.9.0.$env:BUILD_NUMBER"
+        Write-Host "$env:ASSEMBLY_VERSION: $env:ASSEMBLY_VERSION"
         echo "assemblyVersion=$env:ASSEMBLY_VERSION" >> $GITHUB_OUTPUT
 
     # - name: Run pwsh Dump Variables
