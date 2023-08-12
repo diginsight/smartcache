@@ -11,9 +11,9 @@ on:
 
 jobs:
   installActions:
-    uses: ./.github/workflows/Common.SmartCache.InstallActions.yml
-    with:
-      config-path: .github/labeler.yml
+    uses: ./.github/workflows/00.InstallActions.yml
+    # with:
+    #   config-path: .github/labeler.yml
     secrets: inherit
 
   build:
@@ -54,78 +54,48 @@ jobs:
     #- name: Run pwsh Dump github context1
     #  run: |
     #    pwsh -File "scripts/v2/01. DumpContext.ps1" -context ${{ github.GetType() }}
-    - name: Dump GitHub context
+    - name: Dump contexts
       env:
         GITHUB_CONTEXT: ${{ toJson(github) }}
+        JOB_CONTEXT: ${{ toJson(job) }}
+        STEPS_CONTEXT: ${{ toJson(steps) }}
+        RUNNER_CONTEXT: ${{ toJson(runner) }}
+        STRATEGY_CONTEXT: ${{ toJson(strategy) }}
+        MATRIX_CONTEXT: ${{ toJson(matrix) }}
+        ENV_CONTEXT: ${{ toJson(env) }}
+        VARS_CONTEXT: ${{ toJson(vars) }}
+        SECRETS_CONTEXT: ${{ toJson(secrets) }}
+        NEEDS_CONTEXT: ${{ toJson(needs) }}
+        INPUTS_CONTEXT: ${{ toJson(inputs) }}
       run: |
         echo "$GITHUB_CONTEXT"
         echo "$env:GITHUB_CONTEXT" >> 01.GITHUB_CONTEXT.log
-    - name: Dump job context
-      env:
-        JOB_CONTEXT: ${{ toJson(job) }}
-      run: |
         echo "$JOB_CONTEXT"
         echo "$env:JOB_CONTEXT" >> 02.JOB_CONTEXT.log
-    - name: Dump steps context
-      env:
-        STEPS_CONTEXT: ${{ toJson(steps) }}
-      run: |
         echo "$STEPS_CONTEXT"
         echo "$env:STEPS_CONTEXT" >> 03.STEPS_CONTEXT.log
-    - name: Dump runner context
-      env:
-        RUNNER_CONTEXT: ${{ toJson(runner) }}
-      run: |
         echo "$RUNNER_CONTEXT"
         echo "$env:RUNNER_CONTEXT" >> 04.RUNNER_CONTEXT.log
-    - name: Dump strategy context
-      env:
-        STRATEGY_CONTEXT: ${{ toJson(strategy) }}
-      run: |
         echo "$STRATEGY_CONTEXT"
         echo "$env:STRATEGY_CONTEXT" >> 05.STRATEGY_CONTEXT.log
-    - name: Dump matrix context
-      env:
-        MATRIX_CONTEXT: ${{ toJson(matrix) }}
-      run: |
         echo "$MATRIX_CONTEXT"
         echo "$env:MATRIX_CONTEXT" >> 06.MATRIX_CONTEXT.log
-    - name: Dump env context
-      env:
-        ENV_CONTEXT: ${{ toJson(env) }}
-      run: |
         echo "$ENV_CONTEXT"
         echo "$env:ENV_CONTEXT" >> 07.ENV_CONTEXT.log
-    - name: Dump vars context
-      env:
-        VARS_CONTEXT: ${{ toJson(vars) }}
-      run: |
         echo "$VARS_CONTEXT"
         echo "$env:VARS_CONTEXT" >> 08.VARS_CONTEXT.log
+        echo "$SECRETS_CONTEXT"
+        echo "$env:SECRETS_CONTEXT" >> 10.SECRETS_CONTEXT.log
+        echo "$NEEDS_CONTEXT"
+        echo "$env:NEEDS_CONTEXT" >> 11.NEEDS_CONTEXT.log
+        echo "$INPUTS_CONTEXT"
+        echo "$env:INPUTS_CONTEXT" >> 12.INPUTS_CONTEXT.log
     #- name: Dump jobs context
     #  env:
     #    JOBS_CONTEXT: ${{ toJson(jobs) }}
     #  run: |
     #    echo "$JOBS_CONTEXT"
     #    echo "$env:JOBS_CONTEXT" >> 09.JOBS_CONTEXT.log
-    - name: Dump secrets context
-      env:
-        SECRETS_CONTEXT: ${{ toJson(secrets) }}
-      run: |
-        echo "$SECRETS_CONTEXT"
-        echo "$env:SECRETS_CONTEXT" >> 10.SECRETS_CONTEXT.log
-    - name: Dump needs context
-      env:
-        NEEDS_CONTEXT: ${{ toJson(needs) }}
-      run: |
-        echo "$NEEDS_CONTEXT"
-        echo "$env:NEEDS_CONTEXT" >> 11.NEEDS_CONTEXT.log
-    - name: Dump input context
-      env:
-        INPUTS_CONTEXT: ${{ toJson(inputs) }}
-      run: |
-        echo "$INPUTS_CONTEXT"
-        echo "$env:INPUTS_CONTEXT" >> 12.INPUTS_CONTEXT.log
 
     ################################
     # build number and version
