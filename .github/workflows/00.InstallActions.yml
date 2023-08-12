@@ -60,8 +60,8 @@ jobs:
 
     - name: Print KeyVault Secrets
       run: |
-        echo ${{ steps.get_keyvault_secrets.outputs.ConnectionStringDevdgwsamplesstorage }}
-        echo ${{ steps.get_keyvault_secrets.outputs.AppSettings_BlobstorageConnectionString }}
+        echo "${{ steps.get_keyvault_secrets.outputs.ConnectionStringDevdgwsamplesstorage }}"
+        echo "${{ steps.get_keyvault_secrets.outputs.AppSettings_BlobstorageConnectionString }}"
 
     # - name: Install PowerShell Core
     #   id: install_powershell_core
