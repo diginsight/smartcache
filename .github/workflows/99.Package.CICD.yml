@@ -34,15 +34,10 @@ jobs:
       NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
 
     steps:
-    ################################
-    # dump steps
     - name: Run pwsh Dump Variables
       run: |
         pwsh -File "scripts/v2/00. DumpVariables.ps1"
 
-    #- name: Run pwsh Dump github context1
-    #  run: |
-    #    pwsh -File "scripts/v2/01. DumpContext.ps1" -context ${{ github.GetType() }}
     - name: Dump contexts
       env:
         GITHUB_CONTEXT: ${{ toJson(github) }}
@@ -79,21 +74,19 @@ jobs:
         echo "$env:NEEDS_CONTEXT" >> 11.NEEDS_CONTEXT.log
         echo "$INPUTS_CONTEXT"
         echo "$env:INPUTS_CONTEXT" >> 12.INPUTS_CONTEXT.log
-    #- name: Dump jobs context
-    #  env:
-    #    JOBS_CONTEXT: ${{ toJson(jobs) }}
-    #  run: |
-    #    echo "$JOBS_CONTEXT"
-    #    echo "$env:JOBS_CONTEXT" >> 09.JOBS_CONTEXT.log
+        #- name: Dump jobs context
+        #  env:
+        #    JOBS_CONTEXT: ${{ toJson(jobs) }}
+        #  run: |
+        #    echo "$JOBS_CONTEXT"
+        #    echo "$env:JOBS_CONTEXT" >> 09.JOBS_CONTEXT.log
 
-    - name: Set Assembly Version
+    - name: Set Assemblies Version
       run: |
         $env:ASSEMBLY_VERSION="${{ needs.getAssemblyVersion.outputs.assemblyVersion }}"
         Write-Host "Setting assembly version to: $env:ASSEMBLY_VERSION"
         (Get-Content Common.SmartCache/Common.SmartCache.csproj) -replace '<Version>.*<\/Version>', "<Version>$env:ASSEMBLY_VERSION</Version>" | Set-Content Common.SmartCache/Common.SmartCache.csproj
 
-    ################################
-    # restore and build
     - name: Restore dependencies
       run: dotnet restore
       
@@ -117,8 +110,6 @@ jobs:
     #    path: cache
     #    key: bin 
         
-    ################################
-    # upload artifacts
     - name: Upload bin folder as an Artifact
       uses: actions/upload-artifact@v3.1.2
       with:
@@ -128,9 +119,6 @@ jobs:
         if-no-files-found: warn
         retention-days: 1
     
-
-    ################################
-    # test
     - name: Test
       run: dotnet test --no-build --verbosity normal
 
@@ -149,12 +137,11 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: artifact  # Name of the uploaded artifact
-          path: artifactFolder1
+          path: artifactFolder
 
-      ################################
       - name: Publish NuGet package
         run: |
           $env:ASSEMBLY_VERSION="${{ needs.getAssemblyVersion.outputs.assemblyVersion }}"
           Write-Host "Setting assembly version to: $env:ASSEMBLY_VERSION"
-          dotnet nuget push artifactFolder1/Release/Common.SmartCache.$env:ASSEMBLY_VERSION.nupkg --source https://api.nuget.org/v3/index.json --api-key ${{ secrets.NUGET_API_KEY }}
+          dotnet nuget push artifactFolder/Release/Common.SmartCache.$env:ASSEMBLY_VERSION.nupkg --source https://api.nuget.org/v3/index.json --api-key $NUGET_API_KEY
           
