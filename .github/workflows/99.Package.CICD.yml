@@ -137,5 +137,5 @@ jobs:
         run: |
           $env:ASSEMBLY_VERSION="${{ needs.getAssemblyVersion.outputs.assemblyVersion }}"
           Write-Host "Setting assembly version to: $env:ASSEMBLY_VERSION"
-          dotnet nuget push artifactFolder/Release/Common.SmartCache.$env:ASSEMBLY_VERSION.nupkg --source https://api.nuget.org/v3/index.json --api-key $NUGET_API_KEY
+          dotnet nuget push artifactFolder/Release/Common.SmartCache.$env:ASSEMBLY_VERSION.nupkg --source https://api.nuget.org/v3/index.json --api-key ${{ secrets.NUGET_API_KEY }}
           

@@ -32,8 +32,8 @@ jobs:
       id: setup_nuget
       uses: NuGet/setup-nuget@v1.2.0
     
-    - name: Set up Azure CLI
-      uses: azure/setup-az-cli@v1
+    # - name: Set up Azure CLI
+    #   uses: azure/setup-az-cli@v1
 
     # - name: Azure CLI Login
     #   uses: azure/login@v1
