@@ -13,12 +13,15 @@
 	  <PackageTags>cache diginsight smart ai preload</PackageTags>
 	  <PackageIcon>SmartCache.png</PackageIcon>
 	  <Authors>diginsight</Authors>
-	  <Description>Common.Cache is a .Net component that provides hybrid, distributed cache capability with dynamic entries lifetime management and automatic preload support.</Description>
+	  <Description>Common.SmartCache provides intelligent loading for data providers such as external apis or databases.
+Age conscious data management is applied to cache or preload data automatically.
+AI assisted algorithms can be used to ensure data preloading, based on application use.</Description>
 	  <SignAssembly>true</SignAssembly>
 	  <AssemblyOriginatorKeyFile>diginsight.snk</AssemblyOriginatorKeyFile>
 	  <UserSecretsId>ea6bafb2-fe5a-4acb-820e-78ff096f00c7</UserSecretsId>
 	  <Version>1.0.0.0</Version>
 	  <PackageReadmeFile>README.nuget.md</PackageReadmeFile>
+	  <!--<PackageReadmeFile>README.nuget.md</PackageReadmeFile>-->
   </PropertyGroup>
 
   <ItemGroup>
@@ -48,6 +51,10 @@
 		<None Include="..\LICENSE.md">
 			<Pack>True</Pack>
 			<PackagePath></PackagePath>
+		</None>
+		<None Include="..\README.nuget.md">
+		  <Pack>True</Pack>
+		  <PackagePath>\</PackagePath>
 		</None>
 	</ItemGroup>
 
