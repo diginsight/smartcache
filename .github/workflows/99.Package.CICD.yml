@@ -134,24 +134,6 @@ jobs:
         if-no-files-found: warn
         retention-days: 1
     
-    # - name: Publish DLL
-      #   run: dotnet publish Common.SmartCache/Common.SmartCache.csproj --configuration $configuration --output ./publish --no-build
-
-      #- name: Upload Artifact
-      #  uses: actions/upload-artifact@v2
-      #  with:
-      #    name: dll-artifact
-      #    path: ./publish
-
-      #- name: Create NuGet package
-      #  run: dotnet pack --no-build --include-symbols -o ./nupkg
-      #  working-directory: ./Common.SmartCache/bin/Debug
-
-      # - name: Publish NuGet package
-      #   uses: nuget/publish@1.0.0
-      #   with:
-      #     nuget-api-key: ${{ secrets.NUGET_API_KEY }}
-      #     nuget-version: 'latest'
 
     ################################
     # test
