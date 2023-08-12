@@ -32,6 +32,27 @@ jobs:
       id: setup_nuget
       uses: NuGet/setup-nuget@v1.2.0
     
+    - name: Set up Azure CLI
+      uses: azure/setup-az-cli@v1
+
+    - name: Azure CLI Login
+      uses: azure/login@v1
+      with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    - name: Get KeyVault Secrets
+      uses: azure/cli@v1
+      id: keyvault
+      with:
+        inlineScript: |
+          echo "ConnectionStringDevdgwsamplesstorage=$(az keyvault secret show --vault-name dev-dgw-001-kv --name ConnectionStringDevdgwsamplesstorage --query value -o tsv)" >> $GITHUB_OUTPUT
+          echo "AppSettings_BlobstorageConnectionString=$(az keyvault secret show --vault-name dev-dgw-001-kv --name AppSettings--BlobstorageConnectionString --query value -o tsv)" >> $GITHUB_OUTPUT
+
+    - name: Print KeyVault Secrets
+      run: |
+        echo ${{ steps.keyvault.outputs.ConnectionStringDevdgwsamplesstorage }}
+        echo ${{ steps.keyvault.outputs.AppSettings_BlobstorageConnectionString }}
+
     # - name: Install PowerShell Core
     #   id: install_powershell_core
     #   run: |
