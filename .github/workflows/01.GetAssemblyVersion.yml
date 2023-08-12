@@ -13,11 +13,11 @@ on:
       assemblyVersion:
         description: "assembly Version for the current build"
         value: ${{ jobs.main.outputs.assemblyVersion }}
-    secrets:
-      NUGET_API_KEY:
-        required: false
-      # token:
-      #   required: true
+    # secrets:
+    #   NUGET_API_KEY:
+    #     required: false
+    #   # token:
+    #   #   required: true
 
 jobs:
   main:
@@ -25,7 +25,7 @@ jobs:
     outputs:
       assemblyVersion: ${{ steps.get_assembly_version.outputs.assemblyVersion }}
 
-    env:  # Define environment variables here
+    env:  
       NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
 
     steps:
@@ -42,8 +42,8 @@ jobs:
     - name: Get Assembly Version
       id: get_assembly_version
       run: |
-        Write-Host "set_build_number.outputs.BUILD_NUMBER: ${{ steps.set_build_number.outputs.BUILD_NUMBER }}"
-        $env:BUILD_NUMBER="${{ steps.set_build_number.outputs.BUILD_NUMBER }}"
+        Write-Host "get_build_number.outputs.BUILD_NUMBER: ${{ steps.get_build_number.outputs.BUILD_NUMBER }}"
+        $env:BUILD_NUMBER="${{ steps.get_build_number.outputs.BUILD_NUMBER }}"
         Write-Host "env:BUILD_NUMBER: $env:BUILD_NUMBER"
         $env:ASSEMBLY_VERSION="0.9.0.$env:BUILD_NUMBER"
         Write-Host "$env:ASSEMBLY_VERSION: $env:ASSEMBLY_VERSION"
