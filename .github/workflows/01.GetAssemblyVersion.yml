@@ -48,6 +48,7 @@ jobs:
         $env:ASSEMBLY_VERSION="0.9.0.$env:BUILD_NUMBER"
         Write-Host "$env:ASSEMBLY_VERSION: $env:ASSEMBLY_VERSION"
         echo "assemblyVersion=$env:ASSEMBLY_VERSION" >> $GITHUB_OUTPUT
+        echo "::set-output name=assemblyVersion::$env:ASSEMBLY_VERSION"
 
     # - name: Run pwsh Dump Variables
     #   run: |
