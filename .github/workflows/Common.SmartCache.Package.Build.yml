@@ -11,7 +11,7 @@ on:
 
 jobs:
   installActions:
-    uses: ./Common.SmartCache.InstallActions.yml@main
+    uses: .github/workflows/Common.SmartCache.InstallActions.yml@main
     with:
       config-path: .github/labeler.yml
     secrets: inherit
