@@ -101,12 +101,6 @@ jobs:
       run: dotnet build Common.SmartCache/Common.SmartCache.csproj --configuration Debug --no-restore 
       # --verbosity detailed
       
-    #- name: Copy bin folder to artifactFolder
-    #  run: |
-    #    $source = "Common.SmartCache/bin"
-    #    $destination = "artifactFolder"
-    #    Copy-Item -Path $source -Destination $destination -Recurse 
-          
     - name: Build DLL Release
       run: dotnet build Common.SmartCache/Common.SmartCache.csproj --configuration Release --no-restore 
       # --verbosity detailed
@@ -158,22 +152,9 @@ jobs:
           path: artifactFolder1
 
       ################################
-      # build number and version
-      - name: Set build number
-        id: set_build_number
-        run: |
-          $env:BUILD_NUMBER="${{ github.run_number }}"
-          Write-Host "BUILD_NUMBER=$env:BUILD_NUMBER"
-          echo "BUILD_NUMBER=$env:BUILD_NUMBER" >> $GITHUB_ENV
-          echo "::set-output name=BUILD_NUMBER::$env:BUILD_NUMBER"
-
-      ################################
       - name: Publish NuGet package
         run: |
-          Write-Host "set_build_number.outputs.BUILD_NUMBER: ${{ steps.set_build_number.outputs.BUILD_NUMBER }}"
-          $env:BUILD_NUMBER="${{ steps.set_build_number.outputs.BUILD_NUMBER }}"
-          Write-Host "env:BUILD_NUMBER: $env:BUILD_NUMBER"
-          $env:ASSEMBLY_VERSION="0.9.0.$env:BUILD_NUMBER"
+          $env:ASSEMBLY_VERSION="${{ needs.getAssemblyVersion.outputs.assemblyVersion }}"
           Write-Host "Setting assembly version to: $env:ASSEMBLY_VERSION"
           dotnet nuget push artifactFolder1/Release/Common.SmartCache.$env:ASSEMBLY_VERSION.nupkg --source https://api.nuget.org/v3/index.json --api-key ${{ secrets.NUGET_API_KEY }}
           
