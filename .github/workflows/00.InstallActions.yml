@@ -62,8 +62,8 @@ jobs:
       run: |
         $env:ConnectionStringDevdgwsamplesstorage=${{ steps.get_keyvault_secrets.outputs.ConnectionStringDevdgwsamplesstorage }}
         Write-Host "ConnectionStringDevdgwsamplesstorage=$env:ConnectionStringDevdgwsamplesstorage" >> 20.KeyVaultSecrets.log
-        $env:AppSettings_BlobstorageConnectionString=${{ steps.get_keyvault_secrets.outputs.AppSettings_BlobstorageConnectionString }}
-        Write-Host "ConnectionStringDevdgwsamplesstorage=$env:ConnectionStringDevdgwsamplesstorage" >> 20.KeyVaultSecrets.log
+        # $env:AppSettings_BlobstorageConnectionString=${{ steps.get_keyvault_secrets.outputs.AppSettings_BlobstorageConnectionString }}
+        # Write-Host "AppSettings_BlobstorageConnectionString=$env:AppSettings_BlobstorageConnectionString" >> 20.KeyVaultSecrets.log
 
     # - name: Install PowerShell Core
     #   id: install_powershell_core
