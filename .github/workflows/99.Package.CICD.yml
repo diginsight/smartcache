@@ -24,7 +24,7 @@ jobs:
     secrets: inherit
 
   getKeyVaultSecrets:
-    needs: getKeyVaultSecrets
+    needs: installActions
     uses: ./.github/workflows/02.GetKeyVaultSecrets.yml
     # with:
     #   config-path: .github/labeler.yml
