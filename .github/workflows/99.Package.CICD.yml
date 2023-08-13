@@ -23,6 +23,13 @@ jobs:
     #   config-path: .github/labeler.yml
     secrets: inherit
 
+  getKeyVaultSecrets:
+    needs: getKeyVaultSecrets
+    uses: ./.github/workflows/02.GetKeyVaultSecrets.yml
+    # with:
+    #   config-path: .github/labeler.yml
+    secrets: inherit
+
   build:
     needs: getAssemblyVersion
     # strategy:

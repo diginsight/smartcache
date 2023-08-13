@@ -32,39 +32,6 @@ jobs:
       id: setup_nuget
       uses: NuGet/setup-nuget@v1.2.0
     
-    # - name: Set up Azure CLI
-    #   uses: azure/setup-az-cli@v1
-
-    - name: Azure CLI Login
-      uses: Azure/login@v1
-      with:
-        creds: ${{ secrets.AZURE_CREDENTIALS }}
-
-    # - name: Get KeyVault Secrets
-    #   uses: azure/cli@v1
-    #   id: keyvault
-    #   with:
-    #     inlineScript: |
-    #       echo "ConnectionStringDevdgwsamplesstorage=$(az keyvault secret show --vault-name dev-dgw-001-kv --name ConnectionStringDevdgwsamplesstorage --query value -o tsv)" >> $GITHUB_OUTPUT
-    #       echo "AppSettings_BlobstorageConnectionString=$(az keyvault secret show --vault-name dev-dgw-001-kv --name AppSettings--BlobstorageConnectionString --query value -o tsv)" >> $GITHUB_OUTPUT
-
-    - name: Get KeyVault Secrets
-      id: get_keyvault_secrets
-      run: |
-        $env:ConnectionStringDevdgwsamplesstorage=$(az keyvault secret show --vault-name dev-dgw-001-kv --name ConnectionStringDevdgwsamplesstorage --query value -o tsv)
-        # Write-Host "ConnectionStringDevdgwsamplesstorage=$env:ConnectionStringDevdgwsamplesstorage"
-        $env:AppSettings_BlobstorageConnectionString=$(az keyvault secret show --vault-name dev-dgw-001-kv --name AppSettings--BlobstorageConnectionString --query value -o tsv)
-        # Write-Host "AppSettings_BlobstorageConnectionString=$env:AppSettings_BlobstorageConnectionString"
-        echo "::set-output name=ConnectionStringDevdgwsamplesstorage::$env:ConnectionStringDevdgwsamplesstorage"
-        echo "::set-output name=AppSettings_BlobstorageConnectionString::$env:AppSettings_BlobstorageConnectionString"
-
-    - name: Print KeyVault Secrets
-      run: |
-        $env:ConnectionStringDevdgwsamplesstorage="${{ steps.get_keyvault_secrets.outputs.ConnectionStringDevdgwsamplesstorage }}"
-        echo "ConnectionStringDevdgwsamplesstorage=$env:ConnectionStringDevdgwsamplesstorage" >> 20.KeyVaultSecrets.log
-        $env:AppSettings_BlobstorageConnectionString="${{ steps.get_keyvault_secrets.outputs.AppSettings_BlobstorageConnectionString }}"
-        echo "AppSettings_BlobstorageConnectionString=$env:AppSettings_BlobstorageConnectionString" >> 20.KeyVaultSecrets.log
-
     # - name: Install PowerShell Core
     #   id: install_powershell_core
     #   run: |
