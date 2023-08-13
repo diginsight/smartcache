@@ -31,7 +31,7 @@ jobs:
     secrets: inherit
 
   build:
-    needs: getAssemblyVersion
+    needs: [getAssemblyVersion, getKeyVaultSecrets]
     # strategy:
     #   matrix:
     #     configuration: [Debug, Release]
@@ -124,7 +124,7 @@ jobs:
       run: dotnet test --no-build --verbosity normal
 
   publish:
-    needs: [getAssemblyVersion, build]
+    needs: [getAssemblyVersion, getKeyVaultSecrets, build]
     strategy:
       matrix:
         configuration: [Release]
