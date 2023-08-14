@@ -38,6 +38,24 @@ jobs:
     runs-on: self-hosted
 
     env:  # Define environment variables here
+      solutionsFilter: '*.sln'
+      projectsFilter: '*.csproj'
+      projectBaseName: Common.SmartCache
+      solution: ./$(projectBaseName).sln
+      allSolutions: './$(projectBaseName).sln' 
+      packageFolder: $(projectBaseName).Package
+      commonSmartCacheBaseName: $(projectBaseName)
+      commonSmartCacheProj: ./$(commonSmartCacheBaseName)/$(commonSmartCacheBaseName).csproj
+      allProjects: '**/@($(commonSmartCacheProj))' 
+      buildBaseNames: '$(commonSmartCacheBaseName)' 
+      buildPlatform: 'Any CPU'
+      buildConfiguration: 'Release' #Debug,
+      publishBaseNames: '$(commonSmartCacheBaseName)' 
+      buildProjectFiles: '$(commonSmartCacheBaseName).csproj' 
+      publishNupkgFilter: |
+        **\bin\$(buildConfiguration)\**\*.$(computedValues.version).nupkg
+        # !**\bin\$(buildConfiguration)\**\Common.Diagnostics.Core.$(computedValues.version).nupkg
+        # !**\bin\$(buildConfiguration)\**\Common.Diagnostics.Full.$(computedValues.version).nupkg
       NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
 
     steps:
@@ -59,6 +77,8 @@ jobs:
         NEEDS_CONTEXT: ${{ toJson(needs) }}
         INPUTS_CONTEXT: ${{ toJson(inputs) }}
       run: |
+        echo "$solutionsFilter"
+        echo "$projectsFilter"
         echo "$GITHUB_CONTEXT"
         echo "$env:GITHUB_CONTEXT" >> 01.GITHUB_CONTEXT.log
         echo "$JOB_CONTEXT"
@@ -86,7 +106,7 @@ jobs:
       run: |
         $env:ASSEMBLY_VERSION="${{ needs.getAssemblyVersion.outputs.assemblyVersion }}"
         Write-Host "Setting assembly version to: $env:ASSEMBLY_VERSION"
-        (Get-Content Common.SmartCache/Common.SmartCache.csproj) -replace '<Version>.*<\/Version>', "<Version>$env:ASSEMBLY_VERSION</Version>" | Set-Content Common.SmartCache/Common.SmartCache.csproj
+        (Get-Content $commonSmartCacheProj) -replace '<Version>.*<\/Version>', "<Version>$env:ASSEMBLY_VERSION</Version>" | Set-Content Common.SmartCache/Common.SmartCache.csproj
 
     - name: Restore dependencies
       run: dotnet restore
