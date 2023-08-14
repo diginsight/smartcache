@@ -41,10 +41,10 @@ jobs:
       solutionsFilter: '*.sln'
       projectsFilter: '*.csproj'
       projectBaseName: Common.SmartCache
-      solution: ./$(projectBaseName).sln
-      allSolutions: './$(projectBaseName).sln' 
-      packageFolder: $(projectBaseName).Package
-      commonSmartCacheBaseName: $(projectBaseName)
+      solution: ./${{ env.projectBaseName }}.sln
+      allSolutions: './${{ env.projectBaseName }}.sln' 
+      packageFolder: ${{ env.projectBaseName }}.Package
+      commonSmartCacheBaseName: ${{ env.projectBaseName }}
       commonSmartCacheProj: ./$(commonSmartCacheBaseName)/$(commonSmartCacheBaseName).csproj
       allProjects: '**/@($(commonSmartCacheProj))' 
       buildBaseNames: '$(commonSmartCacheBaseName)' 
