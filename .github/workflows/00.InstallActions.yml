@@ -23,28 +23,41 @@ jobs:
       solutionsFilter: '*.sln'
       projectsFilter: '*.csproj'
       projectBaseName: Common.SmartCache
-      solution: ./${env.projectBaseName}.sln
-      # solution2: ./${{env.projectBaseName}}.sln
-      solution3: ./$projectBaseName.sln
-      solution4: ./$env:projectBaseName.sln
-      allSolutions: ./${env.projectBaseName}.sln
-      packageFolder: ${env.projectBaseName}.Package
-      commonSmartCacheBaseName: ${env.projectBaseName}
-      commonSmartCacheProj: ./${env.commonSmartCacheBaseName}/${env.commonSmartCacheBaseName}.csproj
-      allProjects: '**/@(${env:commonSmartCacheProj})' 
-      buildBaseNames: '${env.commonSmartCacheBaseName}' 
       buildPlatform: 'Any CPU'
       buildConfiguration: 'Release' #Debug,
-      publishBaseNames: '${env.commonSmartCacheBaseName}' 
-      buildProjectFiles: '${env.commonSmartCacheBaseName}.csproj' 
-      publishNupkgFilter: |
-        **\bin\$(buildConfiguration)\**\*.$(computedValues.version).nupkg
-        # !**\bin\$(buildConfiguration)\**\Common.Diagnostics.Core.$(computedValues.version).nupkg
-        # !**\bin\$(buildConfiguration)\**\Common.Diagnostics.Full.$(computedValues.version).nupkg
+      # solution: ./${env.projectBaseName}.sln
+      # solution3: ./$projectBaseName.sln
+      # solution4: ./$env:projectBaseName.sln
+      # allSolutions: ./${env.projectBaseName}.sln
+      # packageFolder: ${env.projectBaseName}.Package
+      # commonSmartCacheBaseName: ${env.projectBaseName}
+      # commonSmartCacheProj: ./${env.commonSmartCacheBaseName}/${env.commonSmartCacheBaseName}.csproj
+      # allProjects: '**/@(${env:commonSmartCacheProj})' 
+      # buildBaseNames: '${env.commonSmartCacheBaseName}' 
+      # publishBaseNames: '${env.commonSmartCacheBaseName}' 
+      # buildProjectFiles: '${env.commonSmartCacheBaseName}.csproj' 
+      # publishNupkgFilter: |
+      #   **\bin\$(buildConfiguration)\**\*.$(computedValues.version).nupkg
+      #   # !**\bin\$(buildConfiguration)\**\Common.Diagnostics.Core.$(computedValues.version).nupkg
+      #   # !**\bin\$(buildConfiguration)\**\Common.Diagnostics.Full.$(computedValues.version).nupkg
       NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
 
     steps:
     - uses: actions/checkout@v3
+
+    - name: Process Composite Variables
+      id: composite_variables
+      run: |
+        $env:solution: ./${env.projectBaseName}.sln
+        echo "solution=$env:$env:solution" >> $GITHUB_ENV
+        echo "::set-output name=solution::$env:solution"
+
+    - name: Dump Composite Variables
+      id: dump_composite_variables
+      run: |
+        Write-Host "steps.composite_variables.outputs.solution: ${{ steps.composite_variables.outputs.solution }}"
+        echo "solution=$env:solution"
+
     - name: Setup .NET
       uses: actions/setup-dotnet@v3
       with:
