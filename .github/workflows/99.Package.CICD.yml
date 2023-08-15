@@ -38,24 +38,24 @@ jobs:
     runs-on: self-hosted
 
     env:  # Define environment variables here
-      solutionsFilter: '*.sln'
-      projectsFilter: '*.csproj'
-      projectBaseName: Common.SmartCache
-      solution: ./${env.projectBaseName}.sln
-      allSolutions: ./${env.projectBaseName}.sln
-      packageFolder: ${env.projectBaseName}.Package
-      commonSmartCacheBaseName: ${env.projectBaseName}
-      commonSmartCacheProj: ./${env.commonSmartCacheBaseName}/${env.commonSmartCacheBaseName}.csproj
-      allProjects: '**/@(${env:commonSmartCacheProj})' 
-      buildBaseNames: '${env.commonSmartCacheBaseName}' 
-      buildPlatform: 'Any CPU'
-      buildConfiguration: 'Release' #Debug,
-      publishBaseNames: '${env.commonSmartCacheBaseName}' 
-      buildProjectFiles: '${env.commonSmartCacheBaseName}.csproj' 
-      publishNupkgFilter: |
-        **\bin\$(buildConfiguration)\**\*.$(computedValues.version).nupkg
-        # !**\bin\$(buildConfiguration)\**\Common.Diagnostics.Core.$(computedValues.version).nupkg
-        # !**\bin\$(buildConfiguration)\**\Common.Diagnostics.Full.$(computedValues.version).nupkg
+      # solutionsFilter: '*.sln'
+      # projectsFilter: '*.csproj'
+      # projectBaseName: Common.SmartCache
+      # solution: ./${env.projectBaseName}.sln
+      # allSolutions: ./${env.projectBaseName}.sln
+      # packageFolder: ${env.projectBaseName}.Package
+      # commonSmartCacheBaseName: ${env.projectBaseName}
+      # commonSmartCacheProj: ./${env.commonSmartCacheBaseName}/${env.commonSmartCacheBaseName}.csproj
+      # allProjects: '**/@(${env:commonSmartCacheProj})' 
+      # buildBaseNames: '${env.commonSmartCacheBaseName}' 
+      # buildPlatform: 'Any CPU'
+      # buildConfiguration: 'Release' #Debug,
+      # publishBaseNames: '${env.commonSmartCacheBaseName}' 
+      # buildProjectFiles: '${env.commonSmartCacheBaseName}.csproj' 
+      # publishNupkgFilter: |
+      #   **\bin\$(buildConfiguration)\**\*.$(computedValues.version).nupkg
+      #   # !**\bin\$(buildConfiguration)\**\Common.Diagnostics.Core.$(computedValues.version).nupkg
+      #   # !**\bin\$(buildConfiguration)\**\Common.Diagnostics.Full.$(computedValues.version).nupkg
       NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
 
     steps:
@@ -81,11 +81,11 @@ jobs:
         NEEDS_CONTEXT: ${{ toJson(needs) }}
         INPUTS_CONTEXT: ${{ toJson(inputs) }}
       run: |
-        echo "$solutionsFilter"
-        echo "$projectsFilter"
-        echo "$solution"
-        echo "$commonSmartCacheProj"
-        echo "${{ env.commonSmartCacheProj }}"
+        # echo "$solutionsFilter"
+        # echo "$projectsFilter"
+        # echo "$solution"
+        # echo "$commonSmartCacheProj"
+        # echo "${{ env.commonSmartCacheProj }}"
         echo "$GITHUB_CONTEXT"
         echo "$env:GITHUB_CONTEXT" >> 01.GITHUB_CONTEXT.log
         echo "$JOB_CONTEXT"
