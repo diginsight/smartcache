@@ -84,6 +84,7 @@ jobs:
         echo "$solutionsFilter"
         echo "$projectsFilter"
         echo "$solution"
+        echo "$commonSmartCacheProj"
         echo "$GITHUB_CONTEXT"
         echo "$env:GITHUB_CONTEXT" >> 01.GITHUB_CONTEXT.log
         echo "$JOB_CONTEXT"
@@ -111,7 +112,7 @@ jobs:
       run: |
         $env:ASSEMBLY_VERSION="${{ needs.getAssemblyVersion.outputs.assemblyVersion }}"
         Write-Host "Setting assembly version to: $env:ASSEMBLY_VERSION"
-        (Get-Content ${{env:commonSmartCacheProj}}) -replace '<Version>.*<\/Version>', "<Version>$env:ASSEMBLY_VERSION</Version>" | Set-Content ${{env:commonSmartCacheProj}}
+        (Get-Content "${{env:commonSmartCacheProj}}") -replace '<Version>.*<\/Version>', "<Version>$env:ASSEMBLY_VERSION</Version>" | Set-Content "${{env:commonSmartCacheProj}}"
 
     - name: Restore dependencies
       run: dotnet restore
