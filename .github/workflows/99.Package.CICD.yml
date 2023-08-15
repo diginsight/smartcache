@@ -85,6 +85,7 @@ jobs:
         echo "$projectsFilter"
         echo "$solution"
         echo "$commonSmartCacheProj"
+        echo "${{ env.commonSmartCacheProj }}"
         echo "$GITHUB_CONTEXT"
         echo "$env:GITHUB_CONTEXT" >> 01.GITHUB_CONTEXT.log
         echo "$JOB_CONTEXT"
