@@ -20,6 +20,27 @@ jobs:
     runs-on: self-hosted
 
     env:  # Define environment variables here
+      solutionsFilter: '*.sln'
+      projectsFilter: '*.csproj'
+      projectBaseName: Common.SmartCache
+      solution: ./${env.projectBaseName}.sln
+      solution2: ./${{env.projectBaseName}}.sln
+      solution3: ./$projectBaseName.sln
+      solution4: ./$env:projectBaseName.sln
+      allSolutions: ./${env.projectBaseName}.sln
+      packageFolder: ${env.projectBaseName}.Package
+      commonSmartCacheBaseName: ${env.projectBaseName}
+      commonSmartCacheProj: ./${env.commonSmartCacheBaseName}/${env.commonSmartCacheBaseName}.csproj
+      allProjects: '**/@(${env:commonSmartCacheProj})' 
+      buildBaseNames: '${env.commonSmartCacheBaseName}' 
+      buildPlatform: 'Any CPU'
+      buildConfiguration: 'Release' #Debug,
+      publishBaseNames: '${env.commonSmartCacheBaseName}' 
+      buildProjectFiles: '${env.commonSmartCacheBaseName}.csproj' 
+      publishNupkgFilter: |
+        **\bin\$(buildConfiguration)\**\*.$(computedValues.version).nupkg
+        # !**\bin\$(buildConfiguration)\**\Common.Diagnostics.Core.$(computedValues.version).nupkg
+        # !**\bin\$(buildConfiguration)\**\Common.Diagnostics.Full.$(computedValues.version).nupkg
       NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
 
     steps:
