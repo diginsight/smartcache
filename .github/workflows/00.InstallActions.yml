@@ -48,7 +48,7 @@ jobs:
     - name: Process Composite Variables
       id: composite_variables
       run: |
-        $env:solution="a${{ env.projectBaseName }}" #"./${env:projectBaseName}.sln"
+        $env:solution="${{ env.projectBaseName }}" #"./${env:projectBaseName}.sln"
         Write-Host "env:solution: $env:solution"
         # $env:solution1="./$env:projectBaseName.sln"
         # Write-Host "env:solution1: $env:solution1"
