@@ -202,7 +202,7 @@ jobs:
           Write-Host "rootDir: $env:rootDir"
           Write-Host "default_branch: $env:default_branch"
           Write-Host "repository: $env:repository"
-          pwsh -File "scripts/v2/06. Copy2AzureStorage.ps1" -connectionString '$env:CONNECTIONSTRINGDEVDGWSAMPLESSTORAGE' -sourceFolder $env:packagesFolder -azureShare '$env:azureShare' -rootDir '$env:rootDir' -version '$env:ASSEMBLY_VERSION' -branch $env:default_branch -repository $env:repository
+          pwsh -File "scripts/v2/06. Copy2AzureStorage.ps1" -connectionString "$env:CONNECTIONSTRINGDEVDGWSAMPLESSTORAGE" -sourceFolder $env:packagesFolder -azureShare "$env:azureShare" -rootDir "$env:rootDir" -version "$env:ASSEMBLY_VERSION" -branch $env:default_branch -repository $env:repository
 
       #- task: AzurePowerShell@5
       #  inputs:

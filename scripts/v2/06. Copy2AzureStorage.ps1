@@ -12,6 +12,7 @@ param (
 # Get-Module | Remove-Module
 # $keys = @('PSBoundParameters','PWD','*Preference') + $PSBoundParameters.Keys 
 # Get-Variable -Exclude $keys | Remove-Variable -EA 0
+Write-Host "----------------------------------------"
 Write-Host "connectionString: $connectionString"
 Write-Host "sourceFolder: $sourceFolder"
 Write-Host "azureShare: $azureShare"
