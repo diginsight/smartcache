@@ -33,10 +33,10 @@ jobs:
     - name: Process Composite Variables
       id: composite_variables
       run: |
-        $env:SOLUTION="sample" 
-        Write-Host "env:SOLUTION=$env:SOLUTION"
-        echo "SOLUTION=$env:SOLUTION" >> $GITHUB_ENV
-        echo "::set-output name=SOLUTION::$env:SOLUTION"
+        $env:solution="sample" 
+        write-host "env:solution=$env:solution"
+        echo "solution=$env:solution" >> $github_env
+        echo "::set-output name=solution::$env:solution"
 
     # - name: Dump Composite Variables
     #   id: dump_composite_variables
