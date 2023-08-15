@@ -33,7 +33,7 @@ jobs:
     - name: Process Composite Variables
       id: composite_variables
       run: |
-        $env:solution="$env:projectBaseName" 
+        $env:solution="./${env:projectBaseName}.sln" 
         write-host "env:solution=$env:solution"
         echo "solution=$env:solution" >> $github_env
         echo "::set-output name=solution::$env:solution"
