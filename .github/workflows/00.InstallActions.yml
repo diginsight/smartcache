@@ -48,7 +48,7 @@ jobs:
     - name: Process Composite Variables
       id: composite_variables
       run: |
-        $env:solution: ./${env.projectBaseName}.sln
+        $env:solution="./${env.projectBaseName}.sln"
         echo "solution=$env:$env:solution" >> $GITHUB_ENV
         echo "::set-output name=solution::$env:solution"
 
