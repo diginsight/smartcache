@@ -32,7 +32,7 @@ Set-Location $scriptFolder
 $scriptName = $MyInvocation.MyCommand.Name
 Start-Transcript -Path "\Logs\$scriptName.log" -Append
 
-$agentBuildDirectory = "$($env:RUNNER_WORKSPACE)" 
+$agentBuildDirectory = "$($env:GITHUB_WORKSPACE)" 
 # $buildConfiguration =  "$($env:BUILDCONFIGURATION)" 
 if ([string]::IsNullOrEmpty($agentBuildDirectory)) { $agentBuildDirectory = "D:\dev.darioa\97. diginsight\" }
 if ([string]::IsNullOrEmpty($connectionString)) { $connectionString = "$($env:CONNECTIONSTRING)" }
