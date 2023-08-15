@@ -146,7 +146,7 @@ jobs:
     - name: Test
       run: dotnet test --no-build --verbosity normal
 
-  publish:
+  publishNugetPackage:
     needs: [getCompositeVariables, getKeyVaultSecrets, build]
     strategy:
       matrix:
@@ -178,7 +178,7 @@ jobs:
 
     env:
       azureShare: azureshare
-      packagesFolder: packages
+      packagesFolder: artifactFolder
       rootDir: '\_releases\97. Diginsight'
       NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
 
@@ -203,18 +203,4 @@ jobs:
           Write-Host "default_branch: $env:default_branch"
           Write-Host "repository: $env:repository"
           pwsh -File "scripts/v2/06. Copy2AzureStorage.ps1" -connectionString "$env:CONNECTIONSTRINGDEVDGWSAMPLESSTORAGE" -sourceFolder $env:packagesFolder -azureShare "$env:azureShare" -rootDir "$env:rootDir" -version "$env:ASSEMBLY_VERSION" -branch $env:default_branch -repository $env:repository
-
-      #- task: AzurePowerShell@5
-      #  inputs:
-      #    ScriptType: 'FilePath'
-      #    ScriptPath: '.\scripts\v2\06. Copy2AzureStorage.ps1'
-      #    ScriptArguments: '-connectionString ''$(ConnectionStringDevdgwsamplesstorage)'' -sourceFolder $(packagesFolder) -azureShare ''$(azureShare)'' -rootDir ''$(rootDir)'' -version ''$(computedValues.version)'''
-      #    azureSubscription: 'MCAPS-Hybrid-darioa'
-      #    azurePowerShellVersion: 'LatestVersion'
-      #  name: psCopy2AzureStorageDebug
-      #  env:
-      #    connectionString: $(connectionString)
-      #  displayName: Copy2AzureStorage
-      #  enabled: true
-
 
