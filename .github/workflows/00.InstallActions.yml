@@ -24,7 +24,7 @@ jobs:
       projectsFilter: '*.csproj'
       projectBaseName: Common.SmartCache
       solution: ./${env.projectBaseName}.sln
-      solution2: ./${{env.projectBaseName}}.sln
+      # solution2: ./${{env.projectBaseName}}.sln
       solution3: ./$projectBaseName.sln
       solution4: ./$env:projectBaseName.sln
       allSolutions: ./${env.projectBaseName}.sln
