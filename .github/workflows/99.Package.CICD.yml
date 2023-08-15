@@ -16,9 +16,9 @@ jobs:
     #   config-path: .github/labeler.yml
     secrets: inherit
 
-  getAssemblyVersion:
+  getCompositeVariables:
     needs: installActions
-    uses: ./.github/workflows/01.GetAssemblyVersion.yml
+    uses: ./.github/workflows/01.GetCompositeVariables.yml
     # with:
     #   config-path: .github/labeler.yml
     secrets: inherit
@@ -31,7 +31,7 @@ jobs:
     secrets: inherit
 
   build:
-    needs: [getAssemblyVersion, getKeyVaultSecrets]
+    needs: [getCompositeVariables, getKeyVaultSecrets]
     # strategy:
     #   matrix:
     #     configuration: [Debug, Release]
@@ -111,7 +111,7 @@ jobs:
 
     - name: Set Assemblies Version
       run: |
-        $env:ASSEMBLY_VERSION="${{ needs.getAssemblyVersion.outputs.assemblyVersion }}"
+        $env:ASSEMBLY_VERSION="${{ needs.getCompositeVariables.outputs.assemblyVersion }}"
         Write-Host "Setting assembly version to: $env:ASSEMBLY_VERSION"
         (Get-Content Common.SmartCache/Common.SmartCache.csproj) -replace '<Version>.*<\/Version>', "<Version>$env:ASSEMBLY_VERSION</Version>" | Set-Content Common.SmartCache/Common.SmartCache.csproj
 
@@ -151,7 +151,7 @@ jobs:
       run: dotnet test --no-build --verbosity normal
 
   publish:
-    needs: [getAssemblyVersion, getKeyVaultSecrets, build]
+    needs: [getCompositeVariables, getKeyVaultSecrets, build]
     strategy:
       matrix:
         configuration: [Release]
@@ -169,7 +169,7 @@ jobs:
 
       - name: Publish NuGet package
         run: |
-          $env:ASSEMBLY_VERSION="${{ needs.getAssemblyVersion.outputs.assemblyVersion }}"
+          $env:ASSEMBLY_VERSION="${{ needs.getCompositeVariables.outputs.assemblyVersion }}"
           Write-Host "Setting assembly version to: $env:ASSEMBLY_VERSION"
           dotnet nuget push artifactFolder/Release/Common.SmartCache.$env:ASSEMBLY_VERSION.nupkg --source https://api.nuget.org/v3/index.json --api-key ${{ secrets.NUGET_API_KEY }}
           

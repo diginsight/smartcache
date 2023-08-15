@@ -20,29 +20,29 @@ jobs:
     runs-on: self-hosted
 
     env:  # Define environment variables here
-      solutionsFilter: '*.sln'
-      projectsFilter: '*.csproj'
-      projectBaseName: Common.SmartCache
-      buildPlatform: 'Any CPU'
-      buildConfiguration: 'Release' #Debug,
+      # solutionsFilter: '*.sln'
+      # projectsFilter: '*.csproj'
+      # projectBaseName: Common.SmartCache
+      # buildPlatform: 'Any CPU'
+      # buildConfiguration: 'Release' #Debug,
       NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
 
     steps:
     - uses: actions/checkout@v3
 
-    - name: Process Composite Variables
-      id: composite_variables
-      run: |
-        $env:solution="./${env:projectBaseName}.sln" 
-        write-host "env:solution=$env:solution"
-        echo "solution=$env:solution" >> $github_env
-        echo "::set-output name=solution::$env:solution"
+    # - name: Process Composite Variables
+    #   id: composite_variables
+    #   run: |
+    #     $env:solution="./${env:projectBaseName}.sln" 
+    #     write-host "env:solution=$env:solution"
+    #     echo "solution=$env:solution" >> $github_env
+    #     echo "::set-output name=solution::$env:solution"
 
-    - name: Dump Composite Variables
-      id: dump_composite_variables
-      run: |
-        Write-Host "steps.composite_variables.outputs.solution: ${{ steps.composite_variables.outputs.solution }}"
-        echo "solution=$env:solution"
+    # - name: Dump Composite Variables
+    #   id: dump_composite_variables
+    #   run: |
+    #     Write-Host "steps.composite_variables.outputs.solution: ${{ steps.composite_variables.outputs.solution }}"
+    #     echo "solution=$env:solution"
 
     - name: Setup .NET
       uses: actions/setup-dotnet@v3
