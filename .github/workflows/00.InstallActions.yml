@@ -50,8 +50,8 @@ jobs:
       run: |
         $env:solution="./${env.projectBaseName}.sln"
         Write-Host "env:solution: $env:solution"
-        $env:solution1="./$env:projectBaseName.sln"
-        Write-Host "env:solution1: $env:solution1"
+        # $env:solution1="./$env:projectBaseName.sln"
+        # Write-Host "env:solution1: $env:solution1"
         $env:solution2="./${{ env:projectBaseName }}.sln"
         Write-Host "env:solution2: $env:solution2"
         echo "solution=$env:solution" >> $GITHUB_ENV
