@@ -46,12 +46,12 @@ jobs:
       packageFolder: ${env.projectBaseName}.Package
       commonSmartCacheBaseName: ${env.projectBaseName}
       commonSmartCacheProj: ./${env.commonSmartCacheBaseName}/${env.commonSmartCacheBaseName}.csproj
-      allProjects: '**/@(${commonSmartCacheProj})' 
-      buildBaseNames: '${commonSmartCacheBaseName}' 
+      allProjects: '**/@(${env:commonSmartCacheProj})' 
+      buildBaseNames: '${env.commonSmartCacheBaseName}' 
       buildPlatform: 'Any CPU'
       buildConfiguration: 'Release' #Debug,
-      publishBaseNames: '${commonSmartCacheBaseName}' 
-      buildProjectFiles: '${commonSmartCacheBaseName}.csproj' 
+      publishBaseNames: '${env.commonSmartCacheBaseName}' 
+      buildProjectFiles: '${env.commonSmartCacheBaseName}.csproj' 
       publishNupkgFilter: |
         **\bin\$(buildConfiguration)\**\*.$(computedValues.version).nupkg
         # !**\bin\$(buildConfiguration)\**\Common.Diagnostics.Core.$(computedValues.version).nupkg
