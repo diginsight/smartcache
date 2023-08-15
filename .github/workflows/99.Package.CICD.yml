@@ -41,17 +41,17 @@ jobs:
       solutionsFilter: '*.sln'
       projectsFilter: '*.csproj'
       projectBaseName: Common.SmartCache
-      solution: ./${{ env.projectBaseName }}.sln
-      allSolutions: './${{ env.projectBaseName }}.sln' 
-      packageFolder: ${{ env.projectBaseName }}.Package
-      commonSmartCacheBaseName: ${{ env.projectBaseName }}
-      commonSmartCacheProj: ./$(commonSmartCacheBaseName)/$(commonSmartCacheBaseName).csproj
-      allProjects: '**/@($(commonSmartCacheProj))' 
-      buildBaseNames: '$(commonSmartCacheBaseName)' 
-      buildPlatform: 'Any CPU'
-      buildConfiguration: 'Release' #Debug,
-      publishBaseNames: '$(commonSmartCacheBaseName)' 
-      buildProjectFiles: '$(commonSmartCacheBaseName).csproj' 
+      solution: ./${env.projectBaseName}.sln
+      # allSolutions: './${{ env.projectBaseName }}.sln' 
+      # packageFolder: ${{ env.projectBaseName }}.Package
+      # commonSmartCacheBaseName: ${{ env.projectBaseName }}
+      # commonSmartCacheProj: ./$(commonSmartCacheBaseName)/$(commonSmartCacheBaseName).csproj
+      # allProjects: '**/@($(commonSmartCacheProj))' 
+      # buildBaseNames: '$(commonSmartCacheBaseName)' 
+      # buildPlatform: 'Any CPU'
+      # buildConfiguration: 'Release' #Debug,
+      # publishBaseNames: '$(commonSmartCacheBaseName)' 
+      # buildProjectFiles: '$(commonSmartCacheBaseName).csproj' 
       publishNupkgFilter: |
         **\bin\$(buildConfiguration)\**\*.$(computedValues.version).nupkg
         # !**\bin\$(buildConfiguration)\**\Common.Diagnostics.Core.$(computedValues.version).nupkg
@@ -59,6 +59,10 @@ jobs:
       NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
 
     steps:
+    - name: Process composit variables
+      run: |
+        pwsh -File "scripts/v2/00. DumpVariables.ps1"
+
     - name: Run pwsh Dump Variables
       run: |
         pwsh -File "scripts/v2/00. DumpVariables.ps1"
@@ -79,6 +83,7 @@ jobs:
       run: |
         echo "$solutionsFilter"
         echo "$projectsFilter"
+        echo "$solution"
         echo "$GITHUB_CONTEXT"
         echo "$env:GITHUB_CONTEXT" >> 01.GITHUB_CONTEXT.log
         echo "$JOB_CONTEXT"
