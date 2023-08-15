@@ -49,6 +49,9 @@ jobs:
       id: composite_variables
       run: |
         $env:solution="./${env.projectBaseName}.sln"
+        Write-Host "env:solution: $env:solution"
+        $env:solution1="./$env.projectBaseName.sln"
+        Write-Host "env:solution1: $env:solution1"
         echo "solution=$env:solution" >> $GITHUB_ENV
         echo "::set-output name=solution::$env:solution"
 
