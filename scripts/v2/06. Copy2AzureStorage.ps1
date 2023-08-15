@@ -46,7 +46,9 @@ if ([string]::IsNullOrEmpty($rootDir)) { $rootDir = "\_releases\97. Diginsight" 
 if ([string]::IsNullOrEmpty($buildConfiguration)) { $buildConfiguration = "Release" }
 # if ([string]::IsNullOrEmpty($branch)) { $branch = "$($env:BUILD_SOURCEBRANCHNAME)" }
 if ([string]::IsNullOrEmpty($branch)) { $branch = "main" }
-if ([string]::IsNullOrEmpty($repository)) { $repository = "diginsight/smartcache" }
+
+if ([string]::IsNullOrEmpty($repository)) { $repository = "diginsight.smartcache" }
+$repository = $repository.Replace("/",".")
 
 
 
