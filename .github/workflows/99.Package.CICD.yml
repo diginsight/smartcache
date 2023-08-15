@@ -172,4 +172,27 @@ jobs:
           $env:ASSEMBLY_VERSION="${{ needs.getCompositeVariables.outputs.assemblyVersion }}"
           Write-Host "Setting assembly version to: $env:ASSEMBLY_VERSION"
           dotnet nuget push artifactFolder/Release/Common.SmartCache.$env:ASSEMBLY_VERSION.nupkg --source https://api.nuget.org/v3/index.json --api-key ${{ secrets.NUGET_API_KEY }}
-          
+
+      #- name: Azure Files Upload
+      #  # You may pin to the exact commit or the version. uses: rnakamine/azure-files-upload@5c1081adbe0d65b9c0a8be234f0e17ae93c8b741
+      #  uses: rnakamine/azure-files-upload@v1.0.0
+      #  with:
+      #    connection_string: ${{ needs.getKeyVaultSecrets.outputs.assemblyVersion }}
+      #    destination: # The destination of the upload operation.
+      #    # Extra arguments. Can passing flags like `--pattern` or `--destination-path`
+      #    extra_args: # optional          
+
+      #- task: AzurePowerShell@5
+      #  inputs:
+      #    ScriptType: 'FilePath'
+      #    ScriptPath: '.\scripts\v1\06. Copy2AzureStorage.ps1'
+      #    ScriptArguments: '-connectionString ''$(ConnectionStringDevdgwsamplesstorage)'' -sourceFolder $(packagesFolder) -azureShare ''$(azureShare)'' -rootDir ''$(rootDir)'' -version ''$(computedValues.version)'''
+      #    azureSubscription: 'MCAPS-Hybrid-darioa'
+      #    azurePowerShellVersion: 'LatestVersion'
+      #  name: psCopy2AzureStorageDebug
+      #  env:
+      #    connectionString: $(connectionString)
+      #  displayName: Copy2AzureStorage
+      #  enabled: true
+
+
