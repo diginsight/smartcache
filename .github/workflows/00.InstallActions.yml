@@ -45,17 +45,17 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
-    # - name: Process Composite Variables
-    #   id: composite_variables
-    #   run: |
-    #     $env:SOLUTION="sample" 
-    #     Write-Host "env:SOLUTION=$env:solution"
-    #     # $env:solution1="./$env:projectBaseName.sln"
-    #     # Write-Host "env:solution1: $env:solution1"
-    #     # $env:solution2="./${{ env:projectBaseName }}.sln"
-    #     # Write-Host "env:solution2: $env:solution2"
-    #     # echo "SOLUTION=$env:SOLUTION" >> $GITHUB_ENV
-    #     # echo "::set-output name=SOLUTION::$env:SOLUTION"
+    - name: Process Composite Variables
+      id: composite_variables
+      run: |
+        $env:SOLUTION="sample" 
+        Write-Host "env:SOLUTION=$env:solution"
+        echo "SOLUTION=$env:SOLUTION" >> $GITHUB_ENV
+        echo "::set-output name=SOLUTION::$env:SOLUTION"
+        # $env:solution1="./$env:projectBaseName.sln"
+        # Write-Host "env:solution1: $env:solution1"
+        # $env:solution2="./${{ env:projectBaseName }}.sln"
+        # Write-Host "env:solution2: $env:solution2"
 
     # - name: Dump Composite Variables
     #   id: dump_composite_variables
