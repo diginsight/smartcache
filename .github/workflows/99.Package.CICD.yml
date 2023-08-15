@@ -42,16 +42,16 @@ jobs:
       projectsFilter: '*.csproj'
       projectBaseName: Common.SmartCache
       solution: ./${env.projectBaseName}.sln
-      # allSolutions: './${{ env.projectBaseName }}.sln' 
-      # packageFolder: ${{ env.projectBaseName }}.Package
-      # commonSmartCacheBaseName: ${{ env.projectBaseName }}
-      # commonSmartCacheProj: ./$(commonSmartCacheBaseName)/$(commonSmartCacheBaseName).csproj
-      # allProjects: '**/@($(commonSmartCacheProj))' 
-      # buildBaseNames: '$(commonSmartCacheBaseName)' 
-      # buildPlatform: 'Any CPU'
-      # buildConfiguration: 'Release' #Debug,
-      # publishBaseNames: '$(commonSmartCacheBaseName)' 
-      # buildProjectFiles: '$(commonSmartCacheBaseName).csproj' 
+      allSolutions: ./${env.projectBaseName}.sln
+      packageFolder: ${env.projectBaseName}.Package
+      commonSmartCacheBaseName: ${env.projectBaseName}
+      commonSmartCacheProj: ./${env.commonSmartCacheBaseName}/${env.commonSmartCacheBaseName}.csproj
+      allProjects: '**/@(${commonSmartCacheProj})' 
+      buildBaseNames: '${commonSmartCacheBaseName}' 
+      buildPlatform: 'Any CPU'
+      buildConfiguration: 'Release' #Debug,
+      publishBaseNames: '${commonSmartCacheBaseName}' 
+      buildProjectFiles: '${commonSmartCacheBaseName}.csproj' 
       publishNupkgFilter: |
         **\bin\$(buildConfiguration)\**\*.$(computedValues.version).nupkg
         # !**\bin\$(buildConfiguration)\**\Common.Diagnostics.Core.$(computedValues.version).nupkg
@@ -111,7 +111,7 @@ jobs:
       run: |
         $env:ASSEMBLY_VERSION="${{ needs.getAssemblyVersion.outputs.assemblyVersion }}"
         Write-Host "Setting assembly version to: $env:ASSEMBLY_VERSION"
-        (Get-Content "$env:commonSmartCacheProj") -replace '<Version>.*<\/Version>', "<Version>$env:ASSEMBLY_VERSION</Version>" | Set-Content Common.SmartCache/Common.SmartCache.csproj
+        (Get-Content ${env:commonSmartCacheProj}) -replace '<Version>.*<\/Version>', "<Version>$env:ASSEMBLY_VERSION</Version>" | Set-Content Common.SmartCache/Common.SmartCache.csproj
 
     - name: Restore dependencies
       run: dotnet restore
