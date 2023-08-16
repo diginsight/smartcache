@@ -34,11 +34,11 @@ Start-Transcript -Path "\Logs\$scriptName.log" -Append
 
 $agentBuildDirectory = "$($env:GITHUB_WORKSPACE)" 
 # $buildConfiguration =  "$($env:BUILDCONFIGURATION)" 
-if ([string]::IsNullOrEmpty($agentBuildDirectory)) { $agentBuildDirectory = "D:\dev.darioa\97. diginsight\" }
+if ([string]::IsNullOrEmpty($agentBuildDirectory)) { $agentBuildDirectory = "C:\actions-runner\_work\smartcache\smartcache" }
 if ([string]::IsNullOrEmpty($connectionString)) { $connectionString = "$($env:CONNECTIONSTRING)" }
 if ([string]::IsNullOrEmpty($connectionString)) { $connectionString = "<connectionstring>;" }
 if ([string]::IsNullOrEmpty($sourceFolder)) { $sourceFolder = "$($env:SOURCEFOLDER)" }
-if ([string]::IsNullOrEmpty($sourceFolder)) { $sourceFolder = "packages" }
+if ([string]::IsNullOrEmpty($sourceFolder)) { $sourceFolder = "artifactFolder" }
 if ([string]::IsNullOrEmpty($azureShare))  { $azureShare = "$($env:AZURESHARE)" }
 if ([string]::IsNullOrEmpty($azureShare)) { $azureShare = "azureshare" }
 if ([string]::IsNullOrEmpty($rootDir)) { $rootDir = "$($env:ROOTDIR)" }
@@ -53,7 +53,7 @@ $repository = $repository.Replace("/",".")
 
 
 if ([string]::IsNullOrEmpty($version)) { $version = "$($env:VERSION)" }
-if ([string]::IsNullOrEmpty($version)) { $version = "1.0.0.100" }
+if ([string]::IsNullOrEmpty($version)) { $version = "0.9.0.199" }
 if ([string]::IsNullOrEmpty($filePattern)) { $filePattern = "$($env:FILEPATTERN)" }
 if ([string]::IsNullOrEmpty($filePattern)) { $filePattern = ".*\.$version\.nupkg" }
  
@@ -92,7 +92,7 @@ foreach ($part in $parts) {
     else { $path = "$path\$part"; }
     
     try {
-        $directory = Get-AzStorageFile -Share $share.CloudFileShare -Path $path | where { $_.GetType().Name -eq "CloudFileDirectory" }
+        $directory = Get-AzStorageFile -Share $share.CloudFileShare -Path $path -ErrorAction Stop | where { $_.GetType().Name -eq "CloudFileDirectory" }
         $ex = $null;
         Write-Host "Get-AzStorageFile -Share '$share.CloudFileShare' -Path '$path' => ok"
     } catch {
