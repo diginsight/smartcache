@@ -11,11 +11,12 @@
 	  <RepositoryUrl>https://github.com/diginsight/smartcache.git</RepositoryUrl>
 	  <RepositoryType>git</RepositoryType>
 	  <PackageTags>cache diginsight smart ai preload</PackageTags>
-	  <PackageIcon>SmartCache.png</PackageIcon>
+	  <PackageIcon>SmartCacheV1.png</PackageIcon>
 	  <Authors>diginsight</Authors>
-	  <Description>Common.SmartCache provides intelligent loading for data providers such as external apis or databases.
-Age conscious data management is applied to cache or preload data automatically.
-AI assisted algorithms can be used to ensure data preloading, based on application use.</Description>
+	  <Description>
+		  Common.SmartCache provides intelligent loading for data providers such as external apis or databases.
+		  Age conscious data management is applied to allow automatic cache or data preload.
+		  AI assisted algorithms can be used to ensure data preloading, based on application use.</Description>
 	  <SignAssembly>true</SignAssembly>
 	  <AssemblyOriginatorKeyFile>diginsight.snk</AssemblyOriginatorKeyFile>
 	  <UserSecretsId>ea6bafb2-fe5a-4acb-820e-78ff096f00c7</UserSecretsId>
@@ -53,6 +54,10 @@ AI assisted algorithms can be used to ensure data preloading, based on applicati
 			<PackagePath></PackagePath>
 		</None>
 		<None Include="..\README.nuget.md">
+		  <Pack>True</Pack>
+		  <PackagePath>\</PackagePath>
+		</None>
+		<None Include="..\SmartCacheV1.png">
 		  <Pack>True</Pack>
 		  <PackagePath>\</PackagePath>
 		</None>
