@@ -147,7 +147,7 @@ foreach ($file in $Files) {
     Write-Host "copyed file: $newFilePath"
 }
 
-# Write-Host "$version"
+# Write-Host "$version" 
 # Write-Host "##vso[task.setvariable variable=version;isOutput=true]$version"
 
 Stop-Transcript
