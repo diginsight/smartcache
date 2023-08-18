@@ -3,7 +3,7 @@ set env=DEV
 IF NOT DEFINED UpdateSetup set UpdateSetup=false
 
 rem set TargetBin=C:\temp\New folder
-set TargetBin=E:\dev\01. ABB Port\Ekip Connect 3\EkipConnect\bin\Debug
+set TargetBin=D:\dev.darioa\97. diginsight\smartcache\Common.SmartCache
 
 IF %OutDir% == bin\Debug\net472\ (
 	IF /I %UpdateSetup%==True echo  robocopy .\%OutDir% "%TargetBin%" *.dll
