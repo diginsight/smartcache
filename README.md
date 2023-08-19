@@ -4,7 +4,7 @@ __Age sensitive data management__ is applied to cache or preload data automatica
 __AI assisted algorithms__ can be used to ensure data preloading, based on application use.
 
 Articles:
-- [HOWTO - Leverage age conscious data management to boost application performance.md]<br>
+- [HOWTO - Leverage age sensitive data management to boost application performance.md]<br>
 (TODO): explores how to use Common.SmartCache to boost application performance by means age conscious data magagement.
 - [HOWTO - Enable data preloading by means of Artificial Intelligence.md]<br> (TODO): explores how to enable AI assisted preloading to improve data preloading efficiency.<br><br>
 
