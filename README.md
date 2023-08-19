@@ -3,8 +3,8 @@
 __Age sensitive data management__ is applied to cache or preload data automatically.<br>
 __AI assisted algorithms__ can be used to ensure data preloading, based on application use.<br>
  
-Data load latencies for cached data are (completely) cut for any data provider.<br>
-When data preloading happens, data load latencies are cut since the first call.<br>
+__Data load latencies for cached data are (completely) cut for any data provider__.<br>
+When data preloading happens, __data load latencies can be cut since the first call__.<br>
 
 Articles:
 - [HOWTO - Leverage age sensitive data management to boost application performance.md]<br>
