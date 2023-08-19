@@ -23,7 +23,6 @@
 	  <Version>1.0.0.0</Version>
 	  <PackageReadmeFile>README.nuget.md</PackageReadmeFile>
 	  <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-	  <LangVersion>11</LangVersion>
 	  <!--<PackageReadmeFile>README.nuget.md</PackageReadmeFile>-->
   </PropertyGroup>
 
@@ -37,9 +36,7 @@
 
   <ItemGroup>
     <Compile Remove="Properties\AssemblyInfo.cs" />
-    <Compile Remove="Service\IParallelServiceOptions.cs" />
     <Compile Remove="Service\ParallelService.cs" />
-    <Compile Remove="Service\ParallelServiceOptions.cs" />
   </ItemGroup>
 
 	<ItemGroup>
