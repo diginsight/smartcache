@@ -9,7 +9,7 @@ When data preloading happens, __data load latencies can be cut since the first c
 Articles:
 - [HOWTO - Leverage age sensitive data management to boost application performance.md]<br>
 (TODO): explores how to use Common.SmartCache to boost application performance by means age conscious data magagement.
-- [HOWTO - Enable data preloading by means of Artificial Intelligence.md]<br> (TODO): explores how to enable AI assisted preloading to improve data preloading efficiency.<br><br>
+- [HOWTO - Enable data preloading by means of AI assisted algorithms.md]<br> (TODO): explores how to enable AI assisted preloading to improve data preloading efficiency.<br><br>
 
 NB: __Common.SmartCache is currently under development and use ov versions 0.x.x.x is not supported__<br><br>
 
