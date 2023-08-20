@@ -9,6 +9,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ext", "ext", "{36B023D1-E2A
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Common.Diagnostics", "..\telemetry\Common.Diagnostics\Common.Diagnostics.csproj", "{2F4C57B6-F7FA-4C93-84BC-BA27DF715F1D}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Samples", "Samples", "{79F9E827-FB28-4D3D-9B7B-7367D69EDEFE}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{4EE7D7E9-D71C-4B4A-B026-CB35E65985FA}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EasySample600v2", "Samples\EasySample600v2\EasySample600v2.csproj", "{FD0C49C3-4DA7-461A-88FD-BA6646315A84}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -23,12 +29,17 @@ Global
 		{2F4C57B6-F7FA-4C93-84BC-BA27DF715F1D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2F4C57B6-F7FA-4C93-84BC-BA27DF715F1D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2F4C57B6-F7FA-4C93-84BC-BA27DF715F1D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FD0C49C3-4DA7-461A-88FD-BA6646315A84}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FD0C49C3-4DA7-461A-88FD-BA6646315A84}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FD0C49C3-4DA7-461A-88FD-BA6646315A84}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FD0C49C3-4DA7-461A-88FD-BA6646315A84}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{2F4C57B6-F7FA-4C93-84BC-BA27DF715F1D} = {36B023D1-E2AD-4534-8373-45FAFB5DE239}
+		{FD0C49C3-4DA7-461A-88FD-BA6646315A84} = {79F9E827-FB28-4D3D-9B7B-7367D69EDEFE}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {49B4FD54-31F4-41F8-85D3-3CC6658909BA}

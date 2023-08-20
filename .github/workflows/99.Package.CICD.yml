@@ -112,7 +112,7 @@ jobs:
         (Get-Content Common.SmartCache/Common.SmartCache.csproj) -replace '<Version>.*<\/Version>', "<Version>$env:ASSEMBLY_VERSION</Version>" | Set-Content Common.SmartCache/Common.SmartCache.csproj
 
     - name: Restore dependencies
-      run: dotnet restore
+      run: dotnet restore Common.Smartcache.sln
       
     - name: Build DLL Debug
       run: dotnet build Common.SmartCache/Common.SmartCache.csproj --configuration Debug --no-restore 
