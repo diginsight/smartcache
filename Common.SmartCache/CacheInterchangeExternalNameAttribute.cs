@@ -2,7 +2,7 @@
 
 using System;
 
-namespace Common;
+namespace Common.SmartCache;
 
 [AttributeUsage(AttributeTargets.Assembly, AllowMultiple = true)]
 public sealed class CacheInterchangeExternalNameAttribute : Attribute

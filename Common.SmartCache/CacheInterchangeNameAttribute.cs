@@ -2,7 +2,7 @@
 
 using System;
 
-namespace Common;
+namespace Common.SmartCache;
 
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Interface | AttributeTargets.Enum | AttributeTargets.Assembly, Inherited = false)]
 public sealed class CacheInterchangeNameAttribute : Attribute

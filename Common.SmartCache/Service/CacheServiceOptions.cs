@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Common;
+namespace Common.SmartCache;
 
 public sealed class CacheServiceOptions : ICacheServiceOptions
 {

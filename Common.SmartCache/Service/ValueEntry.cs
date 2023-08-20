@@ -3,7 +3,7 @@
 using Newtonsoft.Json;
 using System;
 
-namespace Common;
+namespace Common.SmartCache;
 
 [CacheInterchangeName("VE")]
 public sealed class ValueEntry<T> : IValueEntry

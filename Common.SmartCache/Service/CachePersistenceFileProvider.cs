@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Primitives;
 
-namespace Common;
+namespace Common.SmartCache;
 
 public sealed class CachePersistenceFileProvider : ICachePersistenceFileProvider
 {

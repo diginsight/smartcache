@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.FileProviders;
 
-namespace Common;
+namespace Common.SmartCache;
 
 public interface ICachePersistenceFileProvider : IFileProvider
 {

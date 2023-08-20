@@ -2,7 +2,7 @@
 
 using System;
 
-namespace Common;
+namespace Common.SmartCache;
 
 public sealed record CacheMissDescriptor(
     byte[] RawKey,

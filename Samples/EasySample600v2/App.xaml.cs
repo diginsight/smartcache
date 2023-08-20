@@ -21,7 +21,8 @@ using System.Threading.Tasks;
 using System.Windows;
 using static System.Formats.Asn1.AsnWriter;
 using Microsoft.AspNetCore.Http;
-using ABB.Ability.ELSP.EnergyManager.Api.Core.Extensions.Services;
+using EasySample600v2;
+using Common.SmartCache;
 #endregion
 
 namespace EasySample
@@ -133,6 +134,7 @@ namespace EasySample
             services.AddClassConfiguration();
             services.AddParallelService(configuration);
             services.AddCacheService(configuration, hostEnvironment);
+            services.AddSingleton<IConfigurationService, ConfigurationService>();
 
             services.AddSingleton<MainWindow>();
 

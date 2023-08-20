@@ -2,7 +2,7 @@
 
 using System;
 
-namespace Common;
+namespace Common.SmartCache;
 
 public interface IValueEntry
 {

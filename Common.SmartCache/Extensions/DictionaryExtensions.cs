@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 
-namespace Common;
+namespace Common.SmartCache;
 
 public static class DictionaryExtensions
 {

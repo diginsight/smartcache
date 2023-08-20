@@ -3,7 +3,7 @@
 using System;
 using System.Threading.Tasks;
 
-namespace Common;
+namespace Common.SmartCache;
 
 public interface IInvalidatable
 {

@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using DotNext;
 using Microsoft.Extensions.FileProviders;
 
-namespace Common;
+namespace Common.SmartCache;
 
 public sealed class CachePersistence : ICachePersistence
 {

@@ -2,7 +2,7 @@
 
 using System.Diagnostics.CodeAnalysis;
 
-namespace Common;
+namespace Common.SmartCache;
 
 public interface ICacheKeyService
 {

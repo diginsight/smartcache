@@ -22,6 +22,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Primitives;
 using StackExchange.Redis;
+using Common.SmartCache;
 
 [assembly: CacheInterchangeExternalName("2", typeof(ValueTuple<,>))]
 [assembly: CacheInterchangeExternalName("3", typeof(ValueTuple<,,>))]
@@ -41,7 +42,7 @@ using StackExchange.Redis;
 [assembly: CacheInterchangeExternalName("o", typeof(object))]
 [assembly: CacheInterchangeExternalName("s", typeof(string))]
 
-namespace Common;
+namespace Common.SmartCache;
 
 public class CacheService : ICacheService
 {

@@ -6,7 +6,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Common;
+namespace Common.SmartCache;
 
 public static class TaskExtensions
 {

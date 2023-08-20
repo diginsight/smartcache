@@ -4,7 +4,7 @@ using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 
-namespace Common;
+namespace Common.SmartCache;
 
 public interface ICacheService
 {

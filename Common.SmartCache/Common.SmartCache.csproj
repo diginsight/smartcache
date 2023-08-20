@@ -43,7 +43,7 @@
   </ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Common.Diagnostics" Version="1.0.2.44" />
+		<PackageReference Include="Common.Diagnostics" Version="1.0.2.45" />
 		<PackageReference Include="DotNext.Threading" Version="4.14.0" />
 		<PackageReference Include="Microsoft.AspNetCore.Mvc.Versioning" Version="5.1.0" />
 		<PackageReference Include="Microsoft.Extensions.Configuration" Version="6.0.0" />

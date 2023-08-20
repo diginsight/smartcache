@@ -1,4 +1,4 @@
-﻿namespace Common;
+﻿namespace Common.SmartCache;
 
 public enum InvalidationReason : byte
 {

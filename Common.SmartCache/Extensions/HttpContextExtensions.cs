@@ -5,7 +5,7 @@ using System.Linq;
 using System.Net.Http.Headers;
 using Microsoft.AspNetCore.Http;
 
-namespace Common;
+namespace Common.SmartCache;
 
 public static class HttpContextExtensions
 {

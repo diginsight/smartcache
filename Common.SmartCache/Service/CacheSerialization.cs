@@ -7,11 +7,12 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
+using Common.SmartCache;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Serialization;
 
-namespace Common;
+namespace Common.SmartCache;
 
 public static class CacheSerialization
 {

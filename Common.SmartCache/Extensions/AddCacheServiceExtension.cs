@@ -5,10 +5,11 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
+using StackExchange.Redis;
 using System;
 using System.IO;
 
-namespace ABB.Ability.ELSP.EnergyManager.Api.Core.Extensions.Services
+namespace Common.SmartCache
 {
     /// <summary>
     ///     Extension class.
@@ -46,6 +47,9 @@ namespace ABB.Ability.ELSP.EnergyManager.Api.Core.Extensions.Services
                         var options = sp.GetRequiredService<IOptions<CacheServiceOptions>>().Value;
                         hc.Timeout = options.CrossPodRequestTimeout > TimeSpan.Zero ? options.CrossPodRequestTimeout : TimeSpan.FromSeconds(5);
                     });
+
+            services.AddSingleton<IConnectionMultiplexer>(_ => ConnectionMultiplexer.Connect(configuration.GetValue<string>("RedisCache:Configuration")));
+            services.AddSingleton(static p => p.GetRequiredService<IConnectionMultiplexer>().GetDatabase());
 
             return services;
         }
