@@ -21,6 +21,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using static System.Formats.Asn1.AsnWriter;
 using Microsoft.AspNetCore.Http;
+using ABB.Ability.ELSP.EnergyManager.Api.Core.Extensions.Services;
 #endregion
 
 namespace EasySample
@@ -74,7 +75,8 @@ namespace EasySample
                             builder.AddEnvironmentVariables();
                         }).ConfigureServices((context, services) =>
                         {
-                            ConfigureServices(context.Configuration, services);
+                            //context.HostingEnvironment
+                            ConfigureServices(context.Configuration, services, context.HostingEnvironment);
                         })
                         .ConfigureLogging((context, loggingBuilder) =>
                         {
@@ -124,44 +126,16 @@ namespace EasySample
                 base.OnStartup(e); scope.LogDebug($"base.OnStartup(e);");
             }
         }
-        private void ConfigureServices(IConfiguration configuration, IServiceCollection services)
+        private void ConfigureServices(IConfiguration configuration, IServiceCollection services, IHostEnvironment hostEnvironment)
         {
             //services.TryAddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             services.AddHttpContextAccessor();
             services.AddClassConfiguration();
+            services.AddParallelService(configuration);
+            services.AddCacheService(configuration, hostEnvironment);
+
             services.AddSingleton<MainWindow>();
 
-            services.AddScoped<ITraceLoggerMinimumLevel, TraceLoggerMinimumLevel>(sp =>
-            {
-                var ok = true;
-                var traceLoggerMinimumLevel = default(TraceLoggerMinimumLevel);
-                var traceLoggerMinimumLevelString = configuration["AppSettings:TraceLoggerMinimumLevel"] as string;
-                if (traceLoggerMinimumLevelString is not null)
-                {
-                    ok = Enum.TryParse<LogLevel>(traceLoggerMinimumLevelString, out LogLevel minimumLevel);
-                    if (ok)
-                    {
-                        if (traceLoggerMinimumLevel == null) { traceLoggerMinimumLevel = new TraceLoggerMinimumLevel(); }
-                        traceLoggerMinimumLevel.MinimumLevel = minimumLevel;
-                    }
-                }
-
-                var contextAccessor = Host.Services.GetService<IHttpContextAccessor>();
-                if (contextAccessor == null) { return traceLoggerMinimumLevel; }
-
-                var headerValues = default(StringValues);
-                ok = contextAccessor?.HttpContext?.Request?.Headers?.TryGetValue("TraceLoggerMinimumLevel", out headerValues) ?? false;
-                if (ok)
-                {
-                    ok = int.TryParse(headerValues.LastOrDefault(), out int minimumLevel);
-                    if (ok)
-                    {
-                        if (traceLoggerMinimumLevel == null) { traceLoggerMinimumLevel = new TraceLoggerMinimumLevel(); }
-                        traceLoggerMinimumLevel.MinimumLevel = (LogLevel)minimumLevel;
-                    }
-                }
-                return traceLoggerMinimumLevel;
-            });
 
             // TODO: register as a singleton ILogger
 
@@ -179,11 +153,4 @@ namespace EasySample
         private string GetMethodName([CallerMemberName] string memberName = "") { return memberName; }
     }
 
-    public class TraceLoggerMinimumLevel : ITraceLoggerMinimumLevel
-    {
-        LogLevel _minimunLevel = LogLevel.Trace;
-        public TraceLoggerMinimumLevel() { }
-
-        public LogLevel MinimumLevel { get => _minimunLevel; set => _minimunLevel = value; }
-    }
 }
