@@ -124,7 +124,7 @@ public static class CacheExtensions
                 }
 
                 JToken tempJt;
-                using (JTokenWriter tempWriter = new ())
+                using (JTokenWriter tempWriter = new())
                 {
                     serializer.Serialize(tempWriter, value, typeof(object));
                     tempJt = tempWriter.Token!;

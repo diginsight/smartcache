@@ -61,32 +61,48 @@ public class CacheService : ICacheService
     private readonly IHttpContextAccessor httpContextAccessor;
     private readonly IHttpClientFactory httpClientFactory;
     private readonly ICachePersistence cachePersistence;
+    private readonly IClassConfigurationGetter classConfigurationGetter;
     //private readonly DaprClient? daprClient;
 
     private readonly AsyncLazy<bool> isDaprEnabledLazy;
     private readonly ISet<ICacheKey> keys = new HashSet<ICacheKey>();
-    private readonly ExternalMissDictionary externalMissDictionary = new ();
+    private readonly ExternalMissDictionary externalMissDictionary = new();
     private readonly AsyncReaderWriterLock rwLock = new();
-    private readonly ConcurrentDictionary<string, Latency> locationLatencies = new ();
+    private readonly ConcurrentDictionary<string, Latency> locationLatencies = new();
+
+    private long memoryCacheSize = 0;
 
     public CacheService(
-        IOptions<CacheServiceOptions> options,
+        IOptions<MemoryCacheOptions> memoryCacheOptionsOptions,
+        ILoggerFactory loggerFactory,
+        IOptions<CacheServiceOptions> cacheServiceOptionsOptions,
         ILogger<CacheService> logger,
-        IMemoryCache memoryCache,
         IDatabase redisDatabase,
         IHttpContextAccessor httpContextAccessor,
         IHttpClientFactory httpClientFactory,
-        ICachePersistence cachePersistence
+        ICachePersistence cachePersistence,
+        IClassConfigurationGetter<CacheService> classConfigurationGetter
         //DaprClient? daprClient = null
         )
     {
-        cacheServiceOptions = options.Value;
+        cacheServiceOptions = cacheServiceOptionsOptions.Value;
         this.logger = logger;
-        this.memoryCache = memoryCache;
+
+        MemoryCacheOptions initalMemoryCacheOptions = memoryCacheOptionsOptions.Value;
+        MemoryCacheOptions memoryCacheOptions = new()
+        {
+            Clock = initalMemoryCacheOptions.Clock,
+            CompactionPercentage = initalMemoryCacheOptions.CompactionPercentage,
+            ExpirationScanFrequency = initalMemoryCacheOptions.ExpirationScanFrequency,
+            SizeLimit = cacheServiceOptions.SizeLimit,
+        };
+        memoryCache = new MemoryCache(memoryCacheOptions, loggerFactory);
+
         this.redisDatabase = redisDatabase;
         this.httpContextAccessor = httpContextAccessor;
         this.httpClientFactory = httpClientFactory;
         this.cachePersistence = cachePersistence;
+        this.classConfigurationGetter = classConfigurationGetter;
         //this.daprClient = daprClient;
 
         //isDaprEnabledLazy = daprClient is null
@@ -105,7 +121,7 @@ public class CacheService : ICacheService
         //        });
     }
 
-    private Task<bool> IsDaprEnabledAsync() => isDaprEnabledLazy.WithCancellation(CancellationToken.None);
+    //private Task<bool> IsDaprEnabledAsync() => isDaprEnabledLazy.WithCancellation(CancellationToken.None);
 
     public async Task<T> GetAsync<T>(ICacheKey key, Func<Task<T>> fetchAsync, ICacheContext? cacheContext = null)
     {
@@ -164,17 +180,19 @@ public class CacheService : ICacheService
             }
         }
 
+        [SuppressMessage("ReSharper", "AccessToDisposedClosure")]
         async Task<TValue> FetchAndSetValueAsync()
         {
             TValue value;
-            long latencyMsec;
             bool skipPersist;
             try
             {
                 Stopwatch sw = Stopwatch.StartNew();
                 value = await fetchAsync();
-                latencyMsec = sw.ElapsedMilliseconds;
+                long latencyMsec = sw.ElapsedMilliseconds;
                 skipPersist = false;
+
+                scope.LogInformation($"Fetched in {latencyMsec} ms");
             }
             catch (Exception)
             {
@@ -184,20 +202,20 @@ public class CacheService : ICacheService
                     throw;
                 }
 
-                Optional<TValue> persistedValueOpt = await cachePersistence.TryRetrieveAsync<TValue>(key, usage == PersistedCacheUsage.EnabledWithCreationDate ? minimumCreationDate : null);
+                Optional<TValue> persistedValueOpt = await cachePersistence.TryRetrieveAsync<TValue>(
+                    key, usage == PersistedCacheUsage.EnabledWithCreationDate ? minimumCreationDate : null);
                 if (persistedValueOpt.IsUndefined)
                 {
                     throw;
                 }
 
                 value = persistedValueOpt.Value;
-                latencyMsec = long.MaxValue;
                 skipPersist = true;
             }
 
             using (await AcquireWriteLockAsync())
             {
-                SetValue(key, value, absExpiration, sldExpiration, skipPersist: skipPersist, latencyMsec: latencyMsec);
+                SetValue(key, value, absExpiration, sldExpiration, skipPersist: skipPersist);
                 return value;
             }
         }
@@ -215,10 +233,10 @@ public class CacheService : ICacheService
                 string rawKey = CacheSerialization.SerializeToString(key);
                 HttpContent content = new StringContent(rawKey, CacheSerialization.HttpEncoding, "application/json");
 
-                ConcurrentBag<string> invalidLocations = new ();
+                ConcurrentBag<string> invalidLocations = new();
 
                 [SuppressMessage("ReSharper", "AccessToDisposedClosure")]
-                async Task<Optional<(TValue, long)>> GetFromOtherPodAsync(string podIp, CancellationToken ct)
+                async Task<Optional<(TValue, double)>> GetFromOtherPodAsync(string podIp, CancellationToken ct)
                 {
                     try
                     {
@@ -226,8 +244,11 @@ public class CacheService : ICacheService
                         using HttpResponseMessage responseMessage = await httpClient.PostAsync($"http://{podIp}/api/v1/clusterCache/get", content, ct);
                         responseMessage.EnsureSuccessStatusCode();
 
+                        HttpContent responseContent = responseMessage.Content;
+                        long contentLength = responseContent.Headers.ContentLength!.Value;
+
                         TValue item;
-                        await using (Stream contentStream = await responseMessage.Content.ReadAsStreamAsync(ct))
+                        await using (Stream contentStream = await responseContent.ReadAsStreamAsync(ct))
                         {
                             item = CacheSerialization.Deserialize<TValue>(contentStream, true);
                         }
@@ -236,7 +257,7 @@ public class CacheService : ICacheService
 
                         scope.LogDebug($"Cache hit: Returning up-to-date value for {keyLogString} from pod {podIp}. Latency: {latencyMsec}");
 
-                        return new Optional<(TValue, long)>((item, latencyMsec));
+                        return new Optional<(TValue, double)>((item, (double)latencyMsec / contentLength));
                     }
                     catch (Exception e) when (e is InvalidOperationException or HttpRequestException || e is TaskCanceledException tce && tce.CancellationToken != ct)
                     {
@@ -248,7 +269,7 @@ public class CacheService : ICacheService
                 }
 
                 [SuppressMessage("ReSharper", "AccessToDisposedClosure")]
-                async Task<Optional<(TValue, long)>> GetFromRedisAsync()
+                async Task<Optional<(TValue, double)>> GetFromRedisAsync()
                 {
                     RedisKey redisKey = RedisKeyPrefix + rawKey;
 
@@ -259,7 +280,7 @@ public class CacheService : ICacheService
                         return default;
                     }
 
-                    ValueEntry<TValue> entry = CacheSerialization.Deserialize<ValueEntry<TValue>>(redisEntry.ToString());
+                    ValueEntry<TValue> entry = CacheSerialization.Deserialize<ValueEntry<TValue>>((byte[])redisEntry!);
                     long latencyMsec = sw.ElapsedMilliseconds;
 
                     if (entry.CreationDate < minimumCreationDate)
@@ -271,27 +292,29 @@ public class CacheService : ICacheService
                         return default;
                     }
 
-                    scope.LogDebug($"Cache hit: Returning up-to-date value for {keyLogString} from Redis. Latency: {latencyMsec}");
-                    return new Optional<(TValue, long)>((entry.Data, latencyMsec));
+                    long redisEntryLength = redisEntry.Length();
+                    scope.LogDebug($"Cache hit (Latency:{latencyMsec}, Size:{redisEntryLength:#,##0}): Returning up-to-date value for {keyLogString} from Redis.");
+                    return new Optional<(TValue, double)>((entry.Data, (double)latencyMsec / redisEntryLength));
                 }
 
-                Func<CancellationToken, Task<Optional<(TValue, long)>>> UpdatingLatency(
+                Func<CancellationToken, Task<Optional<TValue>>> UpdatingLatency(
                     string location,
-                    Func<CancellationToken, Task<Optional<(TValue, long)>>> getFromLocationAsync)
+                    Func<CancellationToken, Task<Optional<(TValue, double)>>> getFromLocationAsync)
                 {
                     return async ct =>
                     {
-                        Optional<(TValue, long LatencyMsec)> outputOpt = await getFromLocationAsync(ct);
+                        Optional<(TValue Item, double RelativeLatency)> outputOpt = await getFromLocationAsync(ct);
                         if (!outputOpt.IsUndefined)
                         {
                             Latency latency = locationLatencies.GetOrAdd(location, static _ => new Latency());
-                            latency.Add(outputOpt.Value.LatencyMsec);
+                            latency.Add(outputOpt.Value.RelativeLatency);
                         }
-                        return outputOpt;
+
+                        return outputOpt.Convert(static x => x.Item);
                     };
                 }
 
-                IEnumerable<Func<CancellationToken, Task<Optional<(TValue, long)>>>> taskFactories = locations
+                IEnumerable<Func<CancellationToken, Task<Optional<TValue>>>> taskFactories = locations
                     .GroupJoin(
                         locationLatencies,
                         static l => l,
@@ -302,7 +325,7 @@ public class CacheService : ICacheService
                         kv =>
                         {
                             string location = kv.Location;
-                            Func<CancellationToken, Task<Optional<(TValue, long)>>> getFromLocationAsync =
+                            Func<CancellationToken, Task<Optional<(TValue, double)>>> getFromLocationAsync =
                                 location == RedisLocation
                                     ? _ => GetFromRedisAsync()
                                     : ct => GetFromOtherPodAsync(location, ct);
@@ -314,13 +337,14 @@ public class CacheService : ICacheService
                 LockReleaser? lockReleaser = null;
                 try
                 {
-                    Optional<(TValue, long)> outputOpt;
+                    Optional<TValue> outputOpt;
                     try
                     {
                         outputOpt = await TaskExtensions.WhenAnyValid(
                             taskFactories.ToArray(),
                             cacheServiceOptions.CrossPodPrefetchCount,
                             cacheServiceOptions.CrossPodMaxParallelism,
+                            // ReSharper disable once AsyncApostle.AsyncWait
                             isValid: static t => new ValueTask<bool>(!t.IsCompletedSuccessfully || !t.Result.IsUndefined));
                     }
                     catch (InvalidOperationException)
@@ -340,8 +364,8 @@ public class CacheService : ICacheService
                     {
                         lockReleaser ??= await AcquireWriteLockAsync();
 
-                        (TValue item, long latencyMsec) = outputOpt.Value;
-                        SetValue(key, item, absExpiration, sldExpiration, othersCreationDate, latencyMsec: latencyMsec);
+                        TValue item = outputOpt.Value;
+                        SetValue(key, item, absExpiration, sldExpiration, othersCreationDate);
                         return item!;
                     }
                 }
@@ -375,10 +399,9 @@ public class CacheService : ICacheService
         int? sldExpirationSec = null,
         DateTime? creationDate = null,
         bool skipPersist = false,
-        bool skipPublish = false,
-        long? latencyMsec = null)
+        bool skipPublish = false)
     {
-        SetValue(key, typeof(TValue), value, absExpirationSec, sldExpirationSec, creationDate, skipPersist, skipPublish, latencyMsec);
+        SetValue(key, typeof(TValue), value, absExpirationSec, sldExpirationSec, creationDate, skipPersist, skipPublish);
     }
 
     private void SetValue(
@@ -389,118 +412,167 @@ public class CacheService : ICacheService
         int? sldExpirationSec = null,
         DateTime? creationDate = null,
         bool skipPersist = false,
-        bool skipPublish = false,
-        long? latencyMsec = null)
+        bool skipPublish = false)
     {
-        using var scope = logger.BeginMethodScope(() => new { key = key.ToLogString(), latencyMsec });
+        using var scope = logger.BeginMethodScope(() => new { key = key.ToLogString() });
 
         keys.Add(key);
         RemoveExternalMiss(key);
 
         IValueEntry entry = IValueEntry.Create(value, valueType, creationDate);
+        DateTime finalCreationDate = entry.CreationDate;
 
         int finalAbsExpirationSecs = absExpirationSec ?? cacheServiceOptions.AbsoluteExpiration;
-        int finalSldExpirationSecs = Math.Min(sldExpirationSec ?? cacheServiceOptions.SlidingExpiration, finalAbsExpirationSecs);
-        long size = Size.Get(value);
-        CacheItemPriority priority =
-            size >= cacheServiceOptions.LowPrioritySizeThreshold ? CacheItemPriority.Low
-            : size >= cacheServiceOptions.MidPrioritySizeThreshold ? CacheItemPriority.Normal
-            : CacheItemPriority.High;
-        TimeSpan finalSldExpiration = TimeSpan.FromSeconds(finalSldExpirationSecs);
+        TimeSpan finalAbsExpiration = TimeSpan.FromSeconds(finalAbsExpirationSecs);
 
-        MemoryCacheEntryOptions entryOptions = new ()
+        if (classConfigurationGetter.Get("RedisOnlyCache", false))
         {
-            AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(finalAbsExpirationSecs),
-            SlidingExpiration = finalSldExpiration,
-            Size = size,
-            Priority = priority,
-        };
-
-        entryOptions.RegisterPostEvictionCallback((k, v, r, _) => OnEvicted((ICacheKey)k, (IValueEntry)v, r, finalSldExpiration));
-
-        memoryCache.Set(key, entry, entryOptions);
-
-        if (!skipPersist && cacheServiceOptions.PersistCache)
-        {
-            _ = Task.Run(() => cachePersistence.PersistAsync(key, entry));
+            WriteToRedis(scope, key, entry, finalAbsExpiration, skipPublish);
         }
-
-        if (!skipPublish)
+        else
         {
-            PublishMiss(key, entry.CreationDate, (value, valueType), false);
+            int finalSldExpirationSecs = Math.Min(sldExpirationSec ?? cacheServiceOptions.SlidingExpiration, finalAbsExpirationSecs);
+            long size = Size.Get(value);
+
+            CacheItemPriority priority =
+                size >= cacheServiceOptions.LowPrioritySizeThreshold ? CacheItemPriority.Low
+                : size >= cacheServiceOptions.MidPrioritySizeThreshold ? CacheItemPriority.Normal
+                : CacheItemPriority.High;
+
+            MemoryCacheEntryOptions entryOptions = new()
+            {
+                AbsoluteExpirationRelativeToNow = finalAbsExpiration,
+                SlidingExpiration = TimeSpan.FromSeconds(finalSldExpirationSecs),
+                Size = size,
+                Priority = priority,
+            };
+
+            entryOptions.RegisterPostEvictionCallback((k, v, r, _) =>
+            {
+                Interlocked.Add(ref memoryCacheSize, -size);
+                OnEvicted((ICacheKey)k, (IValueEntry)v, r, finalAbsExpiration);
+            });
+
+            memoryCache.Set(key, entry, entryOptions);
+            Interlocked.Add(ref memoryCacheSize, size);
+
+            if (!skipPersist)
+            {
+                Persist(key, entry);
+            }
+
+            if (!skipPublish)
+            {
+                PublishMiss(key, finalCreationDate, (value, valueType), false);
+            }
         }
     }
 
     private void OnEvicted(ICacheKey key, IValueEntry entry, EvictionReason reason, TimeSpan expiration)
     {
-        if (reason is EvictionReason.None or EvictionReason.Replaced) { return; }
+        if (reason is EvictionReason.None or EvictionReason.Replaced)
+        {
+            return;
+        }
 
-        using var scope = logger.BeginMethodScope(() => new { reason, expiration, key, entry});
+        using var scope = logger.BeginMethodScope(() => new { reason, expiration, key, entry });
 
-        using (AcquireWriteLock()) // TODO: can we avoid/reduce this lock?
+        using (AcquireWriteLock())
         {
             keys.Remove(key);
             if (cacheServiceOptions.PersistCache)
             {
                 _ = Task.Run(() => cachePersistence.RemoveAsync(key));
             }
-
-            if (reason != EvictionReason.Capacity) { return; }
         }
 
-        RedisKey redisKey = CacheSerialization.SerializeToBytes(key);
-        redisDatabase.StringSet(redisKey.Prepend(RedisKeyPrefix), CacheSerialization.SerializeToBytes(entry), expiration);
-        scope.LogDebug($"redisDatabase.StringSet({redisKey.Prepend(RedisKeyPrefix)}, CacheSerialization.SerializeToBytes(entry), expiration); completed");
+        if (reason != EvictionReason.Capacity)
+        {
+            return;
+        }
 
-        PublishMiss(key, entry.CreationDate, null, true);
+        WriteToRedis(scope, key, entry, expiration);
     }
 
-    private void PublishMiss(ICacheKey key, DateTime localCreationDate, (object?, Type)? valueHolder, bool onRedis)
+    private void WriteToRedis(CodeSectionScope scope, ICacheKey key, IValueEntry entry, TimeSpan expiration, bool skipPublish = false)
+    {
+        Stopwatch sw = Stopwatch.StartNew();
+        RedisKey redisKey = CacheSerialization.SerializeToBytes(key);
+
+        byte[] rawEntry = CacheSerialization.SerializeToBytes(entry);
+        redisDatabase.StringSet(redisKey.Prepend(RedisKeyPrefix), rawEntry, expiration);
+
+        long elapsedMs = sw.ElapsedMilliseconds;
+        scope.LogDebug($"redisDatabase.StringSet completed ({elapsedMs} ms, {rawEntry.LongLength} bytes)");
+
+        if (!skipPublish)
+        {
+            PublishMiss(key, entry.CreationDate, null, true);
+        }
+    }
+
+    private void PublishMiss(ICacheKey key, DateTime creationDate, (object?, Type)? valueHolder, bool onRedis)
     {
         _ = Task.Run(PublishMissAsync);
 
         async Task PublishMissAsync()
         {
-            using var localScope = logger.BeginMethodScope(() => new { key = key.ToLogString(), creationDate = localCreationDate }, memberName: nameof(PublishMissAsync));
+            using var localScope = logger.BeginMethodScope(() => new { key = key.ToLogString(), creationDate }, memberName: nameof(PublishMissAsync));
 
-            if (!await IsDaprEnabledAsync())
+            if (onRedis)
             {
-                return;
-            }
-
-            byte[] rawKey = CacheSerialization.SerializeToBytes(key);
-
-            byte[]? rawValue;
-            string? typeName;
-            if (valueHolder is var (value, valueType) && cacheServiceOptions.MissValueSizeThreshold is > 0 and var size)
-            {
-                byte[] tempRawValue = new byte[size];
-                await using MemoryStream valueStream = new (tempRawValue);
-
-                try
+                using (await AcquireWriteLockAsync())
                 {
-                    CacheSerialization.SerializeToStream(value, valueType, valueStream);
-                    Array.Resize(ref tempRawValue, (int)valueStream.Position);
-
-                    rawValue = tempRawValue;
-                    typeName = CacheSerialization.SerializeType(valueType);
-                }
-                catch (NotSupportedException) // In case the serialized value is longer than 'size'
-                {
-                    rawValue = null;
-                    typeName = null;
+                    externalMissDictionary.Add(key, creationDate, RedisLocation);
                 }
             }
-            else
-            {
-                rawValue = null;
-                typeName = null;
-            }
+
+            //if (!await IsDaprEnabledAsync())
+            //{
+            //    return;
+            //}
+
+            //byte[] rawKey = CacheSerialization.SerializeToBytes(key);
+
+            //byte[]? rawValue;
+            //string? typeName;
+            //if (valueHolder is var (value, valueType) && cacheServiceOptions.MissValueSizeThreshold is > 0 and var size)
+            //{
+            //    byte[] tempRawValue = new byte[size];
+            //    await using MemoryStream valueStream = new(tempRawValue);
+
+            //    try
+            //    {
+            //        CacheSerialization.SerializeToStream(value, valueType, valueStream);
+            //        Array.Resize(ref tempRawValue, (int)valueStream.Position);
+
+            //        rawValue = tempRawValue;
+            //        typeName = CacheSerialization.SerializeType(valueType);
+            //    }
+            //    catch (NotSupportedException) // In case the serialized value is longer than 'size'
+            //    {
+            //        rawValue = null;
+            //        typeName = null;
+            //    }
+            //}
+            //else
+            //{
+            //    rawValue = null;
+            //    typeName = null;
+            //}
 
             //await daprClient!.PublishEventAsync(
             //    ClusterCachePubsubName,
             //    ClusterCacheCacheMissTopicName,
-            //    new CacheMissDescriptor(rawKey, localCreationDate, onRedis ? RedisLocation : PodIp, rawValue, typeName));
+            //    new CacheMissDescriptor(PodIp, rawKey, creationDate, onRedis ? RedisLocation : PodIp, rawValue, typeName));
+        }
+    }
+
+    private void Persist(ICacheKey key, IValueEntry entry)
+    {
+        if (cacheServiceOptions.PersistCache)
+        {
+            _ = Task.Run(() => cachePersistence.PersistAsync(key, entry));
         }
     }
 
@@ -653,12 +725,12 @@ public class CacheService : ICacheService
         {
             using var localScope = logger.BeginMethodScope(() => new { invalidationRule = invalidationRule.ToLogString() }, memberName: nameof(PublishInvalidationAsync));
 
-            if (!await IsDaprEnabledAsync())
-            {
-                return;
-            }
+            //if (!await IsDaprEnabledAsync())
+            //{
+            //    return;
+            //}
 
-            byte[] rawInvalidationRule = CacheSerialization.SerializeToBytes(invalidationRule);
+            //byte[] rawInvalidationRule = CacheSerialization.SerializeToBytes(invalidationRule);
 
             //await daprClient!.PublishEventAsync(
             //    ClusterCachePubsubName,
@@ -680,13 +752,14 @@ public class CacheService : ICacheService
 
     public void AddExternalMiss(CacheMissDescriptor descriptor)
     {
-        (byte[]? rawKey,
+        (string emitter,
+            byte[]? rawKey,
             DateTime timestamp,
             string location,
             byte[]? rawValue,
             string? typeName) = descriptor;
 
-        if (location == PodIp)
+        if (emitter == PodIp)
         {
             return;
         }
@@ -803,7 +876,7 @@ public class CacheService : ICacheService
         private double average = double.PositiveInfinity;
         private int count = 0;
 
-        public void Add(long latency)
+        public void Add(double latency)
         {
             if (count == 0)
             {
@@ -824,8 +897,8 @@ public class CacheService : ICacheService
         private static readonly MethodInfo GetUnmanagedSizeMethod = typeof(Size)
             .GetMethod(nameof(GetUnmanagedSize), BindingFlags.NonPublic | BindingFlags.Static)!;
 
-        private static readonly ConcurrentDictionary<Type, long?> UnmanagedSizeCache = new ();
-        private static readonly ConcurrentDictionary<Type, FieldInfo[]> FieldsCache = new ();
+        private static readonly ConcurrentDictionary<Type, long?> UnmanagedSizeCache = new();
+        private static readonly ConcurrentDictionary<Type, FieldInfo[]> FieldsCache = new();
 
         public static long Get(object? obj)
         {

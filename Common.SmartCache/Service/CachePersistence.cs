@@ -16,7 +16,7 @@ public sealed class CachePersistence : ICachePersistence
     private const string RootTempFileName = "root.tmp.txt";
 
     private readonly IFileProvider fileProvider;
-    private readonly SemaphoreSlim semaphore = new (1, 1);
+    private readonly SemaphoreSlim semaphore = new(1, 1);
 
     public CachePersistence(ICachePersistenceFileProvider fileProvider)
     {

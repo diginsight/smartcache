@@ -58,7 +58,7 @@ public static class CacheSerialization
 
     public static string SerializeToString(object? value, Type type)
     {
-        using StringWriter sw = new ();
+        using StringWriter sw = new();
         Serializer.Serialize(sw, value, type);
         return sw.ToString();
     }
@@ -118,7 +118,7 @@ public static class CacheSerialization
         private static readonly IReadOnlyDictionary<string, Type> NameToTypeMap;
         private static readonly IReadOnlyDictionary<Type, string> TypeToNameMap;
 
-        private static readonly Regex TypeArgsRegex = new (
+        private static readonly Regex TypeArgsRegex = new(
             """
             ^
             (?:
@@ -138,7 +138,7 @@ public static class CacheSerialization
             """,
             RegexOptions.IgnorePatternWhitespace);
 
-        private static readonly Regex FullTypeRegex = new (
+        private static readonly Regex FullTypeRegex = new(
             """
             ^
             (
@@ -296,7 +296,7 @@ public static class CacheSerialization
             {
                 BindToName(serializedType.GetGenericTypeDefinition(), out assemblyName, out string? rootTypeName);
 
-                StringBuilder sb = new ();
+                StringBuilder sb = new();
                 sb.AppendJoin(", ", serializedType.GetGenericArguments().Select(GetNestedBoundName));
                 typeName = $"{rootTypeName}[{sb}]";
 

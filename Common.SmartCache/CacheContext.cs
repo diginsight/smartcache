@@ -10,11 +10,11 @@ public class CacheContext : ICacheContext, ISupportLogString
     public int? MaxAge { get; set; }
     public int? AbsoluteExpiration { get; set; }
     public int? SlidingExpiration { get; set; }
-    public Type InterfaceType { get; set ; }
+    public Type InterfaceType { get; set; }
 
     public CacheContext Clone()
     {
-        return new ()
+        return new()
         {
             Enabled = Enabled,
             MaxAge = MaxAge,
