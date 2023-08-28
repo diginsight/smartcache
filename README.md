@@ -7,7 +7,7 @@ __Data load latencies for cached data are (completely) cut for any data provider
 When data preloading happens, __data load latencies are cut since the first call__.<br>
 
 Articles:
-- [HOWTO - Leverage age sensitive data management to boost application performance.md]: explores how to use Common.SmartCache to boost application performance by means age conscious data magagement.
+- [HOWTO - Leverage age sensitive data management to boost application performance.md: explores how to use Common.SmartCache to boost application performance by means age conscious data magagement.]
 (HOWTO%20-%20Leverage%20age%20sensitive%20data%20management%20to%20boost%20application%20performance.md)
 
 - [HOWTO - Enable data preloading by means of AI assisted algorithms.md]<br> 
