@@ -3,7 +3,7 @@
 In highly distributed environments, data is inherently __disconnected__ and __often loaded across multiple boundaries__.<br>
 for this reasons, loading data from a remote location may be an __expensive operation__ and __loading data efficiently__ may become __a critical challenge__.<br>
 
-Not always fresh data data is strictly needed to obtain the expected behaviour.<br>
+Not always fresh data data is strictly needed in our applications, to obtain the expected behaviour.<br>
 Often, applications may work with data that is __not up to date__.<br><br>
 This is a great opportunity to __boost application performance__: when fresh data is not strictly required data cached from previous calls or data pre-loaded in background may be used to ensure the shortest possible latencies.<br> 
 <br>
@@ -23,7 +23,7 @@ If the required age for a data request is compatible with the creation date of t
 In case the required age is not compatible with the creation date of the corresponding cache entry, the data is loaded from the remote location (__cache miss__) and the cache entry is updated.<br>
 
 In `common caching systems`, the __cache entries lifetime is defined at startup and it cannot be changed across different calls__.<br> A cache hit or a cache miss is determined by the static cache entry lifetime defined at startup.<br>
-With `Common.SmartCache` the cache entry lifetime may be indefinite, and a __cache hit or a cache miss is determined by the `required age`, provided at every single call__.<br>
+With `Common.SmartCache` the cache entry lifetime may be indefinite, and a __cache hit or a cache miss is determined by the `required age`, provided at every single call__, depending on the application need.<br>
 
 # USE CASES
 `Common.SmartCache` can be used with the following type of data:
@@ -52,6 +52,8 @@ When navigating across the pages speed of navigation may be a priority, so __usi
 In these cases navigation will take benefit from the cache hits.
 After the navigation completes, the developer may raise a request with __MaxAge = 0__ to load fresh data for the user.<br>
 In this way navigation will take advantage of cache hits speed and the user will still see fresh data, when the navigation ends.<br>
+
+# USE CASES
 
 # SUMMARY
 `Common.SmartCache` introduces __age sensitive data management__: a new approach to managing data: 
