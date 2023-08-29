@@ -58,7 +58,7 @@ With __age sensitive data management__ a new opportunity for performance is unco
 At every single data load, application is describing __a new important metadata__: `the required age` for the data to be loaded.<br>
 This metadata can easily be used to determine if a cache hit or a cache miss can occur.<br>
 Also, __the same time window in the past, can be used to preload data in background, to ensure a cache hit will be obtained__, when the application needs it.<br>
-`Common.SmartCache` capture this opportunity leveraging the application log to anticipate `the required entries`, `the required maxage` for them and __anticipate entries preload__ in time for the application need.<br>
+`Common.SmartCache` captures this opportunity leveraging the application log to anticipate `the required entries`, `the required maxage` for them and __anticipate entries preload__ in time for the application need.<br>
 
 # SUMMARY
 `Common.SmartCache` introduces __age sensitive data management__: a new approach to managing data: 
