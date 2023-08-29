@@ -53,7 +53,12 @@ In these cases navigation will take benefit from the cache hits.
 After the navigation completes, the developer may raise a request with __MaxAge = 0__ to load fresh data for the user.<br>
 In this way navigation will take advantage of cache hits speed and the user will still see fresh data, when the navigation ends.<br>
 
-# USE CASES
+# A NEW OPPORTUNITY FOR PERFORMANCE
+With __age sensitive data management__ a new opportunity for performance is uncovered.<br>
+At every single data load, application is describing __a new important metadata__: `the required age` for the data to be loaded.<br>
+This metadata can easily be used to determine if a cache hit or a cache miss can occur.<br>
+Also, __the same time window in the past, can be used to preload data in background, to ensure a cache hit will be obtained__, when the application needs it.<br>
+`Common.SmartCache` capture this opportunity leveraging the application log to anticipate `the required entries`, `the required maxage` for them and __anticipate entries preload__ in time for the application need.<br>
 
 # SUMMARY
 `Common.SmartCache` introduces __age sensitive data management__: a new approach to managing data: 
