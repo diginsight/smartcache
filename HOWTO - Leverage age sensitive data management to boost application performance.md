@@ -3,7 +3,7 @@
 In highly distributed environments, data is inherently __disconnected__ and __often loaded across multiple boundaries__.<br>
 For this reasons, loading data may be an __expensive operation__ and __loading data efficiently__ may become __a critical challenge__.<br>
 
-Not always fresh data data is strictly needed in our applications, to obtain the expected behaviour.<br>
+Not always fresh data data is strictly needed in our applications, to obtain the expected application behaviour.<br>
 Often, applications may work with data that is __not up to date__.<br><br>
 This is a great opportunity to __boost application performance__: when fresh data is not strictly required data cached from previous calls or data pre-loaded in background may be used to ensure the shortest possible latencies.<br> 
 <br>
