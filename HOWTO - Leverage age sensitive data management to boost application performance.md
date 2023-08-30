@@ -9,7 +9,9 @@ This is a great opportunity to __boost application performance__: when fresh dat
 <br>
 
 # WHAT IS AGE SENSITIVE DATA MANAGEMENT 
-When loading data a developer can specify the __maximum age__ that is required for it.<br>
+When loading data __every entry is tagged with its `Creation Date`__.<br>
+When accessing data, a developer can specify the __maximum age__ that is required for it.<br>
+
 In `Common.SmartCache` this can be done by means of the following notation:<br>
 
 ```c#
@@ -17,13 +19,11 @@ var cacheContext = new CacheContext() { Enabled = true, MaxAge = 300 }; // 300 s
 var userProfile = await userProfileService.FindUserByEmailAddressAsync(context.Account.Email, cacheContext).ConfigureAwait(false);
 ```
 
-`Common.SmartCache` __tags every cache entry with its `Creation Date`__.<br>
-
 If the required age for a data request is compatible with the creation date of the corresponding cache entry, the data is returned from the cache (__cache hit__).<br>
 In case the required age is not compatible with the creation date of the corresponding cache entry, the data is loaded from the remote location (__cache miss__) and the cache entry is updated.<br>
 
-In `common caching systems`, the __cache entries lifetime is defined at startup (or cache entry set time) and it cannot be changed across different calls__.<br> A cache hit or a cache miss is determined by the static cache entry lifetime.<br>
-With `Common.SmartCache` the cache entry lifetime may be indefinite, and a __cache hit or a cache miss is determined by the `required age`, provided at every single call__, depending on the application need.<br>
+In `common caching systems`, the __cache entries lifetime is defined at startup__ (or cache entry set time) __and it cannot be changed across different calls__.<br> __A cache hit or a cache miss is determined by the static cache entry lifetime__.<br>
+With `Common.SmartCache` the cache entry lifetime may be indefinite, and a __cache hit or a cache miss is determined by the `required age`, provided by the developer, at every single call__, depending on the application need.<br>
 
 # USE CASES
 `Common.SmartCache` can be used with the following type of data:
@@ -32,32 +32,42 @@ With `Common.SmartCache` the cache entry lifetime may be indefinite, and a __cac
 - data that is __updated very frequently__ (eg. notifications, messages or real time data)
 <br><br>
 
-Accessing __configuration data or static data__ that is not frequently updated is a typical use case for all caching system.<br>
-In this cases data doesn't change and the developer can request data with a MaxAge of hours or days (eg. MaxAge = 14400, 4 hours).<br>
+Accessing __configuration data or static data__ that is not frequently updated is a typical use case for all caching systems.<br>
+In this cases data doesn't change and the developer can request data with a __MaxAge of hours or days__ (eg. __MaxAge = 14400__, 4 hours).<br>
 
-__Data that is updated more frequently__ can be accessed with a __shorter MaxAge__ (eg. MaxAge = 300, 5 minutes).<br>
-A typical example for this scenario can be access to the __user profile__ or the __user permissions__.<br>
+__Data that is updated more frequently__ can be accessed with a __shorter MaxAge__ (eg. __MaxAge = 300__, 5 minutes).<br>
+A typical example for this scenario can be access to a __user profile__ or to __user permissions__.<br>
 By default, changes to the User Profile or the User Permissions will not be perceived by the application for a latency of 5 minutes.<br>
 
-In some circunstances the developer may need to be sure about the exact value of such data.
+In some circunstances the developer may need to be sure about the exact value of such data.<br>
 In these cases, the developer can just raise a request with __MaxAge = 0__.<br> 
-It may happen that, notifications are available for changes to the __user profile__ or the __user permissions__.<br> 
-Upon such notifications, the developer may invalidate the cache entry or raise a request with __MaxAge = 0__ to load a cache entry for the same user, with the updated data.<br>
-__When change notifications are handled properly__, even if data changes frequently, the developer can use a __longer maxage__ (eg. hours or days) and take maximum benefit from the cache, __still without delays upon data changes__.<br>
+It may happen that, notifications are available for changes to the cached __user profile__ or the __user permissions__.<br> 
+Upon such notifications, the developer may __invalidate the cache entry__ or raise a request with __MaxAge = 0__ to load a cache entry for the same user, with the updated data.<br>
+__When change notifications are handled properly__, even if data changes frequently, the developer can use a __longer MaxAge__ (eg. hours or days) and take maximum benefit from the cache, __still without delays upon data changes__.<br>
 
-Age sensitive data management becomes very useful when __data changes very frequently__.
-as an example, consider an application showing notifications, messages or real time data.
-When navigating across the pages speed of navigation may be a priority, so __using cached data, still with a shorter maxage (eg. 120 secs) may be a good choice__.
+Age sensitive data management becomes very useful when __data changes very frequently__.<br>
+As an example, consider an application showing notifications, messages or real time data.<br>
+When navigating across the pages speed of navigation may be a priority, so __using cached data may be a good choice__ (still with a shorter MaxAge (eg. 120 secs)).
 
-In these cases navigation will take benefit from the cache hits.
+In these cases navigation will take benefit from the cache hits.<br>
 After the navigation completes, the developer may raise a request with __MaxAge = 0__ to load fresh data for the user.<br>
 In this way navigation will take advantage of cache hits speed and the user will still see fresh data, when the navigation ends.<br>
 
-# A NEW OPPORTUNITY FOR PERFORMANCE
-With __age sensitive data management__ a new opportunity for performance is uncovered.<br>
-At every single data load, application is describing __a new important metadata__: `the required age` for the data to be loaded.<br>
-This metadata can easily be used to determine if a cache hit or a cache miss can occur.<br>
-Also, __the same time window in the past, can be used to preload data in background, to ensure a cache hit will be obtained__, when the application needs it.<br>
+# AN OPPORTUNITY FOR PERFORMANCE: MAXAGE PROMOTION
+Sometimes, data from the past is immutable (eg. realtime data, user or devices messages).<br>
+In such cases, an automatic rule can be applied to __promote MaxAge to a long or indefinite value__ (__MaxAge promotion__).<br>
+
+It may happen that a query or an API call loads data from the present together with data from the past.<br>
+When this happpens the request can be split automatically:<br>
+- Data from the present must be loaded with the MaxAge specified by the developer.<br>
+- Data from the past will take advantage of MaxAge promotion to a long or indefinite value.<br>
+
+Queries to the backend will be faster and with smaller payloads.<br>
+
+# A OPPORTUNITY FOR PERFORMANCE: (AUTOMATIC) DATA PRELOADING
+With __age sensitive data management__ a new opportunity for performance is uncovered.<br><br>
+The `required age` specified by the developer is of course used to determine if a __cache hit__ or a __cache miss__ can occur.<br>
+Such `required age` can also be used as __a time window, in the past__, to __preload data in background__ and __ensure a cache hit will be obtained__, when the application needs it.<br><br>
 `Common.SmartCache` captures this opportunity leveraging the application log to anticipate `the required entries`, `the required maxage` for them and __anticipate entries preload__ in time for the application need.<br>
 
 # SUMMARY
@@ -66,7 +76,11 @@ Also, __the same time window in the past, can be used to preload data in backgro
 When loading data a developer can specify the __maximum age__ that is required for it.<br>
 A __cache hit or a cache miss is determined by the `required age`, provided at every single call__ and not by the cache entries lifetime that is defined at startup.<br>
 
-This __allows using cache with non static data__ such as User profiles or User Permissions or real time data, without requiring delays on perceiving data changes and allowing access to fresh data at any time.<br>
+This __allows using cache with non static data__ and __data that is updated frequently__ without requiring delays in showing data changes, and always allowing easy access to fresh data whenever required.<br>
+
+`Common.SmartCache` allows __MaxAge promotion__ and __(automatic) data preloading__ techniques as great opportunities to boost application performance.<br>
+
+
 
 
 .
