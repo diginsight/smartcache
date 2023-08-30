@@ -10,7 +10,7 @@ This is a great opportunity to __boost applications performance__: when fresh da
 
 # WHAT IS AGE SENSITIVE DATA MANAGEMENT 
 With __age sensitive data management__, when loading data __every entry is tagged with its `Creation Date`__.<br>
-When accessing data, a developer can specify the __maximum age__ that is required for it.<br>
+Also, when accessing data, a developer can specify the __maximum age__ that is required for it.<br>
 
 In `Common.SmartCache` this can be done by means of the following notation:<br>
 
