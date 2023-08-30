@@ -19,8 +19,8 @@ var cacheContext = new CacheContext() { Enabled = true, MaxAge = 300 }; // 300 s
 var userProfile = await userProfileService.FindUserByEmailAddressAsync(context.Account.Email, cacheContext).ConfigureAwait(false);
 ```
 
-If the required age for a data request is compatible with the creation date of the corresponding cache entry, the data is returned from the cache (__cache hit__).<br>
-In case the required age is not compatible with the creation date of the corresponding cache entry, the data is loaded from the remote location (__cache miss__) and the cache entry is updated.<br>
+If the `required age` for a data request is compatible with the creation date of the corresponding cache entry, data is returned from the cache (__cache hit__).<br>
+In case the `required age` is not compatible with the creation date of the corresponding cache entry, the data is loaded from the remote location (__cache miss__) and the cache entry is updated.<br>
 
 In `common caching systems`, the __cache entries lifetime is defined at startup__ (or cache entry set time) __and it cannot be changed across different calls__.<br> __A cache hit or a cache miss is determined by the static cache entry lifetime__.<br>
 With `Common.SmartCache` the cache entry lifetime may be indefinite, and a __cache hit or a cache miss is determined by the `required age`, provided by the developer, at every single call__, depending on the application need.<br>
