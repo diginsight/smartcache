@@ -1,7 +1,7 @@
 # INTRODUCTION 
 `Common.SmartCache` introduces __age sensitive data management__: a new approach to managing data.<br><br> 
 In highly distributed environments, data is inherently __disconnected__ and __often loaded across multiple boundaries__.<br>
-For this reasons, loading data from a remote location may be an __expensive operation__ and __loading data efficiently__ may become __a critical challenge__.<br>
+For this reasons, loading data may be an __expensive operation__ and __loading data efficiently__ may become __a critical challenge__.<br>
 
 Not always fresh data data is strictly needed in our applications, to obtain the expected behaviour.<br>
 Often, applications may work with data that is __not up to date__.<br><br>
