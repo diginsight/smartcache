@@ -22,7 +22,7 @@ var userProfile = await userProfileService.FindUserByEmailAddressAsync(context.A
 If the required age for a data request is compatible with the creation date of the corresponding cache entry, the data is returned from the cache (__cache hit__).<br>
 In case the required age is not compatible with the creation date of the corresponding cache entry, the data is loaded from the remote location (__cache miss__) and the cache entry is updated.<br>
 
-In `common caching systems`, the __cache entries lifetime is defined at startup (or cache entry set time) and it cannot be changed across different calls__.<br> A cache hit or a cache miss is determined by the static cache entry lifetime defined at startup.<br>
+In `common caching systems`, the __cache entries lifetime is defined at startup (or cache entry set time) and it cannot be changed across different calls__.<br> A cache hit or a cache miss is determined by the static cache entry lifetime.<br>
 With `Common.SmartCache` the cache entry lifetime may be indefinite, and a __cache hit or a cache miss is determined by the `required age`, provided at every single call__, depending on the application need.<br>
 
 # USE CASES
