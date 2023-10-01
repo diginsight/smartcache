@@ -24,10 +24,15 @@
 	  <PackageReadmeFile>README.nuget.md</PackageReadmeFile>
 	  <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 	  <LangVersion>11</LangVersion>
+	  <Configurations>Debug;Release;DebugWithProjectReferences</Configurations>
 	  <!--<PackageReadmeFile>README.nuget.md</PackageReadmeFile>-->
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|netstandard2.0|AnyCPU'">
+    <WarningLevel>6</WarningLevel>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='DebugWithProjectReferences|netstandard2.0|AnyCPU'">
     <WarningLevel>6</WarningLevel>
   </PropertyGroup>
 
@@ -43,7 +48,7 @@
   </ItemGroup>
 
 	<ItemGroup>
-		 <PackageReference Include="Common.Diagnostics" Version="1.0.2.48" /> 
+		<PackageReference Include="Common.Diagnostics" Version="1.0.2.48" Condition="'$(Configuration)'!='DebugWithProjectReferences'"  />
 		<PackageReference Include="DotNext.Threading" Version="4.14.0" />
 		<PackageReference Include="Microsoft.AspNetCore.Mvc.Versioning" Version="5.1.0" />
 		<PackageReference Include="Microsoft.Extensions.Configuration" Version="6.0.0" />
@@ -62,9 +67,9 @@
 		<PackageReference Include="System.Text.Json" Version="6.0.1" />
 	</ItemGroup>
 
-	<!--<ItemGroup>
-		<ProjectReference Include="..\..\telemetry\Common.Diagnostics\Common.Diagnostics.csproj" />
-	</ItemGroup>-->
+	<ItemGroup>
+		<ProjectReference Include="..\..\telemetry\Common.Diagnostics\Common.Diagnostics.csproj" Condition="'$(Configuration)'=='DebugWithProjectReferences'" />
+	</ItemGroup>
 
 	<ItemGroup>
 		<None Include="..\images\01. Project image\SmartCache\SmartCache.png">
@@ -91,10 +96,6 @@
 	  <Folder Include="Service\" />
 	  <Folder Include="Properties\" />
 	</ItemGroup>
-
-	<!--<ItemGroup>
-	  <ProjectReference Include="..\..\telemetry\Common.Diagnostics\Common.Diagnostics.csproj" />
-	</ItemGroup>-->
 
 	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
 	  <Exec Command="set OutDir=$(OutDir)&#xD;&#xA;set ConfigurationName=$(ConfigurationName)&#xD;&#xA;set ProjectName=$(ProjectName)&#xD;&#xA;set TargetName=$(TargetName)&#xD;&#xA;set TargetPath=$(TargetPath)&#xD;&#xA;set ProjectPath=$(ProjectPath)&#xD;&#xA;set ProjectFileName=$(ProjectFileName)&#xD;&#xA;set TargetExt=$(TargetExt)&#xD;&#xA;set TargetFileName=$(TargetFileName)&#xD;&#xA;set DevEnvDir=$(DevEnvDir)&#xD;&#xA;set TargetDir=$(TargetDir)&#xD;&#xA;set ProjectDir=$(ProjectDir)&#xD;&#xA;set SolutionFileName=$(SolutionFileName)&#xD;&#xA;set SolutionPath=$(SolutionPath)&#xD;&#xA;set SolutionDir=$(SolutionDir)&#xD;&#xA;set SolutionName=$(SolutionName)&#xD;&#xA;set PlatformName=$(PlatformName)&#xD;&#xA;set ProjectExt=$(ProjectExt)&#xD;&#xA;set SolutionExt=$(SolutionExt)&#xD;&#xA;.\postbuild.cmd" />
