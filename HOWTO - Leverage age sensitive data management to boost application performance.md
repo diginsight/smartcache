@@ -1,4 +1,4 @@
-# INTRODUCTION 
+# BOOST APPLICATION PERFORMANCE WITH AGE SENSITIVE DATA MANAGEMENT 
 `Common.SmartCache` introduces __age sensitive data management__: a new approach to managing data.<br><br> 
 In highly distributed environments, data is inherently __disconnected__ and __often loaded across multiple boundaries__.<br>
 For this reasons, loading data may be an __expensive operation__ and __loading data efficiently__ may become __a critical challenge__.<br>
