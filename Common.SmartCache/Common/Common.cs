@@ -8,7 +8,8 @@ using System.Reflection;
 using System.Windows;
 //using System.Windows.Media;
 using System.Diagnostics;
-using System.Collections.Generic; 
+using System.Collections.Generic;
+using System.Diagnostics.Tracing;
 #endregion
 
 namespace Common
@@ -194,7 +195,6 @@ namespace Common
         #endregion
     }
     #endregion
-
     #region SwitchOnDispose
     internal class SwitchOnDispose<T> : IDisposable
     {
