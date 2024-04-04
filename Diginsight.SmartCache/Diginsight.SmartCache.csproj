@@ -1,0 +1,50 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFrameworks>netstandard2.0;netstandard2.1;net6.0;net7.0;net8.0</TargetFrameworks>
+		<Title>Diginsight SmartCache</Title>
+		<PackageTags>$(PackageTags);cache;smartcache</PackageTags>
+		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+		<!--<LangVersion>10.0</LangVersion>-->
+	</PropertyGroup>
+
+	<Choose>
+		<When Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net6.0'))">
+			<ItemGroup>
+				<FrameworkReference Include="Microsoft.AspNetCore.App" />
+			</ItemGroup>
+		</When>
+		<Otherwise>
+			<ItemGroup>
+				<PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.2.*">
+					<PrivateAssets>contentfiles; analyzers; build; compile</PrivateAssets>
+				</PackageReference>
+				<PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="2.2.*">
+					<PrivateAssets>contentfiles; analyzers; build; compile</PrivateAssets>
+				</PackageReference>
+			</ItemGroup>
+		</Otherwise>
+	</Choose>
+
+	<ItemGroup>
+		<PackageReference Include="Azure.Messaging.ServiceBus" Version="7.17.4" />
+		<PackageReference Include="Diginsight.AspNetCore" Version="3.0.0-alpha.161" />
+		<PackageReference Include="Diginsight.Core" Version="3.0.0-alpha.161" />
+		<PackageReference Include="Diginsight.Diagnostics" Version="3.0.0-alpha.161" />
+		<PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="8.*" />
+		<PackageReference Include="Microsoft.Extensions.Http" Version="8.*" />
+		<PackageReference Include="Polly.Core" Version="8.*" />
+		<PackageReference Include="StackExchange.Redis" Version="2.*" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<!--<ProjectReference Include="..\Diginsight.AspNetCore\Diginsight.AspNetCore.csproj">
+      <PrivateAssets>contentfiles; analyzers; build; compile</PrivateAssets>
+    </ProjectReference>
+    <ProjectReference Include="..\Diginsight.Core\Diginsight.Core.csproj" />
+    <ProjectReference Include="..\Diginsight.Diagnostics\Diginsight.Diagnostics.csproj">
+      <PrivateAssets>contentfiles; analyzers; build; compile</PrivateAssets>
+    </ProjectReference>-->
+	</ItemGroup>
+
+</Project>
