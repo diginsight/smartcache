@@ -1,0 +1,24 @@
+<Project>
+  
+  <ItemGroup>
+    <None Remove="**\*.DotSettings" />
+  </ItemGroup>
+  
+  <ItemGroup Condition="Exists('$(MSBuildProjectDirectory)\packages.lock.json')">
+    <Content Remove="packages.lock.json" />
+    <None Remove="packages.lock.json" />
+  </ItemGroup>
+
+  <PropertyGroup Condition="'$(DiginsightSolutionDirectory)' == ''">
+    <DiginsightDirectImport>false</DiginsightDirectImport>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(DiginsightSolutionDirectory)' != ''">
+    <DiginsightSolutionDirectory>$([MSBuild]::EnsureTrailingSlash('$(DiginsightSolutionDirectory)'))</DiginsightSolutionDirectory>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(DiginsightDirectImport)' == ''">
+    <DiginsightDirectImport>false</DiginsightDirectImport>
+  </PropertyGroup>
+
+</Project>

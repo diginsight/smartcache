@@ -1,0 +1,15 @@
+<Project>
+
+  <PropertyGroup>
+    <LangVersion>12</LangVersion>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <DiginsightVersion>3.0.0-alpha.161</DiginsightVersion>
+  </PropertyGroup>
+
+  <Import Project="Directory.build.props.user" Condition="Exists('Directory.build.props.user')" />
+
+</Project>
