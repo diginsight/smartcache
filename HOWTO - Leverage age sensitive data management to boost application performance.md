@@ -15,8 +15,8 @@ Also, when accessing data, a developer can specify the __maximum age__ that is r
 In `Diginsight.SmartCache` this can be done by means of the following notation:<br>
 
 ```c#
-var cacheContext = new CacheContext() { Enabled = true, MaxAge = 300 }; // 300 seconds
-var userProfile = await userProfileService.FindUserByEmailAddressAsync(context.Account.Email, cacheContext).ConfigureAwait(false);
+var options = new SmartCacheOperationOptions() { MaxAge = TimeSpan.FromSeconds(600) };
+var userProfile = await userProfileService.FindUserByEmailAddressAsync(context.Account.Email, options).ConfigureAwait(false);
 ```
 
 If the `required age` for a data request is compatible with the creation date of the corresponding cache entry, data is returned from the cache (__cache hit__).<br>
