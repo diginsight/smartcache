@@ -13,11 +13,15 @@ In case all levels entries contains old data, incompatible with the request MaxA
 SmartCache supports __data preloading__ and __automatic invalidation__ of the cache entries so, __data load latencies can be cut since the first call__.<br>
 
 # ADDITIONAL INFORMATION 
+SmartCache supports caching data with __low cost__ and __high performance__.<br>
+In particular, __0 latency__ is ensured on in-memory cache hits.
+also, __pressure on external RedIS resource is low__ as most frequently used entries are managed in-memory.
 
+Also, __0 latency__ can be obtained __since the first and for every call__ by means of __Cache Preloading__ and __Cache Invalidation__.
 
-Articles:
+Paragraph [STEPS TO USE SMARTCACHE](#steps-to-use-smartcache) discusses basic steps to start using `Diginsight.SmartCache`.<br>
+The following articles discuss the details of `Diginsight.SmartCache` use and configuration:
 - [HowTo: Cache data, Invalidate entries and reload cache on invalidation.md](<articles/01. Cache data, Invalidate entries and reload cache on invalidation/Cache data, Invalidate entries and reload cache on invalidation.md>).
-
 
 - [HowTo: Synchronize cache entries across application instances with ServiceBusCompanion or KubernetesCompanion.md](<articles/02. Synchronize cache entries across application instances/Synchronize cache entries across application instances.md>).
 
