@@ -7,7 +7,7 @@ In-memory cache ensure __0-latency__ for most recently used data and ensures __l
 __Data is returned from the cache if the requested MaxAge is compatible with the cache entry__.<br>Otherwise data is requested to the real data provider.
 <br>This allows requesting data with __different MaxAge criteria, according to the specific application condition__.<br>
 Data loaded by any request, is made available for the benefit of further requests (as long as compatible with their MaxAge requirement).
-- `SmartCache` The same entries can be cached in multiple levels (frontend, backend or further levels). <br>At any level, __data is returned from the cache if the requested MaxAge is compatible with the cache entry__. otherwise data is requested to the further levels.<br>
+- `SmartCache` is __Multilevel__: The same entries can be cached in multiple levels (frontend, backend or further levels). <br>At any level, __data is returned from the cache if the requested MaxAge is compatible with the cache entry__. otherwise data is requested to the further levels.<br>
 In case all levels entries contains old data, incompatible with the request MaxAge requirement, data is requested to the real data provider.
 
 SmartCache supports __data preloading__ and __automatic invalidation__ of the cache entries so, __data load latencies can be cut since the first call__.<br>
