@@ -4,10 +4,11 @@ diginsight `SmartCache` provides __hybrid, distributed, multilevel caching__ bas
 In-memory cache ensure __0-latency__ for most recently used data and ensures __low pressure (and reduced cost)__ on the external RedIs database.
 - `SmartCache` is __distributed__ as cache entries on different nodes of a multiinstance application are sinchronized automatically, to avoid flickering of values when querying the same data on different nodes.
 - `SmartCache` is based on __age sensitive data management__ as cache entries are returned based on a requested __MaxAge__ parameter.<br>
-__data is returned from the cache if the requested MaxAge is compatible with the cache entry__.<br>Otherwise data is requested to the real data provider.
+__Data is returned from the cache if the requested MaxAge is compatible with the cache entry__.<br>Otherwise data is requested to the real data provider.
 <br>This allows requesting data with __different MaxAge criteria, according to the specific application condition__.<br>
-Data loaded by any request, is made available for the benefit of further requests as long as compatible with the request MaxAge requirement.
-- `SmartCache` is __multilevel__ as cache entries are returned based on a requested __MaxAge__ parameter. <br>The same entries can be cached in multiple levels (frontend, backend or further levels). <br>At any level, __data is returned from the cache if the requested MaxAge is compatible with the cache entry__. otherwise data is requested to the further levels.
+Data loaded by any request, is made available for the benefit of further requests (as long as compatible with their MaxAge requirement).
+- `SmartCache` The same entries can be cached in multiple levels (frontend, backend or further levels). <br>At any level, __data is returned from the cache if the requested MaxAge is compatible with the cache entry__. otherwise data is requested to the further levels.<br>
+In case all levels entries contains old data, incompatible with the request MaxAge requirement, data is requested to the real data provider.
 
 SmartCache supports __data preloading__ and __automatic invalidation__ of the cache entries so, __data load latencies can be cut since the first call__.<br>
 
@@ -22,35 +23,92 @@ Articles:
 (TODO): explores how to enable AI assisted preloading to improve data preloading efficiency.<br><br>
 
 # STEPS TO USE SMARTCACHE:
-- add Diginsight.SmartCache to your application 
 
-- load your data by means of Common.SmartCache `cacheService`
+## STEP 01: add a reference to `Diginsight.SmartCache`
+In the first step you can just add a `Diginsight.SmartCache` reference to your code:
+![alt text](<01. Add a reference to Diginsight.SmartCache.png>)
+
+## STEP 02: register SmartCache services into the startup sequence
+SmartCache services and default settings must be registered into the startup sequence __ConfigureServices methdod__.<br>
+The code snippets below are available as working samples within the [smartcache_samples](https://github.com/diginsight/smartcache_samples) repository.
+
+
 ```c#
-public async Task<UserProfileResponse> GetUserByEmailAddressAsync(string emailAddress, CacheContext cacheContext)
+public void ConfigureServices(IServiceCollection services)
 {
-    using var scope = logger.BeginMethodScope(() => new { emailAddress });
+    ...
+    ...
 
-    var cacheKey = new GetUserByEmailAddressAsyncCacheKey(emailAddress);
+    // configures SmartCache config section with default settings and support of Dynamic-Configuration for MaxAge, expirations etc
+    services.Configure<SmartCacheCoreOptions>(configuration.GetSection("Diginsight:SmartCache"))
+            .PostConfigureClassAwareFromHttpRequestHeaders<SmartCacheCoreOptions>();
 
-    var result = await cacheService.GetAsync(
-        cacheKey,
-        () => wrapped.GetUserByEmailAddressAsyncAsync(emailAddress, MakeRequestOptions(scope)), cacheContext);
+    // adds smartCache services (ISmartCache, ICacheKeyService and other internal services)
+    var smartCacheBuilder = services.AddSmartCache();
 
-    return result;
+    IConfigurationSection smartCacheServiceBusConfiguration = configuration.GetSection("Diginsight:SmartCache:ServiceBus");
+    if (!string.IsNullOrEmpty(smartCacheServiceBusConfiguration[nameof(SmartCacheServiceBusOptions.ConnectionString)]) &&
+        !string.IsNullOrEmpty(smartCacheServiceBusConfiguration[nameof(SmartCacheServiceBusOptions.TopicName)]))
+    {
+        // (opt) registers ServiceBus companion for synchronization of SmartCache entries across application instances
+        smartCacheBuilder
+            .SetServiceBusCompanion(
+                sbo =>
+                {
+                    smartCacheServiceBusConfiguration.Bind(sbo);
+                    sbo.SubscriptionName = SmartCacheServiceBusSubscriptionName;
+                }
+            );
+    }
+
+}
+
+```
+the mimage below shows `Diginsight.SmartCache` settings with default MaxAge and Expiration values for cache entries.
+
+![alt text](<02. Diginsight.SmartCache settings.png>)
+
+> NB. STEP02 only installs smartCache as an in memory service.<br>
+> An additional step can be added to install RedIS support to SmartCache distributed caching.
+
+__Diginsight.SmartCache__ will manage cache entries synchronization across application instances by means of the `SetServiceBusCompanion`.<br>
+HowTo: Configure SmartCache synchronization across application instances
+
+
+
+## STEP 03: load data by means of `Diginsight.SmartCache`
+
+load your data by means of Common.SmartCache `cacheService`
+```c#
+public async Task<SiteLicensesResponse> GetSiteLicensesAsync(string plantId, string plantType, ContextBase context)
+{
+    using var activity = DiginsightDefaults.ActivitySource.StartMethodActivity(logger, new { plantId, plantType });
+
+    // define a key for the cache entry
+    // NB. the cache key should include all imput parameters (that may cause different responses)
+    // in this case the key is defined as a record including all relevant input parameters
+    var cacheKey = new MethodCallCacheKey(cacheKeyService, typeof(PermissionServiceAdapter), nameof(GetSiteLicensesAsync), plantId, plantType);
+    // data with max-age 10 minutes is requested
+    var options = new SmartCacheOperationOptions() { MaxAge = TimeSpan.FromSeconds(600) }; 
+    // load data by means of smartCache service
+    // delegate to load real data from the back end must be passed to smartCache service
+    var siteLicensesResponse = await smartCache.GetAsync(cacheKey,
+        _ => GetSiteLicensesImplAsync(plantId, plantType, context), options
+    );
+
+    activity.SetOutput(siteLicensesResponse);
+    return siteLicensesResponse;
 }
 ```
 
-- load your data expressing the required age for it:
-
+## STEP 04: Add RedIS companion for support of Distributed Hybrid cache
+an additional companion can be installed to make 
 ```c#
-var cacheContext = new CacheContext() { Enabled = true, MaxAge = 300 }; // required age is expressed in seconds
-var userProfile = await userProfileService.FindUserByEmailAddressAsync(context.Account.Email, cacheContext).ConfigureAwait(false);
 ```
 
-__Common.SmartCache__ will provide automatic caching based on payload size, retrieval latency etc.<br>
-Common.SmartCache will support data preloading based on application use and age required for the loaded data.
 
-__Common.SmartCache__ component is supported on .Net Core 6.0+.<br>
+__Diginsight.SmartCache__ will manage caching to in-memory cache or red-is cache based on cache entry size, retrieval latency etc.<br>
+
 For more information visit:
 [SmartCache](https://github.com/diginsight/smartcache)
 
