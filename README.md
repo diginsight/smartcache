@@ -1,10 +1,18 @@
 # INTRODUCTION 
-`Common.SmartCache` provides __intelligent loading for data providers__ such as __external api__ or __databases__.<br> 
-__Age sensitive data management__ is applied to cache or preload data automatically.<br>
-__AI assisted algorithms__ can be used to ensure data preloading, based on application use.<br>
- 
-__Data load latencies for cached data are (completely) cut for any data provider__.<br>
-When data preloading happens, __data load latencies are cut since the first call__.<br>
+diginsight `SmartCache` provides __hybrid, distributed, multilevel caching__ based on __age sensitive data management__.<br> 
+- `SmartCache` is __hybrid__ as it caches data __in-memory__ and on __external RedIs databases__.<br>
+In-memory cache ensure __0-latency__ for most recently used data and ensures __low pressure (and reduced cost)__ on the external RedIs database.
+- `SmartCache` is __distributed__ as cache entries on different nodes of a multiinstance application are sinchronized automatically, to avoid flickering of values when querying the same data on different nodes.
+- `SmartCache` is based on __age sensitive data management__ as cache entries are returned based on a requested __MaxAge__ parameter.<br>
+__data is returned from the cache if the requested MaxAge is compatible with the cache entry__.<br>Otherwise data is requested to the real data provider.
+<br>This allows requesting data with __different MaxAge criteria, according to the specific application condition__.<br>
+Data loaded by any request, is made available for the benefit of further requests as long as compatible with the request MaxAge requirement.
+- `SmartCache` is __multilevel__ as cache entries are returned based on a requested __MaxAge__ parameter. <br>The same entries can be cached in multiple levels (frontend, backend or further levels). <br>At any level, __data is returned from the cache if the requested MaxAge is compatible with the cache entry__. otherwise data is requested to the further levels.
+
+SmartCache supports __data preloading__ and __automatic invalidation__ of the cache entries so, __data load latencies can be cut since the first call__.<br>
+
+# ADDITIONAL INFORMATION 
+
 
 Articles:
 - [HOWTO - Boost application performance with age sensitive data management](/HOWTO%20-%20Leverage%20age%20sensitive%20data%20management%20to%20boost%20application%20performance.md):<br>explores how to use Common.SmartCache to boost application performance by means age conscious data magagement.<br>
@@ -13,10 +21,8 @@ Articles:
 - [HOWTO - Enable data preloading by means of AI assisted algorithms.md]<br> 
 (TODO): explores how to enable AI assisted preloading to improve data preloading efficiency.<br><br>
 
-NB: __Common.SmartCache is currently under development and use ov versions 0.x.x.x is not supported__<br><br>
-
 # STEPS TO USE SMARTCACHE:
-- add Common.SmartCache to your application 
+- add Diginsight.SmartCache to your application 
 
 - load your data by means of Common.SmartCache `cacheService`
 ```c#
