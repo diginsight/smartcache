@@ -22,10 +22,10 @@ Articles:
 - [HOWTO - Enable data preloading by means of AI assisted algorithms.md]<br> 
 (TODO): explores how to enable AI assisted preloading to improve data preloading efficiency.<br><br>
 
-# STEPS TO USE SMARTCACHE:
+# STEPS TO USE SMARTCACHE
 
 ## STEP 01: add a reference to `Diginsight.SmartCache`
-In the first step you can just add a `Diginsight.SmartCache` reference to your code:
+In the first step you can just add a `Diginsight.SmartCache` reference to your code:<br>
 ![alt text](<01. Add a reference to Diginsight.SmartCache.png>)
 
 ## STEP 02: register SmartCache services into the startup sequence
