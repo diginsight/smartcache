@@ -1,5 +1,5 @@
 # BOOST APPLICATION PERFORMANCE WITH AGE SENSITIVE DATA MANAGEMENT 
-`Common.SmartCache` introduces __age sensitive data management__: a new approach to managing data.<br><br> 
+`Diginsight.SmartCache` introduces __age sensitive data management__: a new approach to managing data.<br><br> 
 In highly distributed environments, data is inherently __disconnected__ and __often loaded across multiple boundaries__.<br>
 For this reasons, loading data may be an __expensive operation__ and __loading data efficiently__ may become __a critical challenge__.<br>
 
@@ -12,7 +12,7 @@ This is a great opportunity to __boost applications performance__: when fresh da
 With __age sensitive data management__, when loading data __every entry is tagged with its `Creation Date`__.<br>
 Also, when accessing data, a developer can specify the __maximum age__ that is required for it.<br>
 
-In `Common.SmartCache` this can be done by means of the following notation:<br>
+In `Diginsight.SmartCache` this can be done by means of the following notation:<br>
 
 ```c#
 var cacheContext = new CacheContext() { Enabled = true, MaxAge = 300 }; // 300 seconds
@@ -23,10 +23,10 @@ If the `required age` for a data request is compatible with the creation date of
 In case the `required age` is not compatible with the creation date of the corresponding cache entry, the data is loaded from the remote location (__cache miss__) and the cache entry is updated.<br>
 
 In `common caching systems`, the __cache entries lifetime is defined at startup__ (or cache entry set time) __and it cannot be changed across different calls__.<br> __A cache hit or a cache miss is determined by the static cache entry lifetime__.<br>
-With `Common.SmartCache` the cache entry lifetime may be indefinite, and a __cache hit or a cache miss is determined by the `required age`, provided by the developer, at every single call__, depending on the application need.<br>
+With `Diginsight.SmartCache` the cache entry lifetime may be indefinite, and a __cache hit or a cache miss is determined by the `required age`, provided by the developer, at every single call__, depending on the application need.<br>
 
 # USE CASES
-`Common.SmartCache` can be used with the following type of data:
+`Diginsight.SmartCache` can be used with the following type of data:
 - data that is __not frequently updated__ (eg. configuration data or static data)
 - data that is __updated more frequently__ (eg. user profile or user permissions)
 - data that is __updated very frequently__ (eg. notifications, messages or real time data)
@@ -68,17 +68,17 @@ Queries to the backend will be faster and with smaller payloads.<br>
 With __age sensitive data management__ a new opportunity for performance is uncovered.<br><br>
 The `required age` specified by the developer is of course used to determine if a __cache hit__ or a __cache miss__ can occur.<br>
 Such `required age` can also be used as __a time window, in the past__, to __preload data in background__ and __ensure a cache hit will be obtained__, when the application needs it.<br><br>
-`Common.SmartCache` captures this opportunity leveraging the application log to anticipate `the required entries`, `the required maxage` for them and __anticipate entries preload__ in time for the application need.<br>
+`Diginsight.SmartCache` captures this opportunity leveraging the application log to anticipate `the required entries`, `the required maxage` for them and __anticipate entries preload__ in time for the application need.<br>
 
 # SUMMARY
-`Common.SmartCache` introduces __age sensitive data management__: a new approach to managing data: 
+`Diginsight.SmartCache` introduces __age sensitive data management__: a new approach to managing data: 
 
 When loading data a developer can specify the __maximum age__ that is required for it.<br>
 A __cache hit or a cache miss is determined by the `required age`, provided at every single call__ and not by the cache entries lifetime that is defined at startup.<br>
 
 This __allows using cache with non static data__ and __data that is updated frequently__ without requiring delays in showing data changes, and always allowing easy access to fresh data whenever required.<br>
 
-`Common.SmartCache` allows __MaxAge promotion__ and __(automatic) data preloading__ techniques as great opportunities to boost application performance.<br>
+`Diginsight.SmartCache` allows __MaxAge promotion__ and __(automatic) data preloading__ techniques as great opportunities to boost application performance.<br>
 
 
 
