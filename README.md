@@ -16,11 +16,21 @@ SmartCache supports __data preloading__ and __automatic invalidation__ of the ca
 
 
 Articles:
-- [HOWTO - Boost application performance with age sensitive data management](/HOWTO%20-%20Leverage%20age%20sensitive%20data%20management%20to%20boost%20application%20performance.md):<br>explores how to use Common.SmartCache to boost application performance by means age conscious data magagement.<br>
+- [HowTo: Cache data, Invalidate entries and reload cache on invalidation.md](<articles/01. Cache data, Invalidate entries and reload cache on invalidation/Cache data, Invalidate entries and reload cache on invalidation.md>).
 
 
-- [HOWTO - Enable data preloading by means of AI assisted algorithms.md]<br> 
+- [HowTo: Synchronize cache entries across application instances with ServiceBusCompanion or KubernetesCompanion.md](<articles/02. Synchronize cache entries across application instances with ServiceBusCompanion or KubernetesCompanion/Synchronize cache entries across application instances with ServiceBusCompanion or KubernetesCompanion.md>).
+
+- [HowTo: Configure SmartCache size, latencies, expiration, instances synchronization and RedIs integration.md](<articles/03. Configure SmartCache size, latencies, expiration, instances synchronization and RedIs integration/Configure SmartCache size, latencies, expiration, instances synchronization and RedIs integration.md>).
+
+- [HowTo: Boost application performance with age sensitive data management.md](<articles/10. Boost application performance with age sensitive data management/Boost application performance with age sensitive data management.md>).
+
+- [HowTo: Enable data preloading by means of AI assisted algorithms.md]<br> 
 (TODO): explores how to enable AI assisted preloading to improve data preloading efficiency.<br><br>
+
+<!-- - [HowTo:  Boost application performance with age sensitive data management](articles/10. Leverage age sensitive data management to boost application performance.md):<br>explores how to use `Diginsight.SmartCache` to boost application performance by means age conscious data magagement.<br>
+ -->
+
 
 # STEPS TO USE SMARTCACHE
 
@@ -64,11 +74,11 @@ public void ConfigureServices(IServiceCollection services)
 }
 
 ```
-the mimage below shows `Diginsight.SmartCache` settings with default MaxAge and Expiration values for cache entries.
+the image below shows `Diginsight.SmartCache` settings with default MaxAge and Expiration values for cache entries.
 
 ![alt text](<02. Diginsight.SmartCache settings.png>)
 
-> NB. STEP02 only installs smartCache as an in memory service.<br>
+> NB. STEP02 only installs smartCache as an in-memory service.<br>
 > An additional step can be added to install RedIS support to SmartCache distributed caching.
 
 __Diginsight.SmartCache__ will manage cache entries synchronization across application instances by means of the `SetServiceBusCompanion`.<br>
@@ -78,7 +88,7 @@ HowTo: Configure SmartCache synchronization across application instances
 
 ## STEP 03: load data by means of `Diginsight.SmartCache`
 
-load your data by means of Common.SmartCache `cacheService`
+load your data by means of `Diginsight.SmartCache` `cacheService`
 ```c#
 public async Task<SiteLicensesResponse> GetSiteLicensesAsync(string plantId, string plantType, ContextBase context)
 {
