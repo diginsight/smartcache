@@ -19,7 +19,7 @@ Articles:
 - [HowTo: Cache data, Invalidate entries and reload cache on invalidation.md](<articles/01. Cache data, Invalidate entries and reload cache on invalidation/Cache data, Invalidate entries and reload cache on invalidation.md>).
 
 
-- [HowTo: Synchronize cache entries across application instances with ServiceBusCompanion or KubernetesCompanion.md](<articles/02. Synchronize cache entries across application instances with ServiceBusCompanion or KubernetesCompanion/Synchronize cache entries across application instances with ServiceBusCompanion or KubernetesCompanion.md>).
+- [HowTo: Synchronize cache entries across application instances with ServiceBusCompanion or KubernetesCompanion.md](<articles/02. Synchronize cache entries across application instances/Synchronize cache entries across application instances.md>).
 
 - [HowTo: Configure SmartCache size, latencies, expiration, instances synchronization and RedIs integration.md](<articles/03. Configure SmartCache size, latencies, expiration, instances synchronization and RedIs integration/Configure SmartCache size, latencies, expiration, instances synchronization and RedIs integration.md>).
 
