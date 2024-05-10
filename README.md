@@ -7,8 +7,7 @@ In-memory cache ensure __0-latency__ for most recently used data and ensures __l
 __Data is returned from the cache if the requested MaxAge is compatible with the cache entry__.<br>Otherwise data is requested to the real data provider.
 <br>This allows requesting data with __different MaxAge criteria, according to the specific application condition__.<br>
 Data loaded by any request, is made available for the benefit of further requests (as long as compatible with their MaxAge requirement).
-
-![alt text](<001.01 SmartCache Basic Tenets.png>)
+![alt text](<001.02 SmartCache Basic Tenets.png>)
 
 - `SmartCache` is __Multilevel__: The same entries can be cached in multiple levels (frontend, backend or further levels). <br>At any level, __data is returned from the cache if the requested MaxAge is compatible with the cache entry__. otherwise data is requested to the further levels.<br>
 In case all levels entries contains old data, incompatible with the request MaxAge requirement, data is requested to the real data provider.
@@ -18,16 +17,31 @@ In case all levels entries contains old data, incompatible with the request MaxA
     - __Minimizes use of external backing storage__ (e.g. RedIS) => it is __cheaper__ and __scalable__ as accesses to the backing storage are minimized
     - Replicas synchronize always __keys__ and __small values__, __bigger values__ are synchronized on demand
 
-![alt text](<001.02 SmartCache Tenets Full.png>)
+![alt text](<001.03a SmartCache Tenets Full.png>)
 
 SmartCache supports __data preloading__ and __automatic invalidation__ of the cache entries so, __data load latencies can be cut since the first call__.<br>
 
 # ADDITIONAL INFORMATION 
-SmartCache supports caching data with __low cost__ and __high performance__.<br>
-In particular, __0 latency__ is ensured on in-memory cache hits.
-also, __pressure on external RedIS resource is low__ as most frequently used entries are managed in-memory.
+Using Smartcache the following events are involved when interacting with data:
+- __Cache hit__, __cache miss__: 
+    - a  __cache hit__: occurs when a __cache entry__ exists with key and age compatible with the requested data.<br>
+    In case the cache value is taken from the External (RedIs) backing storage, we call it a  __hybrid cache hit__.
+    - a  __cache miss__: occurs when no __cache entry__ exists for the key or its age is older than requested __MaxAge__ for data.
+- a __miss notification__: every time a __cache miss__ occurs, __all instances are notified__ about it so that in case they receive a request for the same key, they can obtain the value from the instance that owns it, without need to retrieve it from the server again. 
+- __entry eviction__: every time the in-memory cache eccedes the __configured quota__ older and bigger entries are __evicted__, and __off-loaded to the external (RedIs) backing storage__.
+- __Invalidation__: specific application conditions, may requires cache entries to be invalidated.
+Cache keys can be marked implementing interface `IInvalidatable` are notified every time `Invalidate` action is triggered so that they can be evicted when needed.
+- __Reload__: a cache key can be assigned a __reload delegate__ so that when invalidation happens, the value is reloaded, to avoid the cache miss latency on the next incoming call.
+    
 
-Also, __0 latency__ can be obtained __since the first and for every call__ by means of __Cache Preloading__ and __Cache Invalidation__.
+the following image illustrates the described SmartCache events:
+![alt text](<002.01 SmartCache events.png>)
+
+> SmartCache supports caching data with __low cost__ and __high performance__.<br>
+> In particular, __0 latency__ is ensured on in-memory cache hits.
+> also, __pressure on external RedIS resource is low__ as most frequently used entries are managed in-memory.
+> 
+> Also, __0 latency__ can be obtained __since the first and for every call__ by means of __Cache Preloading__ and __Cache Invalidation__.
 
 Paragraph [STEPS TO USE SMARTCACHE](#steps-to-use-smartcache) discusses basic steps to start using `Diginsight.SmartCache`.<br>
 The following articles discuss the details of `Diginsight.SmartCache` use and configuration:
