@@ -66,7 +66,10 @@ The following articles discuss the details of `Diginsight.SmartCache` use and co
 
 ## STEP 01: add a reference to `Diginsight.SmartCache`
 In the first step you can just add a `Diginsight.SmartCache` reference to your code:<br>
-![alt text](<01. Add a reference to Diginsight.SmartCache.png>)
+![alt text](<01. Add a reference to Diginsight.SmartCache.png>)<br>
+
+In case of multiinstance applications `Diginsight.SmartCache.Externalization.ServiceBus` may be needed to support instances synchronization.
+In case of AspNetCore applications `Diginsight.SmartCache.Externalization.AspNetCore` may be useful to support dynamic `MaxAge` specification from http request headers.
 
 ## STEP 02: register SmartCache services into the startup sequence
 SmartCache services and default settings must be registered into the startup sequence __ConfigureServices methdod__.<br>
@@ -77,77 +80,101 @@ The code snippets below are available as working samples within the [smartcache_
 public void ConfigureServices(IServiceCollection services)
 {
     ...
+
+    services.ConfigureRedisCacheSettings(configuration); // reads RedIs connection string
+
     ...
 
-    // configures SmartCache config section with default settings and support of Dynamic-Configuration for MaxAge, expirations etc
+    // configures Diginsight:SmartCache config section with default settings
+    // supports Dynamic-Configuration for MaxAge, expirations etc
     services.Configure<SmartCacheCoreOptions>(configuration.GetSection("Diginsight:SmartCache"))
             .PostConfigureClassAwareFromHttpRequestHeaders<SmartCacheCoreOptions>();
 
     // adds smartCache services (ISmartCache, ICacheKeyService and other internal services)
-    var smartCacheBuilder = services.AddSmartCache();
+    SmartCacheBuilder smartCacheBuilder = services.AddSmartCache().AddHttpHeaderSupport();
 
-    IConfigurationSection smartCacheServiceBusConfiguration = configuration.GetSection("Diginsight:SmartCache:ServiceBus");
-    if (!string.IsNullOrEmpty(smartCacheServiceBusConfiguration[nameof(SmartCacheServiceBusOptions.ConnectionString)]) &&
-        !string.IsNullOrEmpty(smartCacheServiceBusConfiguration[nameof(SmartCacheServiceBusOptions.TopicName)]))
+    // reads ServiceBus configuration so support instances synchronization
+    IConfigurationSection smartCacheServiceBusConfiguration = 
+                          configuration.GetSection("Diginsight:SmartCache:ServiceBus");
+    if (!string.IsNullOrEmpty(smartCacheServiceBusConfiguration["ConnectionString"]) &&
+        !string.IsNullOrEmpty(smartCacheServiceBusConfiguration["TopicName"]))
     {
-        // (opt) registers ServiceBus companion for synchronization of SmartCache entries across application instances
-        smartCacheBuilder
-            .SetServiceBusCompanion(
+        smartCacheBuilder.SetServiceBusCompanion(
                 sbo =>
                 {
                     smartCacheServiceBusConfiguration.Bind(sbo);
-                    sbo.SubscriptionName = SmartCacheServiceBusSubscriptionName;
+                    // add a GUID as a service bus subscription
+                    sbo.SubscriptionName = SmartCacheServiceBusSubscriptionName; 
                 }
             );
     }
 
+    services.TryAddSingleton<ICacheKeyProvider, MyCacheKeyProvider>();
+
 }
 
 ```
-the image below shows `Diginsight.SmartCache` settings with default MaxAge and Expiration values for cache entries.
+The image below shows `Diginsight.SmartCache` settings with default `MaxAge` and `Expiration` values for cache entries.
 
-![alt text](<02. Diginsight.SmartCache settings.png>)
+```json
+"SmartCache": {
+    "MaxAge": "00:05",
+    //"MaxAge@...": "00:01",
+    //"MaxAge@...": "00:10",
+    "AbsoluteExpiration": "1.00:00",
+    "SlidingExpiration": "04:00",
+    "ServiceBus": {
+    "ConnectionString": "", // Key Vault
+    "TopicName": "smartcache-commonapi"
+    }
+}
+```
 
-> NB. STEP02 only installs smartCache as an in-memory service.<br>
-> An additional step can be added to install RedIS support to SmartCache distributed caching.
+> NB. 
+> - __ServiceBus configuration__ is required only in case of __multiinstance applications__ where instances cache entries need to be synchronized
+> - __RedIs configuration__ is required only in case external backing storage is available to save evicted cache entries. this allows __reducing cache miss rate__ and __mininize access to data sources__.
+
 
 __Diginsight.SmartCache__ will manage cache entries synchronization across application instances by means of the `SetServiceBusCompanion`.<br>
 HowTo: Configure SmartCache synchronization across application instances
 
 
 
-## STEP 03: load data by means of `Diginsight.SmartCache`
+## STEP 03: load data by means of `cacheService`
 
 load your data by means of `Diginsight.SmartCache` `cacheService`
 ```c#
-public async Task<SiteLicensesResponse> GetSiteLicensesAsync(string plantId, string plantType, ContextBase context)
+[HttpGet("getplantscached", Name = "GetPlantsCachedAsync")]
+[ApiVersion(ApiVersions.V_2024_04_26.Name)]
+public async Task<IEnumerable<Plant>> GetPlantsCachedAsync()
 {
-    using var activity = DiginsightDefaults.ActivitySource.StartMethodActivity(logger, new { plantId, plantType });
+    using var activity = Program.ActivitySource.StartMethodActivity(logger);
 
-    // define a key for the cache entry
+    // defines a key for the cache entry
     // NB. the cache key should include all imput parameters (that may cause different responses)
     // in this case the key is defined as a record including all relevant input parameters
-    var cacheKey = new MethodCallCacheKey(cacheKeyService, typeof(PermissionServiceAdapter), nameof(GetSiteLicensesAsync), plantId, plantType);
+    var cacheKey = new MethodCallCacheKey(cacheKeyService, 
+                       typeof(PlantsController), nameof(GetPlantsCachedAsync));
+
     // data with max-age 10 minutes is requested
     var options = new SmartCacheOperationOptions() { MaxAge = TimeSpan.FromSeconds(600) }; 
-    // load data by means of smartCache service
-    // delegate to load real data from the back end must be passed to smartCache service
-    var siteLicensesResponse = await smartCache.GetAsync(cacheKey,
-        _ => GetSiteLicensesImplAsync(plantId, plantType, context), options
-    );
 
-    activity.SetOutput(siteLicensesResponse);
-    return siteLicensesResponse;
+    // Calls GetPlantsAsync by means of smartCache service
+    var plants = await smartCache.GetAsync(cacheKey,
+        _ => GetPlantsAsync(), 
+        options);
+
+    activity.SetOutput(plants);
+    return plants;
 }
+
 ```
 
-## STEP 04: Add RedIS companion for support of Distributed Hybrid cache
-an additional companion can be installed to make 
-```c#
-```
+the image below show the log of the `SampleWebApi` `GetPlantsCachedAsync` method.<br>
+The first call finds a `cache miss` and resolves to calling the `GetPlantsAsync` method.
+the second call finds a `cache miss` obtaining the result in __11ms__ instead of more than __1sec__.
+![alt text](<03. cached call log with cache miss and cache hit.png>)
 
-
-__Diginsight.SmartCache__ will manage caching to in-memory cache or red-is cache based on cache entry size, retrieval latency etc.<br>
 
 For more information visit:
 [SmartCache](https://github.com/diginsight/smartcache)
