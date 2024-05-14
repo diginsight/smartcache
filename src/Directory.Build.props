@@ -7,7 +7,7 @@
     <LangVersion>12</LangVersion>
     <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
 
-    <CoreVersion>3.*</CoreVersion>
+    <CoreVersion>3.*-*</CoreVersion>
   </PropertyGroup>
 
   <Import Project="Directory.build.props.user" Condition="Exists('Directory.build.props.user')" />
