@@ -1,0 +1,29 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>netstandard2.0;netstandard2.1;net6.0;net7.0;net8.0</TargetFrameworks>
+    <Title>Diginsight SmartCache Service Bus Externalization extension</Title>
+    <PackageTags>$(PackageTags);externalization;redis</PackageTags>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="StackExchange.Redis" Version="2.*" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Diginsight.SmartCache\Diginsight.SmartCache.csproj" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(CoreDirectImport)' == 'true'">
+    <ProjectReference Include="$(CoreSolutionDirectory)Diginsight.Diagnostics\Diginsight.Diagnostics.csproj">
+      <PrivateAssets>contentfiles; analyzers; build; compile</PrivateAssets>
+    </ProjectReference>
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(CoreDirectImport)' != 'true'">
+    <PackageReference Include="Diginsight.Diagnostics" Version="$(CoreVersion)">
+      <PrivateAssets>contentfiles; analyzers; build; compile</PrivateAssets>
+    </PackageReference>
+  </ItemGroup>
+
+</Project>

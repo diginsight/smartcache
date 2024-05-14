@@ -7,7 +7,7 @@ namespace Diginsight.SmartCache.Externalization;
 
 public sealed class CachePreloader : ICachePreloader
 {
-#if NET6_0_OR_GREATER
+#if NET
     private static Random SharedRandom
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -17,7 +17,7 @@ public sealed class CachePreloader : ICachePreloader
     private static readonly Random SharedRandom = new ();
 #endif
 
-    private readonly ILogger<CachePreloader> logger;
+    private readonly ILogger logger;
     private readonly ICacheCompanion companion;
     private readonly TimeProvider timeProvider;
 
@@ -40,7 +40,7 @@ public sealed class CachePreloader : ICachePreloader
 
         SmartCacheObservability.Instruments.Preloads.Add(1);
 
-        DateTime timestamp = SmartCache.Truncate(timeProvider.GetUtcNow().UtcDateTime);
+        DateTimeOffset timestamp = SmartCache.Truncate(timeProvider.GetUtcNow());
 
         T value;
         StrongBox<double> latencyMsecBox = new ();
@@ -51,10 +51,10 @@ public sealed class CachePreloader : ICachePreloader
 
         logger.LogDebug("Fetched in {LatencyMsec} ms", (long)latencyMsecBox.Value);
 
-        _ = Task.Run(() => NotifyAsync(keyHolder, timestamp, value));
+        TaskUtils.RunAndForget(() => NotifyAsync(keyHolder, timestamp, value));
     }
 
-    private async Task NotifyAsync<TValue>(CacheKeyHolder keyHolder, DateTime creationDate, TValue value)
+    private async Task NotifyAsync<TValue>(CacheKeyHolder keyHolder, DateTimeOffset creationDate, TValue value)
     {
         using Activity? activity = SmartCacheObservability.ActivitySource.StartMethodActivity(logger, new { key = keyHolder.Key, creationDate });
 

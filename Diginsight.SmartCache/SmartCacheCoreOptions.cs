@@ -11,13 +11,15 @@ public sealed class SmartCacheCoreOptions : ISmartCacheCoreOptions, IDynamically
     private TimeSpan localEntryTolerance = TimeSpan.FromSeconds(10);
 
     public bool DiscardExternalMiss { get; set; }
-    public bool RedisOnlyCache { get; set; }
+    public StorageMode StorageMode { get; set; }
 
     public Expiration MaxAge
     {
         get => maxAge;
         set => maxAge = value >= Expiration.Zero ? value : Expiration.Zero;
     }
+
+    public DateTimeOffset? MinimumCreationDate { get; private set; }
 
     public Expiration AbsoluteExpiration
     {
@@ -31,8 +33,8 @@ public sealed class SmartCacheCoreOptions : ISmartCacheCoreOptions, IDynamically
         set => slidingExpiration = value >= Expiration.Zero ? value : Expiration.Zero;
     }
 
-    public int CompanionPrefetchCount { get; set; } = 5;
-    public int CompanionMaxParallelism { get; set; } = 2;
+    public int LocationPrefetchCount { get; set; } = 5;
+    public int LocationMaxParallelism { get; set; } = 2;
 
     public int MissValueSizeThreshold { get; set; } = 5_000;
 
@@ -63,16 +65,22 @@ public sealed class SmartCacheCoreOptions : ISmartCacheCoreOptions, IDynamically
             set => filled.DiscardExternalMiss = value;
         }
 
-        public bool RedisOnlyCache
+        public StorageMode StorageMode
         {
-            get => filled.RedisOnlyCache;
-            set => filled.RedisOnlyCache = value;
+            get => filled.StorageMode;
+            set => filled.StorageMode = value;
         }
 
         public Expiration MaxAge
         {
             get => filled.MaxAge;
             set => filled.MaxAge = value;
+        }
+
+        public DateTimeOffset? MinimumCreationDate
+        {
+            get => filled.MinimumCreationDate;
+            set => filled.MinimumCreationDate = value;
         }
 
         public Expiration AbsoluteExpiration
@@ -85,6 +93,12 @@ public sealed class SmartCacheCoreOptions : ISmartCacheCoreOptions, IDynamically
         {
             get => filled.SlidingExpiration;
             set => filled.SlidingExpiration = value;
+        }
+
+        public int MissValueSizeThreshold
+        {
+            get => filled.MissValueSizeThreshold;
+            set => filled.MissValueSizeThreshold = value;
         }
     }
 }

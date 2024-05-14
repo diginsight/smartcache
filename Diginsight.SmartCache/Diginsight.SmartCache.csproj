@@ -1,48 +1,30 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-	<PropertyGroup>
-		<TargetFrameworks>netstandard2.0;netstandard2.1;net6.0;net7.0;net8.0</TargetFrameworks>
-		<Title>Diginsight SmartCache</Title>
-		<PackageTags>$(PackageTags);cache;smartcache</PackageTags>
-		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-	</PropertyGroup>
+  <PropertyGroup>
+    <TargetFrameworks>netstandard2.0;netstandard2.1;net6.0;net7.0;net8.0</TargetFrameworks>
+    <Title>Diginsight SmartCache</Title>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
 
-	<Choose>
-		<When Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net6.0'))">
-			<ItemGroup>
-				<FrameworkReference Include="Microsoft.AspNetCore.App" />
-			</ItemGroup>
-		</When>
-		<Otherwise>
-			<ItemGroup>
-				<PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.2.*">
-					<PrivateAssets>contentfiles; analyzers; build; compile</PrivateAssets>
-				</PackageReference>
-				<PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="2.2.*">
-					<PrivateAssets>contentfiles; analyzers; build; compile</PrivateAssets>
-				</PackageReference>
-			</ItemGroup>
-		</Otherwise>
-	</Choose>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="8.*" />
+    <PackageReference Include="Microsoft.Extensions.Http" Version="8.*">
+      <PrivateAssets>contentfiles; analyzers; build; compile</PrivateAssets>
+    </PackageReference>
+  </ItemGroup>
 
-	<ItemGroup>
-		<PackageReference Include="Azure.Messaging.ServiceBus" Version="1.*" />
-		<PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="8.*" />
-		<PackageReference Include="Microsoft.Extensions.Http" Version="8.*" />
-		<PackageReference Include="Polly.Core" Version="8.*" />
-		<PackageReference Include="StackExchange.Redis" Version="2.*" />
-	</ItemGroup>
+  <ItemGroup Condition="'$(CoreDirectImport)' == 'true'">
+    <ProjectReference Include="$(CoreSolutionDirectory)Diginsight.Core\Diginsight.Core.csproj" />
+    <ProjectReference Include="$(CoreSolutionDirectory)Diginsight.Diagnostics\Diginsight.Diagnostics.csproj">
+      <PrivateAssets>contentfiles; analyzers; build; compile</PrivateAssets>
+    </ProjectReference>
+  </ItemGroup>
 
-	<ItemGroup>
-	  <Compile Remove="Polyfills\System.PolyfillExtensions.cs" />
-	</ItemGroup>
-	<ItemGroup>
-		<ProjectReference Include="$(DiginsightSolutionDirectory)Diginsight.Core\Diginsight.Core.csproj" Condition="'$(DiginsightDirectImport)' == 'true'" />
-		<ProjectReference Include="$(DiginsightSolutionDirectory)Diginsight.Diagnostics.AspNetCore\Diginsight.Diagnostics.AspNetCore.csproj" Condition="'$(DiginsightDirectImport)' == 'true'" />
-		<ProjectReference Include="$(DiginsightSolutionDirectory)Diginsight.Diagnostics.Log4Net\Diginsight.Diagnostics.Log4Net.csproj" Condition="'$(DiginsightDirectImport)' == 'true'" />
-		<PackageReference Include="Diginsight.Core" Version="3.0.0-alpha.161" Condition="'$(DiginsightDirectImport)' != 'true'" />
-		<PackageReference Include="Diginsight.Diagnostics.AspNetCore" Version="3.0.0-alpha.161" Condition="'$(DiginsightDirectImport)' != 'true'" />
-		<PackageReference Include="Diginsight.Diagnostics.Log4Net" Version="3.0.0-alpha.161" Condition="'$(DiginsightDirectImport)' != 'true'" />
-	</ItemGroup>
+  <ItemGroup Condition="'$(CoreDirectImport)' != 'true'">
+    <PackageReference Include="Diginsight.Core" Version="$(CoreVersion)" />
+    <PackageReference Include="Diginsight.Diagnostics" Version="$(CoreVersion)">
+      <PrivateAssets>contentfiles; analyzers; build; compile</PrivateAssets>
+    </PackageReference>
+  </ItemGroup>
 
 </Project>

@@ -3,15 +3,16 @@
 public interface ISmartCacheCoreOptions
 {
     bool DiscardExternalMiss { get; }
-    bool RedisOnlyCache { get; }
+    StorageMode StorageMode { get; }
 
     Expiration MaxAge { get; }
+    DateTimeOffset? MinimumCreationDate { get; }
 
     Expiration AbsoluteExpiration { get; }
     Expiration SlidingExpiration { get; }
 
-    int CompanionPrefetchCount { get; }
-    int CompanionMaxParallelism { get; }
+    int LocationPrefetchCount { get; }
+    int LocationMaxParallelism { get; }
 
     int MissValueSizeThreshold { get; }
 

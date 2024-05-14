@@ -1,4 +1,4 @@
-name: Build and Publish 'Diginsight' v3+ NuGet Packages
+name: Build and Publish 'Diginsight SmartCache' v3+ NuGet Packages
 
 on:
   push:
@@ -20,7 +20,7 @@ defaults:
     shell: pwsh
 
 env:
-  SOLUTION_SLN: Diginsight.sln
+  SOLUTION_SLN: Diginsight.SmartCache.sln
   DOTNET_NOLOGO: 1
   DOTNET_CLI_TELEMETRY_OPTOUT: 1
 

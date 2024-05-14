@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Http;
 using Microsoft.Extensions.Options;
 
 namespace Diginsight.SmartCache;
@@ -11,10 +12,13 @@ public sealed class SmartCacheBuilder
     internal SmartCacheBuilder(IServiceCollection services)
     {
         services.AddMemoryCache();
+        services.AddClassAwareOptions();
         services.TryAddSingleton<ISmartCache, SmartCache>();
         services.TryAddSingleton(static sp => new Lazy<ISmartCache>(sp.GetRequiredService<ISmartCache>));
         services.TryAddSingleton<ICacheKeyService, CacheKeyService>();
         services.TryAddEnumerable(ServiceDescriptor.Singleton<IValidateOptions<SmartCacheCoreOptions>, ValidateSmartCacheCoreOptions>());
+        services.TryAddEnumerable(ServiceDescriptor.Singleton<IHttpMessageHandlerBuilderFilter, SmartCacheHttpMessageHandlerBuilderFilter>());
+        services.TryAddSingleton<SmartCacheDownstreamSettings>();
 
         Services = services;
     }
@@ -34,22 +38,22 @@ public sealed class SmartCacheBuilder
                 messages.Add($"{nameof(SmartCacheCoreOptions.LowPrioritySizeThreshold)} must be greater than or equal to {nameof(SmartCacheCoreOptions.MidPrioritySizeThreshold)}");
             }
 
-            int companionPrefetchCount = options.CompanionPrefetchCount;
-            int companionMaxParallelism = options.CompanionMaxParallelism;
+            int locationPrefetchCount = options.LocationPrefetchCount;
+            int locationMaxParallelism = options.LocationMaxParallelism;
 
-            if (companionPrefetchCount <= 0)
+            if (locationPrefetchCount <= 0)
             {
-                messages.Add($"{nameof(SmartCacheCoreOptions.CompanionPrefetchCount)} must be positive");
+                messages.Add($"{nameof(SmartCacheCoreOptions.LocationPrefetchCount)} must be positive");
             }
 
-            if (companionMaxParallelism <= 0)
+            if (locationMaxParallelism <= 0)
             {
-                messages.Add($"{nameof(SmartCacheCoreOptions.CompanionMaxParallelism)} must be positive");
+                messages.Add($"{nameof(SmartCacheCoreOptions.LocationMaxParallelism)} must be positive");
             }
 
-            if (companionPrefetchCount > 0 && companionMaxParallelism > 0 && companionPrefetchCount < companionMaxParallelism)
+            if (locationPrefetchCount > 0 && locationMaxParallelism > 0 && locationPrefetchCount < locationMaxParallelism)
             {
-                messages.Add($"{nameof(SmartCacheCoreOptions.CompanionMaxParallelism)} must be less than or equal to {nameof(SmartCacheCoreOptions.CompanionPrefetchCount)}");
+                messages.Add($"{nameof(SmartCacheCoreOptions.LocationMaxParallelism)} must be less than or equal to {nameof(SmartCacheCoreOptions.LocationPrefetchCount)}");
             }
 
             return messages.Any() ? ValidateOptionsResult.Fail(messages) : ValidateOptionsResult.Success;
