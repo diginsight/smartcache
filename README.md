@@ -7,7 +7,7 @@ In-memory cache ensure __0-latency__ for most recently used data and ensures __l
 __Data is returned from the cache if the requested MaxAge is compatible with the cache entry__.<br>Otherwise data is requested to the real data provider.
 <br>This allows requesting data with __different MaxAge criteria, according to the specific application condition__.<br>
 Data loaded by any request, is made available for the benefit of further requests (as long as compatible with their MaxAge requirement).
-![alt text](<001.02 SmartCache Basic Tenets.png>)
+![alt text](<docs/001.02 SmartCache Basic Tenets.png>)
 
 - `SmartCache` is __Multilevel__: The same entries can be cached in multiple levels (frontend, backend or further levels). <br>At any level, __data is returned from the cache if the requested MaxAge is compatible with the cache entry__. otherwise data is requested to the further levels.<br>
 In case all levels entries contains old data, incompatible with the request MaxAge requirement, data is requested to the real data provider.
@@ -26,7 +26,7 @@ In case all levels entries contains old data, incompatible with the request MaxA
 <br>
 
 the following image illustrates the five SmartCache tenets:
-![alt text](<001.03a SmartCache Tenets Full.png>)
+![alt text](<docs/001.03a SmartCache Tenets Full.png>)
 
 
 # ADDITIONAL INFORMATION 
@@ -43,22 +43,22 @@ Cache keys can be marked implementing interface `IInvalidatable` are notified ev
 
 
 The following image illustrates the described SmartCache events:<br>
-![alt text](<002.01 SmartCache events.png>)
+![alt text](<docs/002.01 SmartCache events.png>)
 
 Paragraph [STEPS TO USE SMARTCACHE](#steps-to-use-smartcache) discusses basic steps to start using `Diginsight.SmartCache`.<br>
 The following articles discuss the details of `Diginsight.SmartCache` use and configuration:
-- [HowTo: Cache data, Invalidate entries and reload cache on invalidation.md](<articles/01. Cache data, Invalidate entries and reload cache on invalidation/Cache data, Invalidate entries and reload cache on invalidation.md>).
+- [HowTo: Cache data, Invalidate entries and reload cache on invalidation.md](<docs/articles/01. Cache data, Invalidate entries and reload cache on invalidation/Cache data, Invalidate entries and reload cache on invalidation.md>).
 
-- [HowTo: Synchronize cache entries across application instances with ServiceBusCompanion or KubernetesCompanion.md](<articles/02. Synchronize cache entries across application instances/Synchronize cache entries across application instances.md>).
+- [HowTo: Synchronize cache entries across application instances with ServiceBusCompanion or KubernetesCompanion.md](<docs/articles/02. Synchronize cache entries across application instances/Synchronize cache entries across application instances.md>).
 
-- [HowTo: Configure SmartCache size, latencies, expiration, instances synchronization and RedIs integration.md](<articles/03. Configure SmartCache size, latencies, expiration, instances synchronization and RedIs integration/Configure SmartCache size, latencies, expiration, instances synchronization and RedIs integration.md>).
+- [HowTo: Configure SmartCache size, latencies, expiration, instances synchronization and RedIs integration.md](<docs/articles/03. Configure SmartCache size, latencies, expiration, instances synchronization and RedIs integration/Configure SmartCache size, latencies, expiration, instances synchronization and RedIs integration.md>).
 
-- [HowTo: Boost application performance with age sensitive data management.md](<articles/10. Boost application performance with age sensitive data management/Boost application performance with age sensitive data management.md>).
+- [HowTo: Boost application performance with age sensitive data management.md](<docs/articles/10. Boost application performance with age sensitive data management/Boost application performance with age sensitive data management.md>).
 
 - [HowTo: Enable data preloading by means of AI assisted algorithms.md]<br> 
 (TODO): explores how to enable AI assisted preloading to improve data preloading efficiency.<br><br>
 
-<!-- - [HowTo:  Boost application performance with age sensitive data management](articles/10. Leverage age sensitive data management to boost application performance.md):<br>explores how to use `Diginsight.SmartCache` to boost application performance by means age conscious data magagement.<br>
+<!-- - [HowTo:  Boost application performance with age sensitive data management](<docs/articles/10. Leverage age sensitive data management to boost application performance.md>):<br>explores how to use `Diginsight.SmartCache` to boost application performance by means age conscious data magagement.<br>
  -->
 
 
@@ -66,7 +66,7 @@ The following articles discuss the details of `Diginsight.SmartCache` use and co
 
 ## STEP 01: add a reference to `Diginsight.SmartCache`
 In the first step you can just add a `Diginsight.SmartCache` reference to your code:<br>
-![alt text](<01. Add a reference to Diginsight.SmartCache.png>)<br>
+![alt text](<docs/01. Add a reference to Diginsight.SmartCache.png>)<br>
 
 In case of multiinstance applications `Diginsight.SmartCache.Externalization.ServiceBus` may be needed to support instances synchronization.
 In case of AspNetCore applications `Diginsight.SmartCache.Externalization.AspNetCore` may be useful to support dynamic `MaxAge` specification from http request headers.
@@ -173,7 +173,7 @@ public async Task<IEnumerable<Plant>> GetPlantsCachedAsync()
 the image below show the log of the `SampleWebApi` `GetPlantsCachedAsync` method.<br>
 The first call finds a `cache miss` and resolves to calling the `GetPlantsAsync` method.
 the second call finds a `cache miss` obtaining the result in __11ms__ instead of more than __1sec__.
-![alt text](<03. cached call log with cache miss and cache hit.png>)
+![alt text](<docs/03. cached call log with cache miss and cache hit.png>)
 
 
 For more information visit:
@@ -187,4 +187,4 @@ Contribute to the repository with your pull requests.
 - [Diagnostics](https://github.com/diginsight/telemetry)
 
 # License
-See the [LICENSE](LICENSE.md) file for license rights and limitations (MIT).
+See the [LICENSE](<LICENSE>) file for license rights and limitations (MIT).
