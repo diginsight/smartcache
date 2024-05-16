@@ -13,16 +13,16 @@
     </PackageReference>
   </ItemGroup>
 
-  <ItemGroup Condition="'$(CoreDirectImport)' == 'true'">
-    <ProjectReference Include="$(CoreSolutionDirectory)Diginsight.Core\Diginsight.Core.csproj" />
-    <ProjectReference Include="$(CoreSolutionDirectory)Diginsight.Diagnostics\Diginsight.Diagnostics.csproj">
+  <ItemGroup Condition="'$(DiginsightCoreDirectImport)' == 'true'">
+    <ProjectReference Include="$(DiginsightCoreSolutionDirectory)Diginsight.Core\Diginsight.Core.csproj" />
+    <ProjectReference Include="$(DiginsightCoreSolutionDirectory)Diginsight.Diagnostics\Diginsight.Diagnostics.csproj">
       <PrivateAssets>contentfiles; analyzers; build; compile</PrivateAssets>
     </ProjectReference>
   </ItemGroup>
 
-  <ItemGroup Condition="'$(CoreDirectImport)' != 'true'">
-    <PackageReference Include="Diginsight.Core" Version="$(CoreVersion)" />
-    <PackageReference Include="Diginsight.Diagnostics" Version="$(CoreVersion)">
+  <ItemGroup Condition="'$(DiginsightCoreDirectImport)' != 'true'">
+    <PackageReference Include="Diginsight.Core" Version="$(DiginsightCoreVersion)" />
+    <PackageReference Include="Diginsight.Diagnostics" Version="$(DiginsightCoreVersion)">
       <PrivateAssets>contentfiles; analyzers; build; compile</PrivateAssets>
     </PackageReference>
   </ItemGroup>

@@ -66,16 +66,16 @@
     </None>
   </ItemGroup>
 
-  <PropertyGroup Condition="'$(CoreSolutionDirectory)' == ''">
-    <CoreDirectImport>false</CoreDirectImport>
+  <PropertyGroup Condition="'$(DiginsightCoreSolutionDirectory)' == ''">
+    <DiginsightCoreDirectImport>false</DiginsightCoreDirectImport>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(CoreSolutionDirectory)' != ''">
-    <CoreSolutionDirectory>$([MSBuild]::EnsureTrailingSlash('$(CoreSolutionDirectory)'))</CoreSolutionDirectory>
+  <PropertyGroup Condition="'$(DiginsightCoreSolutionDirectory)' != ''">
+    <DiginsightCoreSolutionDirectory>$([MSBuild]::EnsureTrailingSlash('$(DiginsightCoreSolutionDirectory)'))</DiginsightCoreSolutionDirectory>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(CoreDirectImport)' == ''">
-    <CoreDirectImport>false</CoreDirectImport>
+  <PropertyGroup Condition="'$(DiginsightCoreVersion)' == ''">
+    <DiginsightCoreVersion>false</DiginsightCoreVersion>
   </PropertyGroup>
 
 </Project>

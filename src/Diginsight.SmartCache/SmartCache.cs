@@ -72,7 +72,7 @@ internal sealed class SmartCache : ISmartCache
     {
         using Activity? activity = SmartCacheObservability.ActivitySource.StartMethodActivity(logger, new { key, operationOptions, callerType });
 
-        callerType ??= RuntimeUtils.GetCaller().DeclaringType;
+        callerType ??= RuntimeUtils.GetCallerType();
         operationOptions ??= new SmartCacheOperationOptions();
 
         CacheKeyHolder keyHolder = new (key);
