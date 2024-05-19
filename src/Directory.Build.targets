@@ -66,16 +66,17 @@
     </None>
   </ItemGroup>
 
-  <PropertyGroup Condition="'$(CoreSolutionDirectory)' == ''">
+  <PropertyGroup Condition="'$(CoreDirectImport)' == ''">
     <CoreDirectImport>false</CoreDirectImport>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(CoreSolutionDirectory)' == ''">
+    <CoreSolutionDirectory >..\..\..\..\telemetry\src\</CoreSolutionDirectory>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(CoreSolutionDirectory)' != ''">
     <CoreSolutionDirectory>$([MSBuild]::EnsureTrailingSlash('$(CoreSolutionDirectory)'))</CoreSolutionDirectory>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(CoreDirectImport)' == ''">
-    <CoreDirectImport>false</CoreDirectImport>
-  </PropertyGroup>
 
 </Project>
