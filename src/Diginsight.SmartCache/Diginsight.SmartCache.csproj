@@ -15,7 +15,7 @@
 
   <ItemGroup Condition="'$(DiginsightCoreDirectImport)' == 'true'">
     <ProjectReference Include="$(DiginsightCoreSolutionDirectory)Diginsight.Core\Diginsight.Core.csproj" />
-    <ProjectReference Include="$(DiginsightCoreSolutionDirectory)Diginsight.Diagnostics\Diginsight.Diagnostics.csproj">
+    <ProjectReference Include="$(DiginsightCoreSolutionDirectory)Diginsight.Diagnostics\Diginsight.Diagnostics.csproj" >
       <PrivateAssets>contentfiles; analyzers; build; compile</PrivateAssets>
     </ProjectReference>
   </ItemGroup>
