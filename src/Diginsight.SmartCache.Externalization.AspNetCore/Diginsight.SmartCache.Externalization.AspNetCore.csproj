@@ -25,16 +25,16 @@
     <ProjectReference Include="..\Diginsight.SmartCache.Externalization.Http\Diginsight.SmartCache.Externalization.Http.csproj" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(CoreDirectImport)' == 'true'">
-    <ProjectReference Include="$(CoreSolutionDirectory)Diginsight.AspNetCore\Diginsight.AspNetCore.csproj" />
-    <ProjectReference Include="$(CoreSolutionDirectory)Diginsight.Diagnostics\Diginsight.Diagnostics.csproj">
+  <ItemGroup Condition="'$(DiginsightCoreDirectImport)' == 'true'">
+    <ProjectReference Include="$(DiginsightCoreSolutionDirectory)Diginsight.AspNetCore\Diginsight.AspNetCore.csproj" />
+    <ProjectReference Include="$(DiginsightCoreSolutionDirectory)Diginsight.Diagnostics\Diginsight.Diagnostics.csproj">
       <PrivateAssets>contentfiles; analyzers; build; compile</PrivateAssets>
     </ProjectReference>
   </ItemGroup>
 
-  <ItemGroup Condition="'$(CoreDirectImport)' != 'true'">
-    <PackageReference Include="Diginsight.AspNetCore" Version="$(CoreVersion)" />
-    <PackageReference Include="Diginsight.Diagnostics" Version="$(CoreVersion)">
+  <ItemGroup Condition="'$(DiginsightCoreDirectImport)' != 'true'">
+    <PackageReference Include="Diginsight.AspNetCore" Version="$(DiginsightCoreVersion)" />
+    <PackageReference Include="Diginsight.Diagnostics" Version="$(DiginsightCoreVersion)">
       <PrivateAssets>contentfiles; analyzers; build; compile</PrivateAssets>
     </PackageReference>
   </ItemGroup>
