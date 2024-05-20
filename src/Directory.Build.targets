@@ -66,17 +66,4 @@
     </None>
   </ItemGroup>
 
-  <PropertyGroup Condition="'$(DiginsightCoreDirectImport)' == ''">
-    <DiginsightCoreDirectImport>false</DiginsightCoreDirectImport>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(DiginsightCoreSolutionDirectory)' == ''">
-    <DiginsightCoreSolutionDirectory >..\..\..\..\telemetry\src\</DiginsightCoreSolutionDirectory>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(DiginsightCoreSolutionDirectory)' != ''">
-    <DiginsightCoreSolutionDirectory>$([MSBuild]::EnsureTrailingSlash('$(DiginsightCoreSolutionDirectory)'))</DiginsightCoreSolutionDirectory>
-  </PropertyGroup>
-
-
 </Project>
