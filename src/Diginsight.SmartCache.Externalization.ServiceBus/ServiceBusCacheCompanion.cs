@@ -23,11 +23,14 @@ internal sealed class ServiceBusCacheCompanion : BackgroundService, ICacheCompan
     private const string CacheMissMessageSubject = "cachemiss";
     private const string InvalidateMessageSubject = "invalidate";
 
+    private static readonly TimeSpan SenderTimeout = TimeSpan.FromSeconds(5);
+
     private readonly ILogger logger;
     private readonly Lazy<ISmartCache> smartCacheLazy;
     private readonly IServiceProvider serviceProvider;
     private readonly ISmartCacheServiceBusOptions serviceBusOptions;
 
+    private readonly MreUtils mreUtils;
     private readonly ClientHolder clientHolder;
     // TODO Add cacheMiss and invalidate dictionaries
     private readonly RequestDictionary getRequestDictionary;
@@ -65,15 +68,62 @@ internal sealed class ServiceBusCacheCompanion : BackgroundService, ICacheCompan
 
         PassiveLocations = passiveLocations;
 
-        clientHolder = new ClientHolder(this.serviceBusOptions);
+        mreUtils = ActivatorUtilities.CreateInstance<MreUtils>(serviceProvider);
+        clientHolder = ActivatorUtilities.CreateInstance<ClientHolder>(serviceProvider, mreUtils);
 
         timeProvider ??= TimeProvider.System;
         getRequestDictionary = new RequestDictionary(timeProvider);
         getResponseDictionary = new ResponseDictionary(timeProvider);
     }
 
+    private sealed class MreUtils
+    {
+        private readonly ILogger logger;
+
+        public MreUtils(ILogger<MreUtils> logger)
+        {
+            this.logger = logger;
+        }
+
+        public void Wait(ManualResetEventSlim mre, CancellationToken cancellationToken, string description)
+        {
+            logger.LogTrace("Waiting for {Description}", description);
+            mre.Wait(cancellationToken);
+        }
+
+        public bool Wait(ManualResetEventSlim mre, TimeSpan timeout, CancellationToken cancellationToken, string description)
+        {
+            logger.LogTrace("Waiting for {Description}", description);
+            return mre.Wait(timeout, cancellationToken);
+        }
+
+        public void Reset(ManualResetEventSlim? mre, string description)
+        {
+            if (mre is null)
+                return;
+            logger.LogTrace("Resetting {Description}", description);
+            mre.Reset();
+        }
+
+        public void Set(ManualResetEventSlim mre, string description)
+        {
+            logger.LogTrace("Setting {Description}", description);
+            mre.Set();
+        }
+
+        public void Dispose(ManualResetEventSlim? mre, string description)
+        {
+            if (mre is null)
+                return;
+            logger.LogTrace("Disposing {Description}", description);
+            mre.Dispose();
+        }
+    }
+
     private sealed class ClientHolder : IDisposable
     {
+        private readonly ILogger<ClientHolder> logger;
+        private readonly MreUtils mreUtils;
         private readonly ISmartCacheServiceBusOptions serviceBusOptions;
 
         private ManualResetEventSlim? mre = new ();
@@ -81,32 +131,47 @@ internal sealed class ServiceBusCacheCompanion : BackgroundService, ICacheCompan
         private ServiceBusClient? client;
         private ServiceBusSender? sender;
 
-        public ServiceBusClient Client
+        public ClientHolder(
+            ILogger<ClientHolder> logger,
+            MreUtils mreUtils,
+            IOptions<SmartCacheServiceBusOptions> serviceBusOptions
+        )
         {
-            get
-            {
-                (mre ?? throw new ObjectDisposedException(nameof(ClientHolder))).Wait();
-                return client!;
-            }
+            this.logger = logger;
+            this.mreUtils = mreUtils;
+            this.serviceBusOptions = serviceBusOptions.Value;
         }
 
-        public ServiceBusSender Sender
+        public ServiceBusClient GetClient(CancellationToken cancellationToken)
         {
-            get
-            {
-                (mre ?? throw new ObjectDisposedException(nameof(ClientHolder))).Wait();
-                return sender!;
-            }
+            mreUtils.Wait(mre ?? throw new ObjectDisposedException(nameof(ClientHolder)), cancellationToken, "Client");
+            return client!;
         }
 
-        public ClientHolder(ISmartCacheServiceBusOptions serviceBusOptions)
+        public async Task SendMessageAsync(ServiceBusMessage message, CancellationToken cancellationToken)
         {
-            this.serviceBusOptions = serviceBusOptions;
+            // ReSharper disable once LocalVariableHidesMember
+            ManualResetEventSlim mre = this.mre ?? throw new ObjectDisposedException(nameof(ClientHolder));
+
+            try
+            {
+                if (!mreUtils.Wait(mre, SenderTimeout, cancellationToken, "Sender"))
+                {
+                    logger.LogWarning("Message not sent due to initialization timeout");
+                    return;
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                logger.LogWarning("Message not sent due to stopping");
+            }
+
+            await sender!.SendMessageAsync(message, CancellationToken.None);
         }
 
         public void Invalidate()
         {
-            mre?.Reset();
+            mreUtils.Reset(mre, "Client holder");
             client = null;
             sender = null;
         }
@@ -120,13 +185,13 @@ internal sealed class ServiceBusCacheCompanion : BackgroundService, ICacheCompan
 
             client = new ServiceBusClient(serviceBusOptions.ConnectionString);
             sender = client.CreateSender(serviceBusOptions.TopicName);
-            mre.Set();
+            mreUtils.Set(mre, "Client holder");
         }
 
         public void Dispose()
         {
             Invalidate();
-            Interlocked.Exchange(ref mre, null)?.Dispose();
+            mreUtils.Dispose(Interlocked.Exchange(ref mre, null), "Client holder");
         }
     }
 
@@ -355,7 +420,7 @@ internal sealed class ServiceBusCacheCompanion : BackgroundService, ICacheCompan
         }
     }
 
-    protected override async Task ExecuteAsync(CancellationToken cancellationToken)
+    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         string topicName = serviceBusOptions.TopicName;
         string subscriptionName = serviceBusOptions.SubscriptionName;
@@ -363,21 +428,21 @@ internal sealed class ServiceBusCacheCompanion : BackgroundService, ICacheCompan
 
         try
         {
-            while (!cancellationToken.IsCancellationRequested)
+            while (!stoppingToken.IsCancellationRequested)
             {
                 logger.LogDebug("Starting messages listen loop");
 
                 try
                 {
-                    await using ServiceBusClient client = clientHolder.Client;
+                    await using ServiceBusClient client = clientHolder.GetClient(stoppingToken);
                     await using ServiceBusReceiver receiver = client.CreateReceiver(topicName, subscriptionName);
 
-                    while (!cancellationToken.IsCancellationRequested)
+                    while (!stoppingToken.IsCancellationRequested)
                     {
                         ServiceBusReceivedMessage? receivedMessage;
                         try
                         {
-                            receivedMessage = await receiver.ReceiveMessageAsync(maxWaitTime: receiveWaitTime, cancellationToken);
+                            receivedMessage = await receiver.ReceiveMessageAsync(receiveWaitTime, stoppingToken);
                         }
                         catch (Exception exception)
                         {
@@ -391,7 +456,7 @@ internal sealed class ServiceBusCacheCompanion : BackgroundService, ICacheCompan
                         if (receivedMessage is null)
                             continue;
 
-                        await ProcessAsync(receiver, receivedMessage);
+                        await ProcessAsync(receiver, receivedMessage, stoppingToken);
                     }
                 }
                 finally
@@ -399,26 +464,26 @@ internal sealed class ServiceBusCacheCompanion : BackgroundService, ICacheCompan
                     clientHolder.Invalidate();
                 }
 
-                if (cancellationToken.IsCancellationRequested)
+                if (stoppingToken.IsCancellationRequested)
                     break;
 
-                await InstallAsync(cancellationToken);
+                await InstallAsync(stoppingToken);
             }
         }
         finally
         {
-            executionMre.Set();
+            mreUtils.Set(executionMre, "Execution");
         }
     }
 
-    private async Task ProcessAsync(ServiceBusReceiver receiver, ServiceBusReceivedMessage receivedMessage)
+    private async Task ProcessAsync(ServiceBusReceiver receiver, ServiceBusReceivedMessage receivedMessage, CancellationToken stoppingToken)
     {
         using Activity? activity = SmartCacheObservability.ActivitySource.StartMethodActivity(logger);
 
         if (receivedMessage.ApplicationProperties.GetValueOrDefault(SourcePropertyName) is not string emitter)
         {
             logger.LogDebug("Received message without emitter; will be discarded");
-            await receiver.AbandonMessageAsync(receivedMessage);
+            await receiver.AbandonMessageAsync(receivedMessage, cancellationToken: CancellationToken.None);
             return;
         }
 
@@ -434,7 +499,7 @@ internal sealed class ServiceBusCacheCompanion : BackgroundService, ICacheCompan
 
             async Task CompleteMessageAsync()
             {
-                await receiver.CompleteMessageAsync(receivedMessage);
+                await receiver.CompleteMessageAsync(receivedMessage, cancellationToken: CancellationToken.None);
                 completedBox.Value = true;
             }
 
@@ -496,7 +561,7 @@ internal sealed class ServiceBusCacheCompanion : BackgroundService, ICacheCompan
                     {
                         logger.LogDebug("Sending message {ChunkIndex}/{ChunkCount} for get reply to '{Destination}'", 1, 1, emitter);
 
-                        await clientHolder.Sender.SendMessageAsync(MakeMessage());
+                        await clientHolder.SendMessageAsync(MakeMessage(), stoppingToken);
                         return;
                     }
 
@@ -506,6 +571,7 @@ internal sealed class ServiceBusCacheCompanion : BackgroundService, ICacheCompan
 #if NET
                     await Parallel.ForEachAsync(
                         Enumerable.Range(0, responseChunkCount),
+                        CancellationToken.None,
                         async (responseChunkIndex, _) =>
 #else
                     {
@@ -522,7 +588,7 @@ internal sealed class ServiceBusCacheCompanion : BackgroundService, ICacheCompan
 
                             logger.LogDebug("Sending message {ChunkIndex}/{ChunkCount} for get reply to '{Destination}'", responseChunkIndex + 1, responseChunkCount, emitter);
 
-                            await clientHolder.Sender.SendMessageAsync(message, CancellationToken.None);
+                            await clientHolder.SendMessageAsync(message, stoppingToken);
                         }
 #if NET
                     );
@@ -582,7 +648,7 @@ internal sealed class ServiceBusCacheCompanion : BackgroundService, ICacheCompan
 
             if (finishAsync is not null)
             {
-                TaskUtils.RunAndForget(finishAsync);
+                TaskUtils.RunAndForget(finishAsync, CancellationToken.None);
             }
         }
         catch (Exception exception)
@@ -590,7 +656,7 @@ internal sealed class ServiceBusCacheCompanion : BackgroundService, ICacheCompan
             logger.LogWarning(exception, "Error processing '{Subject}' message", subject);
             if (!completedBox.Value)
             {
-                await receiver.DeadLetterMessageAsync(receivedMessage, "ExceptionProcessing", exception.Message);
+                await receiver.DeadLetterMessageAsync(receivedMessage, "ExceptionProcessing", exception.Message, CancellationToken.None);
                 completedBox.Value = true;
             }
         }
@@ -598,7 +664,7 @@ internal sealed class ServiceBusCacheCompanion : BackgroundService, ICacheCompan
         {
             if (!completedBox.Value)
             {
-                await receiver.AbandonMessageAsync(receivedMessage);
+                await receiver.AbandonMessageAsync(receivedMessage, cancellationToken: CancellationToken.None);
             }
         }
     }
@@ -621,7 +687,7 @@ internal sealed class ServiceBusCacheCompanion : BackgroundService, ICacheCompan
 
         try
         {
-            executionMre.Wait();
+            mreUtils.Wait(executionMre, CancellationToken.None, "Execution");
 
             clientHolder.Invalidate();
 
@@ -638,7 +704,7 @@ internal sealed class ServiceBusCacheCompanion : BackgroundService, ICacheCompan
         }
         finally
         {
-            uninstallationMre.Set();
+            mreUtils.Set(executionMre, "Uninstallation");
         }
     }
 
@@ -655,8 +721,8 @@ internal sealed class ServiceBusCacheCompanion : BackgroundService, ICacheCompan
         getResponseDictionary.Dispose();
         clientHolder.Dispose();
 
-        uninstallationMre.Wait();
-        uninstallationMre.Dispose();
+        mreUtils.Set(uninstallationMre, "Uninstallation");
+        mreUtils.Dispose(uninstallationMre, "Uninstallation");
     }
 
     public Task<IEnumerable<ActiveCacheLocation>> GetActiveLocationsAsync(IEnumerable<string> locationIds)
@@ -716,7 +782,7 @@ internal sealed class ServiceBusCacheCompanion : BackgroundService, ICacheCompan
             byte[] body;
             using (lap.Start())
             {
-                await companion.clientHolder.Sender.SendMessageAsync(message, CancellationToken.None);
+                await companion.clientHolder.SendMessageAsync(message, cancellationToken);
 
                 try
                 {
@@ -760,14 +826,17 @@ internal sealed class ServiceBusCacheCompanion : BackgroundService, ICacheCompan
     private sealed class ServiceBusCacheEventNotifier : CacheEventNotifier
     {
         private readonly ILogger logger;
+        private readonly IHostApplicationLifetime applicationLifetime;
         private readonly ServiceBusCacheCompanion companion;
 
         public ServiceBusCacheEventNotifier(
             ILogger<ServiceBusCacheEventNotifier> logger,
+            IHostApplicationLifetime applicationLifetime,
             ServiceBusCacheCompanion companion
         )
         {
             this.logger = logger;
+            this.applicationLifetime = applicationLifetime;
             this.companion = companion;
         }
 
@@ -781,9 +850,7 @@ internal sealed class ServiceBusCacheCompanion : BackgroundService, ICacheCompan
             return NotifyAsync(descriptorHolder, InvalidateMessageSubject);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private Task NotifyAsync<T>(CachePayloadHolder<T> descriptorHolder, string subject)
-            where T : notnull
+        private Task NotifyAsync(ICachePayloadHolder descriptorHolder, string subject)
         {
             logger.LogDebug("Sending message for '{Subject}' event notification", subject);
 
@@ -796,7 +863,7 @@ internal sealed class ServiceBusCacheCompanion : BackgroundService, ICacheCompan
                 },
             };
 
-            return companion.clientHolder.Sender.SendMessageAsync(message);
+            return companion.clientHolder.SendMessageAsync(message, applicationLifetime.ApplicationStopping);
         }
     }
 }
