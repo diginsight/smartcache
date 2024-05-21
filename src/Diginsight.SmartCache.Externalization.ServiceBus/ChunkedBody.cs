@@ -18,6 +18,7 @@ internal sealed class ChunkedBody : IDisposable
         mre.Wait(cancellationToken);
 
         long fullLength = 0;
+        // ReSharper disable once LocalVariableHidesMember
         int chunkCount = chunks!.Length;
         byte[][] bodies = new byte[chunkCount][];
         for (int i = 0; i < chunkCount; i++)
