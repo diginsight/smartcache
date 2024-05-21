@@ -5,7 +5,7 @@ public abstract class PassiveCacheLocation : CacheLocation
     protected PassiveCacheLocation(string id)
         : base(id) { }
 
-    public void WriteAndForget(CacheKeyHolder keyHolder, IValueEntry entry, Expiration expiration, Func<Task> notifyMissAsync)
+    public void WriteAndForget(CachePayloadHolder<object> keyHolder, IValueEntry entry, Expiration expiration, Func<Task> notifyMissAsync)
     {
         TaskUtils.RunAndForget(
             async () =>
@@ -18,12 +18,12 @@ public abstract class PassiveCacheLocation : CacheLocation
         );
     }
 
-    protected abstract Task<bool> TryWriteAsync(CacheKeyHolder keyHolder, IValueEntry entry, Expiration expiration);
+    protected abstract Task<bool> TryWriteAsync(CachePayloadHolder<object> keyHolder, IValueEntry entry, Expiration expiration);
 
-    public void DeleteAndForget(CacheKeyHolder keyHolder)
+    public void DeleteAndForget(CachePayloadHolder<object> keyHolder)
     {
         TaskUtils.RunAndForget(() => DeleteAsync(keyHolder));
     }
 
-    protected abstract Task DeleteAsync(CacheKeyHolder keyHolder);
+    protected abstract Task DeleteAsync(CachePayloadHolder<object> keyHolder);
 }

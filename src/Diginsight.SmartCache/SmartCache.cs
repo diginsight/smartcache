@@ -75,7 +75,7 @@ internal sealed class SmartCache : ISmartCache
         Type finalCallerType = callerType ?? RuntimeUtils.GetCallerType();
         SmartCacheOperationOptions finalOperationOptions = operationOptions ?? new SmartCacheOperationOptions();
 
-        CacheKeyHolder keyHolder = new (key);
+        CachePayloadHolder<object> keyHolder = new CacheKeyHolder(key);
 
         SmartCacheObservability.Instruments.Calls.Add(1);
 
@@ -128,7 +128,7 @@ internal sealed class SmartCache : ISmartCache
     }
 
     private async Task<T> GetAsync<T>(
-        CacheKeyHolder keyHolder,
+        CachePayloadHolder<object> keyHolder,
         Func<CancellationToken, Task<T>> fetchAsync,
         DateTimeOffset timestamp,
         DateTimeOffset? maybeMinimumCreationDate,
@@ -324,7 +324,7 @@ internal sealed class SmartCache : ISmartCache
     }
 
     private void SetValue<T>(
-        CacheKeyHolder keyHolder,
+        CachePayloadHolder<object> keyHolder,
         T value,
         DateTimeOffset creationDate,
         ISmartCacheCoreOptions? dynamicCoreOptions,
@@ -337,7 +337,7 @@ internal sealed class SmartCache : ISmartCache
     }
 
     private void SetValue(
-        CacheKeyHolder keyHolder,
+        CachePayloadHolder<object> keyHolder,
         Type valueType,
         object? value,
         DateTimeOffset creationDate,
@@ -438,7 +438,7 @@ internal sealed class SmartCache : ISmartCache
         }
     }
 
-    private void OnEvicted(CacheKeyHolder keyHolder, IValueEntry entry, EvictionReason reason, Expiration expiration)
+    private void OnEvicted(CachePayloadHolder<object> keyHolder, IValueEntry entry, EvictionReason reason, Expiration expiration)
     {
         using Activity? activity = SmartCacheObservability.ActivitySource.StartMethodActivity(logger, () => new { key = keyHolder.Payload, reason, expiration });
 
@@ -474,7 +474,7 @@ internal sealed class SmartCache : ISmartCache
     }
 
     private void WriteToLocation(
-        PassiveCacheLocation location, CacheKeyHolder keyHolder, IValueEntry entry, Expiration expiration, int missValueSizeThreshold, bool skipNotify = false
+        PassiveCacheLocation location, CachePayloadHolder<object> keyHolder, IValueEntry entry, Expiration expiration, int missValueSizeThreshold, bool skipNotify = false
     )
     {
         location.WriteAndForget(
@@ -488,14 +488,14 @@ internal sealed class SmartCache : ISmartCache
     }
 
     private void NotifyMiss(
-        CacheKeyHolder keyHolder, DateTimeOffset creationDate, int missValueSizeThreshold, (object?, Type)? valueHolder, string? locationId
+        CachePayloadHolder<object> keyHolder, DateTimeOffset creationDate, int missValueSizeThreshold, (object?, Type)? valueHolder, string? locationId
     )
     {
         TaskUtils.RunAndForget(() => NotifyMissAsync(keyHolder, creationDate, missValueSizeThreshold, valueHolder, locationId));
     }
 
     private async Task NotifyMissAsync(
-        CacheKeyHolder keyHolder, DateTimeOffset creationDate, int missValueSizeThreshold, (object?, Type)? valueHolder, string? locationId
+        CachePayloadHolder<object> keyHolder, DateTimeOffset creationDate, int missValueSizeThreshold, (object?, Type)? valueHolder, string? locationId
     )
     {
         if (locationId is not null)
@@ -510,9 +510,9 @@ internal sealed class SmartCache : ISmartCache
         }
 
         (Type, object?)? valueTuple;
-        if (valueHolder is var (value, valueType) && missValueSizeThreshold is > 0 and var size)
+        if (valueHolder is var (value, valueType) && missValueSizeThreshold > 0)
         {
-            byte[] valueBytes = new byte[size];
+            byte[] valueBytes = new byte[missValueSizeThreshold];
 #if NET || NETSTANDARD2_1_OR_GREATER
             await using MemoryStream valueStream = new (valueBytes);
 #else
@@ -677,7 +677,7 @@ internal sealed class SmartCache : ISmartCache
         }
     }
 
-    private void RemoveExternalMiss(CacheKeyHolder keyHolder)
+    private void RemoveExternalMiss(CachePayloadHolder<object> keyHolder)
     {
         foreach (string locationId in externalMissDictionary.Remove(keyHolder.Payload))
         {

@@ -36,7 +36,7 @@ public sealed class CachePreloader : ICachePreloader
     {
         using Activity? activity = SmartCacheObservability.ActivitySource.StartMethodActivity(logger, () => new { key });
 
-        CacheKeyHolder keyHolder = new CacheKeyHolder(key);
+        CachePayloadHolder<object> keyHolder = new CacheKeyHolder(key);
 
         SmartCacheObservability.Instruments.Preloads.Add(1);
 
@@ -54,7 +54,7 @@ public sealed class CachePreloader : ICachePreloader
         TaskUtils.RunAndForget(() => NotifyAsync(keyHolder, timestamp, value));
     }
 
-    private async Task NotifyAsync<TValue>(CacheKeyHolder keyHolder, DateTimeOffset creationDate, TValue value)
+    private async Task NotifyAsync<TValue>(CachePayloadHolder<object> keyHolder, DateTimeOffset creationDate, TValue value)
     {
         using Activity? activity = SmartCacheObservability.ActivitySource.StartMethodActivity(logger, () => new { key = keyHolder.Payload, creationDate });
 

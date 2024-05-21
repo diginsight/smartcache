@@ -1,6 +1,8 @@
-﻿namespace Diginsight.SmartCache.Externalization;
+﻿using Diginsight.Strings;
 
-public class CachePayloadHolder<T> : ICachePayloadHolder
+namespace Diginsight.SmartCache.Externalization;
+
+public class CachePayloadHolder<T> : ICachePayloadHolder, ILogStringable
     where T : notnull
 {
     private readonly KeyValuePair<string, object?> metricTag;
@@ -10,6 +12,9 @@ public class CachePayloadHolder<T> : ICachePayloadHolder
     private byte[]? payloadAsBytes;
 
     public T Payload { get; }
+
+    bool ILogStringable.IsDeep => false;
+    object ILogStringable.Subject => Payload;
 
     public CachePayloadHolder(T payload, KeyValuePair<string, object?> metricTag)
     {
@@ -70,4 +75,6 @@ public class CachePayloadHolder<T> : ICachePayloadHolder
             return payloadAsBytes ??= pab;
         }
     }
+
+    void ILogStringable.AppendTo(AppendingContext appendingContext) => appendingContext.ComposeAndAppend(Payload);
 }
