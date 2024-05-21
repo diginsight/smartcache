@@ -6,14 +6,14 @@ namespace Diginsight.SmartCache;
 public interface ISmartCache
 {
     Task<T> GetAsync<T>(
-        ICacheKey key,
+        object key,
         Func<CancellationToken, Task<T>> fetchAsync,
         SmartCacheOperationOptions? operationOptions = null,
         Type? callerType = null,
         CancellationToken cancellationToken = default
     );
 
-    bool TryGetDirectFromMemory(ICacheKey key, [NotNullWhen(true)] out Type? type, out object? value);
+    bool TryGetDirectFromMemory(object key, [NotNullWhen(true)] out Type? type, out object? value);
 
     void Invalidate(IInvalidationRule invalidationRule);
 

@@ -2,15 +2,13 @@
 
 namespace Diginsight.SmartCache.Externalization;
 
-public sealed class CacheKeyHolder : CachePayloadHolder<ICacheKey>, ILogStringable
+public sealed class CacheKeyHolder : CachePayloadHolder<object>, ILogStringable
 {
-    public ICacheKey Key => Payload;
-
     bool ILogStringable.IsDeep => false;
-    object ILogStringable.Subject => Key;
+    object ILogStringable.Subject => Payload;
 
-    public CacheKeyHolder(ICacheKey key)
+    public CacheKeyHolder(object key)
         : base(key, SmartCacheObservability.Tags.Subject.Key) { }
 
-    public void AppendTo(AppendingContext appendingContext) => appendingContext.ComposeAndAppend(Key);
+    public void AppendTo(AppendingContext appendingContext) => appendingContext.ComposeAndAppend(Payload);
 }

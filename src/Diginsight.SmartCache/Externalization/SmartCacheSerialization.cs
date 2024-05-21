@@ -208,7 +208,7 @@ public static class SmartCacheSerialization
                         }
                         catch (ReflectionTypeLoadException)
                         {
-                            return Enumerable.Empty<Type>();
+                            return [ ];
                         }
                     }
                 )

@@ -555,7 +555,7 @@ internal sealed class ServiceBusCacheCompanion : BackgroundService, ICacheCompan
                     byte[]? outgoingBody;
                     using (TimerLap lap = SmartCacheObservability.Instruments.FetchDuration.StartLap(SmartCacheObservability.Tags.Type.Direct))
                     {
-                        ICacheKey key = SmartCacheSerialization.Deserialize<ICacheKey>(incomingBody);
+                        object key = SmartCacheSerialization.Deserialize<object>(incomingBody);
 
                         if (SmartCache.TryGetDirectFromMemory(key, out Type? type, out object? value))
                         {
@@ -806,7 +806,7 @@ internal sealed class ServiceBusCacheCompanion : BackgroundService, ICacheCompan
             CacheKeyHolder keyHolder, DateTimeOffset minimumCreationDate, Action markInvalid, CancellationToken cancellationToken
         )
         {
-            using Activity? activity = SmartCacheObservability.ActivitySource.StartMethodActivity(logger, new { key = keyHolder.Key, minimumCreationDate });
+            using Activity? activity = SmartCacheObservability.ActivitySource.StartMethodActivity(logger, () => new { key = keyHolder.Payload, minimumCreationDate });
             logger.LogDebug("Sending message for get request to '{Destination}'", Id);
 
             using TimerLap lap = SmartCacheObservability.Instruments.FetchDuration.CreateLap(SmartCacheObservability.Tags.Type.Distributed);

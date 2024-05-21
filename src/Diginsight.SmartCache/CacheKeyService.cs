@@ -6,7 +6,7 @@ namespace Diginsight.SmartCache;
 
 internal sealed class CacheKeyService : ICacheKeyService
 {
-    public static readonly ICacheKeyService Empty = new CacheKeyService(Enumerable.Empty<ICacheKeyProvider>());
+    public static readonly ICacheKeyService Empty = new CacheKeyService([ ]);
 
     private readonly IEnumerable<ICacheKeyProvider> cacheKeyProviders;
 
@@ -15,16 +15,15 @@ internal sealed class CacheKeyService : ICacheKeyService
         this.cacheKeyProviders = cacheKeyProviders;
     }
 
-    public ToKeyResult ToKey(object? obj)
+    public object? ToKey(object? obj)
     {
         switch (obj)
         {
             case null:
-                return ToKeyResult.None;
+                return null;
 
             case string:
-            case ICacheKey:
-                return new ToKeyResult(obj);
+                return obj;
 
             case ICachable x:
                 return x.ToKey(this);
@@ -32,7 +31,7 @@ internal sealed class CacheKeyService : ICacheKeyService
 
         foreach (ICacheKeyProvider provider in cacheKeyProviders)
         {
-            if (provider.ToKey(this, obj) is { Success: true } result)
+            if (provider.ToKey(this, obj) is { } result)
             {
                 return result;
             }
@@ -40,17 +39,17 @@ internal sealed class CacheKeyService : ICacheKeyService
 
         return obj switch
         {
-            IEnumerable<object> x => new ToKeyResult(this.Wrap(x)),
-            IEnumerable x => new ToKeyResult(this.Wrap(x.Cast<object>())),
-            IEquatable<object> x => new ToKeyResult(x),
-            IStructuralEquatable x => new ToKeyResult(new StructuralEquatable(x)),
-            _ => ToKeyResult.None,
+            IEnumerable<object> x => this.Wrap(x),
+            IEnumerable x => this.Wrap(x.Cast<object>()),
+            IEquatable<object> x => x,
+            IStructuralEquatable x => new StructuralEquatable(x),
+            _ => null,
         };
     }
 
     [CacheInterchangeName("SE")]
     private sealed class StructuralEquatable
-        : IEquatable<StructuralEquatable>, ICacheKey, IUnwrappable
+        : IEquatable<StructuralEquatable>, IUnwrappable
     {
         [JsonConverter(typeof(DetailedJsonConverter))]
         private readonly IStructuralEquatable underlying;

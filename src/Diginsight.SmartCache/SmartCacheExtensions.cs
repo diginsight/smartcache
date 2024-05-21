@@ -24,25 +24,25 @@ public static partial class SmartCacheExtensions
             .SetLocalCompanion();
     }
 
-    public static ICacheKey Wrap<TSource>(this ICacheKeyService cacheKeyService, IEnumerable<TSource>? source)
+    public static object Wrap<TSource>(this ICacheKeyService cacheKeyService, IEnumerable<TSource>? source)
     {
-        return cacheKeyService.WrapCore(source ?? Enumerable.Empty<TSource>());
+        return cacheKeyService.WrapCore(source ?? [ ]);
     }
 
-    public static ICacheKey Wrap<TSource, TOrder>(
+    public static object Wrap<TSource, TOrder>(
         this ICacheKeyService cacheKeyService, IEnumerable<TSource>? source, Func<TSource, TOrder> order, IComparer<TOrder>? comparer = null
     )
     {
-        return cacheKeyService.WrapCore((source ?? Enumerable.Empty<TSource>()).OrderBy(order, comparer));
+        return cacheKeyService.WrapCore((source ?? [ ]).OrderBy(order, comparer));
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static ICacheKey WrapCore<TSource>(this ICacheKeyService cacheKeyService, IEnumerable<TSource> source)
+    private static object WrapCore<TSource>(this ICacheKeyService cacheKeyService, IEnumerable<TSource> source)
     {
-        return new EquatableArray(source.Select(x => cacheKeyService.ToKey(x).UntypedKey ?? x).ToArray());
+        return new EquatableArray(source.Select(x => cacheKeyService.ToKey(x) ?? x).ToArray());
     }
 
-    public static T UnwrapAs<T>(this ICacheKey key)
+    public static T UnwrapAs<T>(this object key)
     {
         Type type = typeof(T);
         if (!type.IsArray ||
@@ -57,19 +57,19 @@ public static partial class SmartCacheExtensions
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static T UnwrapAsPlain<T>(this ICacheKey key)
+    private static T UnwrapAsPlain<T>(this object key)
     {
-        return (T)((IUnwrappable)key).Unwrap();
+        return key is T unwrapped ? unwrapped : (T)((IUnwrappable)key).Unwrap();
     }
 
-    private static T[] UnwrapAsArray<T>(this ICacheKey key)
+    private static T[] UnwrapAsArray<T>(this object key)
     {
         return Array.ConvertAll(key.UnwrapAsPlain<object[]>(), static x => (T)x);
     }
 
     [CacheInterchangeName("EA")]
     private sealed class EquatableArray
-        : IEquatable<EquatableArray>, ICacheKey, IUnwrappable
+        : IEquatable<EquatableArray>, IUnwrappable
     {
         [JsonProperty(ItemConverterType = typeof(DetailedJsonConverter))]
         private readonly object?[] array;

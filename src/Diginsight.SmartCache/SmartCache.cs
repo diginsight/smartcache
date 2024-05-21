@@ -26,7 +26,7 @@ internal sealed class SmartCache : ISmartCache
     private readonly IReadOnlyDictionary<string, PassiveCacheLocation> passiveLocations;
     private readonly ISmartCacheCoreOptions staticCoreOptions;
 
-    private readonly IDictionary<ICacheKey, ValueTuple> keys = new ConcurrentDictionary<ICacheKey, ValueTuple>();
+    private readonly IDictionary<object, ValueTuple> keys = new ConcurrentDictionary<object, ValueTuple>();
     private readonly ExternalMissDictionary externalMissDictionary = new ();
     private readonly ConcurrentDictionary<string, Latency> locationLatencies = new ();
 
@@ -63,23 +63,23 @@ internal sealed class SmartCache : ISmartCache
 
     [MethodImpl(MethodImplOptions.NoInlining)]
     public async Task<T> GetAsync<T>(
-        ICacheKey key,
+        object key,
         Func<CancellationToken, Task<T>> fetchAsync,
         SmartCacheOperationOptions? operationOptions,
         Type? callerType,
         CancellationToken cancellationToken
     )
     {
-        using Activity? activity = SmartCacheObservability.ActivitySource.StartMethodActivity(logger, new { key, operationOptions, callerType });
+        using Activity? activity = SmartCacheObservability.ActivitySource.StartMethodActivity(logger, () => new { key, operationOptions, callerType });
 
-        callerType ??= RuntimeUtils.GetCallerType();
-        operationOptions ??= new SmartCacheOperationOptions();
+        Type finalCallerType = callerType ?? RuntimeUtils.GetCallerType();
+        SmartCacheOperationOptions finalOperationOptions = operationOptions ?? new SmartCacheOperationOptions();
 
         CacheKeyHolder keyHolder = new (key);
 
         SmartCacheObservability.Instruments.Calls.Add(1);
 
-        if (operationOptions.Disabled)
+        if (finalOperationOptions.Disabled)
         {
             SmartCacheObservability.Instruments.Sources.Add(1, SmartCacheObservability.Tags.Type.Disabled);
 
@@ -90,9 +90,9 @@ internal sealed class SmartCache : ISmartCache
             }
         }
 
-        ISmartCacheCoreOptions coreOptions = coreOptionsMonitor.Get(callerType);
+        ISmartCacheCoreOptions coreOptions = coreOptionsMonitor.Get(finalCallerType);
 
-        Expiration? maxAge = operationOptions.MaxAge;
+        Expiration? maxAge = finalOperationOptions.MaxAge;
         DateTimeOffset timestamp = Truncate(timeProvider.GetUtcNow());
         DateTimeOffset minimumCreationDate = GetMinimumCreationDate(ref maxAge, timestamp, coreOptions);
         bool forceFetch = maxAge.Value == Expiration.Zero || minimumCreationDate >= timestamp;
@@ -104,8 +104,8 @@ internal sealed class SmartCache : ISmartCache
                 fetchAsync,
                 timestamp,
                 forceFetch ? null : minimumCreationDate,
-                operationOptions.AbsoluteExpiration,
-                operationOptions.SlidingExpiration,
+                finalOperationOptions.AbsoluteExpiration,
+                finalOperationOptions.SlidingExpiration,
                 coreOptions,
                 cancellationToken
             );
@@ -139,7 +139,7 @@ internal sealed class SmartCache : ISmartCache
     )
     {
         using Activity? activity = SmartCacheObservability.ActivitySource.StartMethodActivity(
-            logger, new { keyHolder.Key, timestamp, maybeMinimumCreationDate, absExpiration, sldExpiration }
+            logger, () => new { key = keyHolder.Payload, timestamp, maybeMinimumCreationDate, absExpiration, sldExpiration }
         );
 
         using TimerLap memoryLap = SmartCacheObservability.Instruments.FetchDuration.CreateLap(SmartCacheObservability.Tags.Type.Memory);
@@ -159,8 +159,8 @@ internal sealed class SmartCache : ISmartCache
         {
             using (memoryLap.Start())
             {
-                localEntry = memoryCache.Get<ValueEntry<T>?>(keyHolder.Key);
-                externalEntry = discardExternalMiss ? null : externalMissDictionary.Get(keyHolder.Key);
+                localEntry = memoryCache.Get<ValueEntry<T>?>(keyHolder.Payload);
+                externalEntry = discardExternalMiss ? null : externalMissDictionary.Get(keyHolder.Payload);
             }
 
             if (localEntry is not null)
@@ -265,7 +265,7 @@ internal sealed class SmartCache : ISmartCache
                 {
                     if (invalidLocations.Any())
                     {
-                        externalMissDictionary.RemoveSub(keyHolder.Key, invalidLocations);
+                        externalMissDictionary.RemoveSub(keyHolder.Payload, invalidLocations);
                     }
                 }
 
@@ -348,10 +348,10 @@ internal sealed class SmartCache : ISmartCache
     )
     {
         using Activity? activity = SmartCacheObservability.ActivitySource.StartMethodActivity(
-            logger, new { key = keyHolder.Key, valueType, creationDate, absExpiration, sldExpiration, skipNotify }
+            logger, () => new { key = keyHolder.Payload, valueType, creationDate, absExpiration, sldExpiration, skipNotify }
         );
 
-        ICacheKey key = keyHolder.Key;
+        object key = keyHolder.Payload;
 
         keys[key] = default;
         RemoveExternalMiss(keyHolder);
@@ -422,7 +422,7 @@ internal sealed class SmartCache : ISmartCache
                     Interlocked.Add(ref memoryCacheSize, -size);
                     SmartCacheObservability.Instruments.TotalSize.Add(-size);
 
-                    OnEvicted(new CacheKeyHolder((ICacheKey)k), (IValueEntry)v!, r, finalAbsExpiration);
+                    OnEvicted(new CacheKeyHolder(k), (IValueEntry)v!, r, finalAbsExpiration);
                 }
             }
         );
@@ -440,7 +440,7 @@ internal sealed class SmartCache : ISmartCache
 
     private void OnEvicted(CacheKeyHolder keyHolder, IValueEntry entry, EvictionReason reason, Expiration expiration)
     {
-        using Activity? activity = SmartCacheObservability.ActivitySource.StartMethodActivity(logger, new { key = keyHolder.Key, reason, expiration });
+        using Activity? activity = SmartCacheObservability.ActivitySource.StartMethodActivity(logger, () => new { key = keyHolder.Payload, reason, expiration });
 
         SmartCacheObservability.Instruments.Evictions.Add(
             1,
@@ -460,7 +460,7 @@ internal sealed class SmartCache : ISmartCache
             return;
         }
 
-        keys.Remove(keyHolder.Key);
+        keys.Remove(keyHolder.Payload);
 
         if (reason != EvictionReason.Capacity)
         {
@@ -500,7 +500,7 @@ internal sealed class SmartCache : ISmartCache
     {
         if (locationId is not null)
         {
-            externalMissDictionary.Add(keyHolder.Key, creationDate, locationId);
+            externalMissDictionary.Add(keyHolder.Payload, creationDate, locationId);
         }
 
         IEnumerable<CacheEventNotifier> eventNotifiers = await companion.GetAllEventNotifiersAsync();
@@ -539,7 +539,7 @@ internal sealed class SmartCache : ISmartCache
         }
 
         string selfLocationId = companion.SelfLocationId;
-        CacheMissDescriptor descriptor = new (selfLocationId, keyHolder.Key, creationDate, locationId ?? selfLocationId, valueTuple);
+        CacheMissDescriptor descriptor = new (selfLocationId, keyHolder.Payload, creationDate, locationId ?? selfLocationId, valueTuple);
         CachePayloadHolder<CacheMissDescriptor> descriptorHolder = new (descriptor, SmartCacheObservability.Tags.Subject.Value);
 
         foreach (CacheEventNotifier eventNotifier in eventNotifiers)
@@ -554,9 +554,9 @@ internal sealed class SmartCache : ISmartCache
         return maybeDynamic is { IsNever: false } dynamic ? dynamic : (maybeOperation ?? fallback);
     }
 
-    public bool TryGetDirectFromMemory(ICacheKey key, [NotNullWhen(true)] out Type? type, out object? value)
+    public bool TryGetDirectFromMemory(object key, [NotNullWhen(true)] out Type? type, out object? value)
     {
-        using Activity? activity = SmartCacheObservability.ActivitySource.StartMethodActivity(logger, new { key });
+        using Activity? activity = SmartCacheObservability.ActivitySource.StartMethodActivity(logger, () => new { key });
 
         if (memoryCache.Get<IValueEntry?>(key) is { } entry)
         {
@@ -593,9 +593,9 @@ internal sealed class SmartCache : ISmartCache
 
         ICollection<Func<Task>> invalidationCallbacks = new List<Func<Task>>();
 
-        void CoreInvalidate(IEnumerable<ICacheKey> ks, Action<ICacheKey> remove)
+        void CoreInvalidate(IEnumerable<object> ks, Action<object> remove)
         {
-            foreach (ICacheKey k in ks.ToArray())
+            foreach (object k in ks.ToArray())
             {
                 // ReSharper disable once SuspiciousTypeConversion.Global
                 if (k is not IInvalidatable invalidatable ||
@@ -657,7 +657,7 @@ internal sealed class SmartCache : ISmartCache
     public void AddExternalMiss(CacheMissDescriptor descriptor)
     {
         (string emitter,
-            ICacheKey key,
+            object key,
             DateTimeOffset timestamp,
             string location,
             Type? valueType) = descriptor;
@@ -679,7 +679,7 @@ internal sealed class SmartCache : ISmartCache
 
     private void RemoveExternalMiss(CacheKeyHolder keyHolder)
     {
-        foreach (string locationId in externalMissDictionary.Remove(keyHolder.Key))
+        foreach (string locationId in externalMissDictionary.Remove(keyHolder.Payload))
         {
             if (passiveLocations.TryGetValue(locationId, out PassiveCacheLocation? passiveLocation))
             {
@@ -690,24 +690,24 @@ internal sealed class SmartCache : ISmartCache
 
     private sealed class ExternalMissDictionary
     {
-        private readonly ConcurrentDictionary<ICacheKey, Entry> underlying = new ();
+        private readonly ConcurrentDictionary<object, Entry> underlying = new ();
 
-        public IEnumerable<ICacheKey> Keys => underlying.Keys;
+        public IEnumerable<object> Keys => underlying.Keys;
 
         private readonly object lockObject = new ();
 
-        public Entry? Get(ICacheKey key)
+        public Entry? Get(object key)
         {
             // ReSharper disable once CanSimplifyDictionaryTryGetValueWithGetValueOrDefault
             return underlying.TryGetValue(key, out Entry? entry) ? entry : null;
         }
 
-        public IEnumerable<string> Remove(ICacheKey key)
+        public IEnumerable<string> Remove(object key)
         {
-            return underlying.TryRemove(key, out Entry? entry) ? entry.Locations : Enumerable.Empty<string>();
+            return underlying.TryRemove(key, out Entry? entry) ? entry.Locations : [ ];
         }
 
-        public void RemoveSub(ICacheKey key, IEnumerable<string> locations)
+        public void RemoveSub(object key, IEnumerable<string> locations)
         {
             lock (lockObject)
             {
@@ -731,7 +731,7 @@ internal sealed class SmartCache : ISmartCache
             }
         }
 
-        public void Add(ICacheKey key, DateTimeOffset timestamp, string location)
+        public void Add(object key, DateTimeOffset timestamp, string location)
         {
             lock (lockObject)
             {

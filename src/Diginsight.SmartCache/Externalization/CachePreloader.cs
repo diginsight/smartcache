@@ -32,9 +32,9 @@ public sealed class CachePreloader : ICachePreloader
         this.timeProvider = timeProvider ?? TimeProvider.System;
     }
 
-    public async Task PreloadAsync<T>(ICacheKey key, Func<Task<T>> fetchAsync)
+    public async Task PreloadAsync<T>(object key, Func<Task<T>> fetchAsync)
     {
-        using Activity? activity = SmartCacheObservability.ActivitySource.StartMethodActivity(logger, new { key });
+        using Activity? activity = SmartCacheObservability.ActivitySource.StartMethodActivity(logger, () => new { key });
 
         CacheKeyHolder keyHolder = new CacheKeyHolder(key);
 
@@ -56,7 +56,7 @@ public sealed class CachePreloader : ICachePreloader
 
     private async Task NotifyAsync<TValue>(CacheKeyHolder keyHolder, DateTimeOffset creationDate, TValue value)
     {
-        using Activity? activity = SmartCacheObservability.ActivitySource.StartMethodActivity(logger, new { key = keyHolder.Key, creationDate });
+        using Activity? activity = SmartCacheObservability.ActivitySource.StartMethodActivity(logger, () => new { key = keyHolder.Payload, creationDate });
 
         IEnumerable<CacheEventNotifier> eventNotifiers = await companion.GetAllEventNotifiersAsync();
         if (!eventNotifiers.Any())
@@ -65,7 +65,7 @@ public sealed class CachePreloader : ICachePreloader
         }
 
         string selfLocationId = companion.SelfLocationId;
-        CacheMissDescriptor descriptor = new (selfLocationId, keyHolder.Key, creationDate, selfLocationId, (typeof(TValue), value));
+        CacheMissDescriptor descriptor = new (selfLocationId, keyHolder.Payload, creationDate, selfLocationId, (typeof(TValue), value));
         CachePayloadHolder<CacheMissDescriptor> descriptorHolder = new (descriptor, SmartCacheObservability.Tags.Subject.Value);
 
         CacheEventNotifier[] eventNotifiersArray = eventNotifiers.ToArray();

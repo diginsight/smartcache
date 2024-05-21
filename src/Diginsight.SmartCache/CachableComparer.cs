@@ -22,8 +22,8 @@ public sealed class CachableComparer : IEqualityComparer<ICachable>
 
     public int GetHashCode(ICachable obj)
     {
-        return obj.ToKey(cacheKeyService) is { Success: true } result
-            ? keyComparer.GetHashCode(result.UntypedKey!)
+        return obj.ToKey(cacheKeyService) is { } result
+            ? keyComparer.GetHashCode(result)
             : RuntimeHelpers.GetHashCode(obj);
     }
 }

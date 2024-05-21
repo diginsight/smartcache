@@ -10,7 +10,7 @@ public sealed class CacheMissDescriptor
 
     public string Emitter { get; }
 
-    public ICacheKey Key { get; }
+    public object Key { get; }
 
     public DateTimeOffset Timestamp { get; }
 
@@ -26,7 +26,7 @@ public sealed class CacheMissDescriptor
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public CacheMissDescriptor(
         string emitter,
-        ICacheKey key,
+        object key,
         DateTimeOffset timestamp,
         string location,
         (Type Type, object? Value)? valueTuple
@@ -36,7 +36,7 @@ public sealed class CacheMissDescriptor
     [JsonConstructor]
     private CacheMissDescriptor(
         string emitter,
-        ICacheKey key,
+        object key,
         DateTimeOffset timestamp,
         string location,
         Type? valueType,
@@ -52,7 +52,7 @@ public sealed class CacheMissDescriptor
     }
 
     [EditorBrowsable(EditorBrowsableState.Never)]
-    public void Deconstruct(out string emitter, out ICacheKey key, out DateTimeOffset timestamp, out string location, out Type? valueType)
+    public void Deconstruct(out string emitter, out object key, out DateTimeOffset timestamp, out string location, out Type? valueType)
     {
         emitter = Emitter;
         key = Key;

@@ -65,7 +65,7 @@ internal sealed class SmartCacheMiddleware : IMiddleware
         byte[] rawValue;
         using (TimerLap lap = SmartCacheObservability.Instruments.FetchDuration.StartLap(SmartCacheObservability.Tags.Type.Direct))
         {
-            ICacheKey key = await DeserializeBodyAsync<ICacheKey>(httpContext);
+            object key = await DeserializeBodyAsync<object>(httpContext);
             if (!smartCache.TryGetDirectFromMemory(key, out Type? type, out object? value))
             {
                 lap.AddTags(SmartCacheObservability.Tags.Found.False);

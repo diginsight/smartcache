@@ -2,5 +2,5 @@
 
 public interface ICachePreloader
 {
-    Task PreloadAsync<T>(ICacheKey key, Func<Task<T>> fetchAsync);
+    Task PreloadAsync<T>(object key, Func<Task<T>> fetchAsync);
 }

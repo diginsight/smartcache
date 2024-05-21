@@ -2,5 +2,5 @@
 
 public interface ICacheKeyProvider
 {
-    ToKeyResult ToKey(ICacheKeyService service, object? obj);
+    object? ToKey(ICacheKeyService service, object? obj);
 }
