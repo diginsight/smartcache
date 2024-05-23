@@ -172,9 +172,8 @@ public async Task<IEnumerable<Plant>> GetPlantsCachedAsync()
 
 the image below show the log of the `SampleWebApi` `GetPlantsCachedAsync` method.<br>
 The first call finds a `cache miss` and resolves to calling the `GetPlantsAsync` method.
-the second call finds a `cache miss` obtaining the result in __11ms__ instead of more than __1sec__.
-![alt text](<docs/03. cached call log with cache miss and cache hit.png>)
-
+the following calla find a `cache miss` obtaining the result in __2/3ms__ instead of more than __1sec__ (about __1 to 1000 ratio__).
+![alt text](<docs/03.01 cached call log with cache miss and cache hit.png>)
 
 For more information visit:
 [SmartCache](https://github.com/diginsight/smartcache)
