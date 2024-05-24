@@ -7,7 +7,7 @@
     <LangVersion>12</LangVersion>
     <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
 
-    <DiginsightCoreVersion>3.0.0-alpha.183</DiginsightCoreVersion>
+    <DiginsightCoreVersion>3.0.0-alpha.184</DiginsightCoreVersion>
   </PropertyGroup>
 
   <Import Project="$(MSBuildThisFileDirectory)Directory.build.props.user" Condition="Exists('$(MSBuildThisFileDirectory)Directory.build.props.user')" />
@@ -20,8 +20,8 @@
     <DiginsightCoreSolutionDirectory>$([MSBuild]::EnsureTrailingSlash('$(DiginsightCoreSolutionDirectory)'))</DiginsightCoreSolutionDirectory>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(DiginsightCoreVersion)' == ''">
-    <DiginsightCoreVersion>false</DiginsightCoreVersion>
+  <PropertyGroup Condition="'$(DiginsightCoreDirectImport)' == ''">
+    <DiginsightCoreDirectImport>false</DiginsightCoreDirectImport>
   </PropertyGroup>
 
 </Project>
