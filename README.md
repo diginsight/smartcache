@@ -45,21 +45,9 @@ Cache keys can be marked implementing interface `IInvalidatable` are notified ev
 The following image illustrates the described SmartCache events:<br>
 ![alt text](<docs/002.01 SmartCache events.png>)
 
-Paragraph [STEPS TO USE SMARTCACHE](#steps-to-use-smartcache) discusses basic steps to start using `Diginsight.SmartCache`.<br>
-The following articles discuss the details of `Diginsight.SmartCache` use and configuration:
-- [HowTo: Cache data, Invalidate entries and reload cache on invalidation.md](<docs/articles/01. Cache data, Invalidate entries and reload cache on invalidation/Cache data, Invalidate entries and reload cache on invalidation.md>).
-
-- [HowTo: Synchronize cache entries across application instances with ServiceBusCompanion or KubernetesCompanion.md](<docs/articles/02. Synchronize cache entries across application instances/Synchronize cache entries across application instances.md>).
-
-- [HowTo: Configure SmartCache size, latencies, expiration, instances synchronization and RedIs integration.md](<docs/articles/03. Configure SmartCache size, latencies, expiration, instances synchronization and RedIs integration/Configure SmartCache size, latencies, expiration, instances synchronization and RedIs integration.md>).
-
-- [HowTo: Boost application performance with age sensitive data management.md](<docs/articles/10. Boost application performance with age sensitive data management/Boost application performance with age sensitive data management.md>).
-
-- [HowTo: Enable data preloading by means of AI assisted algorithms.md]<br> 
-(TODO): explores how to enable AI assisted preloading to improve data preloading efficiency.<br><br>
-
-<!-- - [HowTo:  Boost application performance with age sensitive data management](<docs/articles/10. Leverage age sensitive data management to boost application performance.md>):<br>explores how to use `Diginsight.SmartCache` to boost application performance by means age conscious data magagement.<br>
- -->
+The following paragraph:<br>
+[STEPS TO USE SMARTCACHE](#steps-to-use-smartcache) <br>
+discusses basic steps to start using `Diginsight.SmartCache`.<br>
 
 
 # STEPS TO USE SMARTCACHE
@@ -174,6 +162,29 @@ the image below show the log of the `SampleWebApi` `GetPlantsCachedAsync` method
 The first call finds a `cache miss` and resolves to calling the `GetPlantsAsync` method.
 the following calla find a `cache miss` obtaining the result in __2/3ms__ instead of more than __1sec__ (about __1 to 1000 ratio__).
 ![alt text](<docs/03.01 cached call log with cache miss and cache hit.png>)
+
+
+# Reference 
+The following articles discuss the details of `Diginsight.SmartCache` use and configuration:
+
+- [HowTo: Cache data, Invalidate entries and reload cache on invalidation](<docs/articles/01. Cache data, Invalidate entries and reload cache on invalidation/Cache data, Invalidate entries and reload cache on invalidation.md>)<br>
+discusses how to cache calls, and add support for invalidation and reload to cached data. 
+
+- [HowTo: Synchronize cache entries across application instances with ServiceBusCompanion or KubernetesCompanion](<docs/articles/02. Synchronize cache entries across application instances/Synchronize cache entries across application instances.md>).<br>
+discusses how to configure the ServiceBusCompanion or the KubernetesCompanion to support distributed cache entries across application instances. 
+
+- [HowTo: Configure SmartCache size, latencies, expiration, instances synchronization and RedIs integration](<docs/articles/03. Configure SmartCache size, latencies, expiration, instances synchronization and RedIs integration/Configure SmartCache size, latencies, expiration, instances synchronization and RedIs integration.md>).<br>
+discusses how to configure cache size, expiration latencies and connection to external RedIs backing storage. 
+
+- [HowTo: Boost application performance with age sensitive data management](<docs/articles/10. Boost application performance with age sensitive data management/Boost application performance with age sensitive data management.md>).<br>
+discusses how performance of our applications can be boosted by using smartcache. 
+
+- [HowTo: Enable data preloading by means of AI assisted algorithms.md]<br> 
+(TODO): explores how to enable AI assisted preloading to improve data preloading efficiency.<br><br>
+
+<!-- - [HowTo:  Boost application performance with age sensitive data management](<docs/articles/10. Leverage age sensitive data management to boost application performance.md>):<br>explores how to use `Diginsight.SmartCache` to boost application performance by means age conscious data magagement.<br>
+ -->
+
 
 For more information visit:
 [SmartCache](https://github.com/diginsight/smartcache)
