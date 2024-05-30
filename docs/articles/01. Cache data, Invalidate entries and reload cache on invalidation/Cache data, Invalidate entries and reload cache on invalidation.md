@@ -24,10 +24,10 @@ public async Task<SiteLicensesResponse> GetSiteLicensesAsync(string plantId, str
 ```
 
 result from the method execution can be cached with the following steps:
-- inject `smartCache` and `cacheKeyService` into the current class
+- inject `smartCache` and `cacheKeyService` into the current class<br>
 ![alt text](<01. inject smartCache and cacheKeyService.png>)
 - move method `GetSiteLicensesAsync` to `GetSiteLicensesAsyncImpl`
-- create a new method `GetSiteLicensesAsync` calling `GetSiteLicensesAsyncImpl` by means of smartCache service
+- create a new method `GetSiteLicensesAsync` calling `GetSiteLicensesAsyncImpl` by means of smartCache service<br>
 
     ```c#
     public async Task<SiteLicensesResponse> GetSiteLicensesAsyncImpl(string plantId, string plantType, ContextBase context)
@@ -65,10 +65,10 @@ result from the method execution can be cached with the following steps:
     }
     ```
 
-the `smartCache.GetAsyc()` manages cached call of `GetSiteLicensesImplAsync`:
-- cacheKey
-- delegate with the call to `GetSiteLicensesImplAsync`
-- (opt) options with required MaxAge 
+the `smartCache.GetAsyc()` call manages cached call to `GetSiteLicensesImplAsync`:
+- __cacheKey__: is the __cache key__ class associated to the cache entry
+- __delegate__ with the call to `GetSiteLicensesImplAsync` is used to fetch values in case of cache miss
+- (opt) __options__ with required __MaxAge__ allows requesting data specifying a specific age criteria: cache hit will happen only if available data is within the requested age.
 
     ```c#
     var siteLicensesResponse = await smartCache.GetAsync(cacheKey,
