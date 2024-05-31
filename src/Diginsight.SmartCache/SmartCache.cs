@@ -114,7 +114,7 @@ internal sealed class SmartCache : ISmartCache
 
     private DateTimeOffset GetMinimumCreationDate([NotNull] ref Expiration? maxAge, DateTimeOffset timestamp, ISmartCacheCoreOptions coreOptions)
     {
-        Expiration finalMaxAge = Choose(coreOptions.MaxAge, maxAge, staticCoreOptions.MaxAge);
+        Expiration finalMaxAge = coreOptions.ForceDynamicMaxAge ? coreOptions.MaxAge : Choose(coreOptions.MaxAge, maxAge, staticCoreOptions.MaxAge);
 
         DateTimeOffset minimumCreationDate = finalMaxAge.IsNever ? DateTimeOffset.MinValue : timestamp - finalMaxAge.Value;
         if (coreOptions.MinimumCreationDate is { } dynamicMinimumCreationDate && dynamicMinimumCreationDate > minimumCreationDate)
@@ -551,7 +551,9 @@ internal sealed class SmartCache : ISmartCache
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static Expiration Choose(Expiration? maybeDynamic, Expiration? maybeOperation, Expiration fallback)
     {
-        return maybeDynamic is { IsNever: false } dynamic ? dynamic : (maybeOperation ?? fallback);
+        Expiration dynamic = maybeDynamic ?? Expiration.Never;
+        Expiration operation = maybeOperation ?? fallback;
+        return dynamic < operation ? dynamic : operation;
     }
 
     public bool TryGetDirectFromMemory(object key, [NotNullWhen(true)] out Type? type, out object? value)

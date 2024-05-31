@@ -6,6 +6,7 @@ public interface ISmartCacheCoreOptions
     StorageMode StorageMode { get; }
 
     Expiration MaxAge { get; }
+    bool ForceDynamicMaxAge { get; }
     DateTimeOffset? MinimumCreationDate { get; }
 
     Expiration AbsoluteExpiration { get; }

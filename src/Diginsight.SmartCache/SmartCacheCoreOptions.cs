@@ -1,11 +1,16 @@
 ﻿using Diginsight.CAOptions;
+using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
+using System.Text.RegularExpressions;
 
 namespace Diginsight.SmartCache;
 
 public sealed class SmartCacheCoreOptions : ISmartCacheCoreOptions, IDynamicallyPostConfigurable
 {
     private Expiration maxAge = Expiration.Never;
+    private bool forceDynamicMaxAge;
+    private DateTimeOffset? minimumCreationDate;
     private Expiration absoluteExpiration = Expiration.Never;
     private Expiration slidingExpiration = Expiration.Never;
     private TimeSpan localEntryTolerance = TimeSpan.FromSeconds(10);
@@ -19,7 +24,9 @@ public sealed class SmartCacheCoreOptions : ISmartCacheCoreOptions, IDynamically
         set => maxAge = value >= Expiration.Zero ? value : Expiration.Zero;
     }
 
-    public DateTimeOffset? MinimumCreationDate { get; private set; }
+    bool ISmartCacheCoreOptions.ForceDynamicMaxAge => forceDynamicMaxAge;
+
+    DateTimeOffset? ISmartCacheCoreOptions.MinimumCreationDate => minimumCreationDate;
 
     public Expiration AbsoluteExpiration
     {
@@ -71,16 +78,16 @@ public sealed class SmartCacheCoreOptions : ISmartCacheCoreOptions, IDynamically
             set => filled.StorageMode = value;
         }
 
-        public Expiration MaxAge
+        public ExpirationForceable MaxAge
         {
-            get => filled.MaxAge;
-            set => filled.MaxAge = value;
+            get => new (filled.MaxAge, filled.forceDynamicMaxAge);
+            set => (filled.MaxAge, filled.forceDynamicMaxAge) = value;
         }
 
         public DateTimeOffset? MinimumCreationDate
         {
-            get => filled.MinimumCreationDate;
-            set => filled.MinimumCreationDate = value;
+            get => filled.minimumCreationDate;
+            set => filled.minimumCreationDate = value;
         }
 
         public Expiration AbsoluteExpiration
@@ -99,6 +106,51 @@ public sealed class SmartCacheCoreOptions : ISmartCacheCoreOptions, IDynamically
         {
             get => filled.MissValueSizeThreshold;
             set => filled.MissValueSizeThreshold = value;
+        }
+    }
+
+    [TypeConverter(typeof(ExpirationForceableConverter))]
+    private readonly struct ExpirationForceable
+    {
+        public Expiration Expiration { get; }
+        public bool Force { get; }
+
+        public ExpirationForceable(Expiration expiration, bool force)
+        {
+            Expiration = expiration;
+            Force = force;
+        }
+
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public void Deconstruct(out Expiration expiration, out bool force)
+        {
+            expiration = Expiration;
+            force = Force;
+        }
+    }
+
+    private sealed class ExpirationForceableConverter : TypeConverter
+    {
+        private static readonly Regex Regex = new("^(.*?)(; *force *)?$", RegexOptions.IgnoreCase);
+
+        public override bool CanConvertFrom(ITypeDescriptorContext? context, Type sourceType)
+        {
+            return sourceType == typeof (string) || base.CanConvertFrom(context, sourceType);
+        }
+
+#if NET
+        public override object? ConvertFrom(ITypeDescriptorContext? context, CultureInfo? culture, object value)
+#else
+        public override object? ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object? value)
+#endif
+        {
+            if (value is not string s)
+            {
+                return base.ConvertFrom(context, culture, value);
+            }
+
+            Match match = Regex.Match(s);
+            return new ExpirationForceable(Expiration.Parse(match.Groups[1].Value, culture), match.Groups[2].Success);
         }
     }
 }
