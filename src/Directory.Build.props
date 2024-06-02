@@ -22,7 +22,6 @@
   <PropertyGroup Condition="'$(DiginsightCoreSolutionDirectory)' != ''">
     <DiginsightCoreSolutionDirectory>$([MSBuild]::EnsureTrailingSlash('$(DiginsightCoreSolutionDirectory)'))</DiginsightCoreSolutionDirectory>
   </PropertyGroup>
-
   <PropertyGroup Condition="'$(DiginsightCoreDirectImport)' == ''">
     <DiginsightCoreDirectImport>false</DiginsightCoreDirectImport>
   </PropertyGroup>
