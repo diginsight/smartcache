@@ -2,5 +2,7 @@
 
 public interface IManualSize
 {
-    (long Sz, bool Fxd) GetSize(Func<object?, (long Sz, bool Fxd)> innerGetSize);
+    SizeResult GetSize(SizeGetter innerGetSize);
+
+    public delegate SizeResult SizeGetter(object? obj);
 }

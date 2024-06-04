@@ -2,8 +2,7 @@
 
 public interface ISmartCacheCoreOptions
 {
-    bool DiscardExternalMiss { get; }
-    StorageMode StorageMode { get; }
+    SmartCacheMode Mode { get; }
 
     Expiration MaxAge { get; }
     bool ForceDynamicMaxAge { get; }

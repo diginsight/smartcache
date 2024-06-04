@@ -31,6 +31,7 @@ internal sealed class SmartCache : ISmartCache
     private readonly ConcurrentDictionary<string, Latency> locationLatencies = new ();
 
     private long memoryCacheSize = 0;
+    private bool warnedModeDowngrade = false;
 
     public SmartCache(
         ILogger<SmartCache> logger,
@@ -148,8 +149,6 @@ internal sealed class SmartCache : ISmartCache
         ValueEntry<T>? localEntry;
         ExternalMissDictionary.Entry? externalEntry;
 
-        bool discardExternalMiss = coreOptions.DiscardExternalMiss;
-
         if (maybeMinimumCreationDate is null)
         {
             localEntry = null;
@@ -160,7 +159,7 @@ internal sealed class SmartCache : ISmartCache
             using (memoryLap.Start())
             {
                 localEntry = memoryCache.Get<ValueEntry<T>?>(keyHolder.Payload);
-                externalEntry = discardExternalMiss ? null : externalMissDictionary.Get(keyHolder.Payload);
+                externalEntry = externalMissDictionary.Get(keyHolder.Payload);
             }
 
             if (localEntry is not null)
@@ -185,7 +184,7 @@ internal sealed class SmartCache : ISmartCache
 
             logger.LogDebug("Fetched in {LatencyMsec} ms", latencyMsec);
 
-            SetValue(keyHolder, value, timestamp, coreOptions, absExpiration, sldExpiration, discardExternalMiss);
+            SetValue(keyHolder, value, timestamp, coreOptions, absExpiration, sldExpiration);
             return value;
         }
 
@@ -277,7 +276,7 @@ internal sealed class SmartCache : ISmartCache
                     SmartCacheObservability.Instruments.CompanionFetchDuration.Underlying.Record(latencyMsec, metricTag);
                     SmartCacheObservability.Instruments.CompanionFetchRelativeDuration.Record(latencyMsec / valueSerializedSize * 1000, metricTag);
 
-                    SetValue(keyHolder, item, othersCreationDate, coreOptions, absExpiration, sldExpiration, discardExternalMiss);
+                    SetValue(keyHolder, item, othersCreationDate, coreOptions, absExpiration, sldExpiration);
                     return item!;
                 }
             }
@@ -361,45 +360,48 @@ internal sealed class SmartCache : ISmartCache
         Expiration finalAbsExpiration = Choose(dynamicCoreOptions?.AbsoluteExpiration, absExpiration, staticCoreOptions.AbsoluteExpiration);
 
         ISmartCacheCoreOptions coreOptions = dynamicCoreOptions ?? staticCoreOptions;
-        StorageMode storageMode = coreOptions.StorageMode;
-        int missValueThreshold = coreOptions.MissValueSizeThreshold;
-
-        if (storageMode != StorageMode.Auto)
+        SmartCacheMode mode;
+        if (passiveLocations.Count > 1)
         {
-            foreach (PassiveCacheLocation passiveLocation in passiveLocations.Values)
+            mode = coreOptions.Mode;
+        }
+        else
+        {
+            if (!warnedModeDowngrade)
             {
-                WriteToLocation(passiveLocation, keyHolder, entry, finalAbsExpiration, missValueThreshold, skipNotify);
+                warnedModeDowngrade = true;
+                logger.LogWarning($"{nameof(SmartCacheMode)} downgraded to {nameof(SmartCacheMode.InMemory)} because no passive location is available");
             }
-
-            if (storageMode == StorageMode.Passive)
-                return;
+            mode = SmartCacheMode.InMemory;
         }
 
         Expiration candidateSldExpiration = Choose(dynamicCoreOptions?.SlidingExpiration, sldExpiration, staticCoreOptions.SlidingExpiration);
         Expiration finalSldExpiration = candidateSldExpiration < finalAbsExpiration ? candidateSldExpiration : finalAbsExpiration;
 
         long keySize;
-        try
+        Exception? sizeException;
+        using (SmartCacheObservability.Instruments.SizeComputationDuration.StartLap(SmartCacheObservability.Tags.Subject.Key))
         {
-            using (SmartCacheObservability.Instruments.SizeComputationDuration.StartLap(SmartCacheObservability.Tags.Subject.Key))
-            {
-                keySize = Size.Get(key);
-            }
-            SmartCacheObservability.Instruments.KeyObjectSize.Record(keySize);
+            (keySize, sizeException) = Size.Get(key);
         }
-        catch (Exception)
+        SmartCacheObservability.Instruments.KeyObjectSize.Record(keySize);
+        if (sizeException is not null)
         {
-            keySize = 0;
+            logger.LogWarning(sizeException, "Error calculating key size");
         }
 
         long valueSize;
         using (SmartCacheObservability.Instruments.SizeComputationDuration.StartLap(SmartCacheObservability.Tags.Subject.Value))
         {
-            valueSize = Size.Get(value);
+            (valueSize, sizeException) = Size.Get(value);
         }
         SmartCacheObservability.Instruments.ValueObjectSize.Record(valueSize);
+        if (sizeException is not null)
+        {
+            logger.LogWarning(sizeException, "Error calculating key size");
+        }
 
-        long size = keySize + valueSize;
+        long size = SizeResult.SafeAdd(keySize, valueSize);
 
         CacheItemPriority priority =
             size >= coreOptions.LowPrioritySizeThreshold ? CacheItemPriority.Low
@@ -432,15 +434,64 @@ internal sealed class SmartCache : ISmartCache
         Interlocked.Add(ref memoryCacheSize, size);
         SmartCacheObservability.Instruments.TotalSize.Add(size);
 
-        if (!skipNotify)
+        if (skipNotify)
+            return;
+
+        switch (mode)
         {
-            NotifyMiss(keyHolder, creationDate, missValueThreshold, (value, valueType), null);
+            case SmartCacheMode.InMemory:
+                NotifyMiss(keyHolder, creationDate, valueType, value, (vt, v) => IsSmallValue(vt, v, coreOptions.MissValueSizeThreshold));
+                break;
+
+            case SmartCacheMode.MixedPassive:
+                if (!IsSmallValue(valueType, value, coreOptions.MissValueSizeThreshold))
+                {
+                    goto case SmartCacheMode.PurePassive;
+                }
+
+                NotifyMiss(keyHolder, creationDate, valueType, value, static (_, _) => true);
+                break;
+
+            case SmartCacheMode.PurePassive:
+                foreach (PassiveCacheLocation passiveLocation in passiveLocations.Values)
+                {
+                    WriteToLocation(passiveLocation, keyHolder, entry, finalAbsExpiration);
+                }
+                break;
+
+            default:
+                throw new UnreachableException($"Unrecognized {nameof(SmartCacheMode)}");
+        }
+    }
+
+    private static bool IsSmallValue(Type valueType, object? value, int missValueSizeThreshold)
+    {
+        if (missValueSizeThreshold <= 0)
+        {
+            return false;
+        }
+
+        byte[] valueBytes = new byte[missValueSizeThreshold];
+        using MemoryStream valueStream = new(valueBytes);
+        using (SmartCacheObservability.Instruments.SerializationDuration.StartLap(SmartCacheObservability.Tags.Operation.Serialization, SmartCacheObservability.Tags.Subject.Value))
+        {
+            try
+            {
+                SmartCacheSerialization.SerializeToStream(value, valueType, valueStream);
+                return true;
+            }
+            catch (NotSupportedException) // In case the serialized value is too big for the buffer
+            {
+                return false;
+            }
         }
     }
 
     private void OnEvicted(CachePayloadHolder<object> keyHolder, IValueEntry entry, EvictionReason reason, Expiration expiration)
     {
-        using Activity? activity = SmartCacheObservability.ActivitySource.StartMethodActivity(logger, () => new { key = keyHolder.Payload, reason, expiration });
+        using Activity? activity = SmartCacheObservability.ActivitySource.StartMethodActivity(
+            logger, () => new { key = keyHolder.Payload, reason, expiration }
+        );
 
         SmartCacheObservability.Instruments.Evictions.Add(
             1,
@@ -469,77 +520,46 @@ internal sealed class SmartCache : ISmartCache
 
         foreach (PassiveCacheLocation passiveLocation in passiveLocations.Values)
         {
-            WriteToLocation(passiveLocation, keyHolder, entry, expiration, 0);
+            WriteToLocation(passiveLocation, keyHolder, entry, expiration);
         }
     }
 
-    private void WriteToLocation(
-        PassiveCacheLocation location, CachePayloadHolder<object> keyHolder, IValueEntry entry, Expiration expiration, int missValueSizeThreshold, bool skipNotify = false
-    )
+    private void WriteToLocation(PassiveCacheLocation location, CachePayloadHolder<object> keyHolder, IValueEntry entry, Expiration expiration)
     {
-        location.WriteAndForget(
-            keyHolder,
-            entry,
-            expiration,
-            skipNotify
-                ? static () => Task.CompletedTask
-                : () => NotifyMissAsync(keyHolder, entry.CreationDate, missValueSizeThreshold, null, location.Id)
-        );
+        location.WriteAndForget(keyHolder, entry, expiration, () => NotifyMissAsync(keyHolder, entry.CreationDate, location.Id));
     }
 
     private void NotifyMiss(
-        CachePayloadHolder<object> keyHolder, DateTimeOffset creationDate, int missValueSizeThreshold, (object?, Type)? valueHolder, string? locationId
+        CachePayloadHolder<object> keyHolder, DateTimeOffset creationDate, Type valueType, object? value, Func<Type, object?, bool> isSmallValue
     )
     {
-        TaskUtils.RunAndForget(() => NotifyMissAsync(keyHolder, creationDate, missValueSizeThreshold, valueHolder, locationId));
+        TaskUtils.RunAndForget(() => NotifyMissAsync(keyHolder, creationDate, valueType, value, isSmallValue));
+    }
+
+    private Task NotifyMissAsync(
+        CachePayloadHolder<object> keyHolder, DateTimeOffset creationDate, Type valueType, object? value, Func<Type, object?, bool> isSmallValue
+    )
+    {
+        return NotifyMissAsync(keyHolder, creationDate, companion.SelfLocationId, () => isSmallValue(valueType, value) ? (valueType, value) : null);
+    }
+
+    private Task NotifyMissAsync(CachePayloadHolder<object> keyHolder, DateTimeOffset creationDate, string locationId)
+    {
+        externalMissDictionary.Add(keyHolder.Payload, creationDate, locationId);
+        return NotifyMissAsync(keyHolder, creationDate, locationId, null);
     }
 
     private async Task NotifyMissAsync(
-        CachePayloadHolder<object> keyHolder, DateTimeOffset creationDate, int missValueSizeThreshold, (object?, Type)? valueHolder, string? locationId
+        CachePayloadHolder<object> keyHolder, DateTimeOffset creationDate, string locationId, Func<(Type, object?)?>? makeValueTuple
     )
     {
-        if (locationId is not null)
-        {
-            externalMissDictionary.Add(keyHolder.Payload, creationDate, locationId);
-        }
-
         IEnumerable<CacheEventNotifier> eventNotifiers = await companion.GetAllEventNotifiersAsync();
         if (!eventNotifiers.Any())
         {
             return;
         }
 
-        (Type, object?)? valueTuple;
-        if (valueHolder is var (value, valueType) && missValueSizeThreshold > 0)
-        {
-            byte[] valueBytes = new byte[missValueSizeThreshold];
-#if NET || NETSTANDARD2_1_OR_GREATER
-            await using MemoryStream valueStream = new (valueBytes);
-#else
-            using MemoryStream valueStream = new (valueBytes);
-#endif
-
-            using (SmartCacheObservability.Instruments.SerializationDuration.StartLap(SmartCacheObservability.Tags.Operation.Serialization, SmartCacheObservability.Tags.Subject.Value))
-            {
-                try
-                {
-                    SmartCacheSerialization.SerializeToStream(value, valueType, valueStream);
-
-                    valueTuple = (valueType, value);
-                }
-                catch (NotSupportedException) // In case the serialized value is longer than 'size'
-                {
-                    valueTuple = null;
-                }
-            }
-        }
-        else
-        {
-            valueTuple = null;
-        }
-
-        string selfLocationId = companion.SelfLocationId;
-        CacheMissDescriptor descriptor = new (selfLocationId, keyHolder.Payload, creationDate, locationId ?? selfLocationId, valueTuple);
+        CacheMissDescriptor descriptor = new (companion.SelfLocationId, keyHolder.Payload, creationDate, locationId, makeValueTuple?.Invoke());
         CachePayloadHolder<CacheMissDescriptor> descriptorHolder = new (descriptor, SmartCacheObservability.Tags.Subject.Value);
 
         foreach (CacheEventNotifier eventNotifier in eventNotifiers)
@@ -774,44 +794,57 @@ internal sealed class SmartCache : ISmartCache
 
     private static class Size
     {
+#if NET || NETSTANDARD2_1_OR_GREATER
+        private static readonly MethodInfo IsReferenceOrContainsReferencesMethod = typeof(RuntimeHelpers)
+            .GetMethod(nameof(RuntimeHelpers.IsReferenceOrContainsReferences), BindingFlags.Public | BindingFlags.Static)!;
+#endif
         private static readonly MethodInfo GetUnmanagedSizeMethod = typeof(Size)
             .GetMethod(nameof(GetUnmanagedSize), BindingFlags.NonPublic | BindingFlags.Static)!;
 
         private static readonly IDictionary<Type, long> FixedSizes = new ConcurrentDictionary<Type, long>();
         private static readonly IDictionary<Type, ValueTuple> ManagedTypes = new ConcurrentDictionary<Type, ValueTuple>();
-        private static readonly IDictionary<Type, (long, IEnumerable<FieldInfo>)> VariableCache = new ConcurrentDictionary<Type, (long, IEnumerable<FieldInfo>)>();
+#if NET || NETSTANDARD2_1_OR_GREATER
+        private static readonly IDictionary<Type, (long, IEnumerable<int>)> VariableIndexCache =
+            new ConcurrentDictionary<Type, (long, IEnumerable<int>)>();
+#endif
+        private static readonly IDictionary<Type, (long, IEnumerable<FieldInfo>)> VariableFieldCache =
+            new ConcurrentDictionary<Type, (long, IEnumerable<FieldInfo>)>();
 
-        public static long Get(object? obj)
+        public static (long, Exception?) Get(object? obj, int depthLimit = 25)
         {
             ISet<object> seen = new HashSet<object>();
-            int depth = 0;
+            StrongBox<int> depthBox = new(0);
 
-            (long Sz, bool Fxd) CoreGet(object? current)
+            SizeResult CoreGet(object? current)
             {
-                depth++;
+                if (depthBox.Value++ > depthLimit)
+                {
+                    return new SizeResult(long.MaxValue, new InvalidOperationException("Size calculation recursion limit reached"));
+                }
+
                 try
                 {
                     if (current is null)
                     {
-                        return (0, false);
+                        return default;
                     }
 
                     if (current is Pointer or Delegate)
                     {
-                        return (0, true);
+                        return new SizeResult(0, true);
                     }
 
                     Type type = current.GetType();
                     if (FixedSizes.TryGetValue(type, out long fsz))
                     {
-                        return (fsz, true);
+                        return new SizeResult(fsz, true);
                     }
 
                     if (!ManagedTypes.ContainsKey(type))
                     {
                         if (TryGetUnmanagedSize(type) is { } usz)
                         {
-                            return (FixedSizes[type] = usz, true);
+                            return new SizeResult(FixedSizes[type] = usz, true);
                         }
                         else
                         {
@@ -828,29 +861,69 @@ internal sealed class SmartCache : ISmartCache
 
                     if (current is string str)
                     {
-                        return (str.Length * sizeof(char), false);
+                        return new SizeResult(str.Length * sizeof(char));
                     }
 
-                    if (current is IManualSize ms)
+#if NET || NETSTANDARD2_1_OR_GREATER
+                    if (current is ITuple tuple)
                     {
-                        return ms.GetSize(CoreGet);
+                        if (VariableIndexCache.TryGetValue(type, out (long, IEnumerable<int>) pair))
+                        {
+                            (long baseSz, IEnumerable<int> indexes) = pair;
+                            SizeResult result = new (baseSz);
+
+                            foreach (int index in indexes)
+                            {
+                                result += CoreGet(tuple[index]);
+                            }
+
+                            return result;
+                        }
+
+                        SizeResult fixedResult = new (0, true);
+                        SizeResult variableResult = new (0, false);
+
+                        ICollection<int> variableIndexes = new List<int>();
+
+                        for (int index = 0; index < tuple.Length; index++)
+                        {
+                            SizeResult currentResult = CoreGet(tuple[index]);
+                            if (currentResult.Fxd)
+                            {
+                                fixedResult += currentResult;
+                            }
+                            else
+                            {
+                                variableResult += currentResult;
+                                variableIndexes.Add(index);
+                            }
+                        }
+
+                        if (!variableIndexes.Any())
+                        {
+                            return fixedResult;
+                        }
+
+                        VariableIndexCache[type] = (fixedResult.Sz, variableIndexes);
+                        return fixedResult + variableResult;
                     }
+#endif
 
                     if (current is Type)
                     {
-                        return (IntPtr.Size, true);
+                        return new SizeResult(IntPtr.Size, true);
                     }
 
                     if (current is JToken jt)
                     {
                         return jt switch
                         {
-                            JValue jv => (CoreGet(jv.Value).Sz, false),
-                            JArray ja => (CoreGet(ja.Children().ToArray()).Sz, false),
-                            JObject jo => (CoreGet(jo.Properties().ToArray()).Sz, false),
-                            JProperty jp => (CoreGet(jp.Name).Sz + CoreGet(jp.Value).Sz, false),
-                            JConstructor jc => (CoreGet(jc.Name).Sz + CoreGet(jc.Children().ToArray()).Sz, false),
-                            _ => throw new ArgumentException($"unsupported {nameof(JToken)} subclass"),
+                            JValue jv => ~CoreGet(jv.Value),
+                            JArray ja => ~CoreGet(ja.Children().ToArray()),
+                            JObject jo => ~CoreGet(jo.Properties().ToArray()),
+                            JProperty jp => ~(CoreGet(jp.Name) + CoreGet(jp.Value)),
+                            JConstructor jc => ~(CoreGet(jc.Name) + CoreGet(jc.Children().ToArray())),
+                            _ => new SizeResult(0, new UnreachableException($"Unsupported {nameof(JToken)} subclass")),
                         };
                     }
 
@@ -861,21 +934,39 @@ internal sealed class SmartCache : ISmartCache
 
                     if (!seen.Add(current))
                     {
-                        return (IntPtr.Size, false);
+                        return new SizeResult(IntPtr.Size);
                     }
 
                     try
                     {
+                        if (current is IManualSize ms)
+                        {
+                            return ms.GetSize(CoreGet);
+                        }
+
                         if (current is IEnumerable enumerable)
                         {
-                            long sz = 0;
+                            SizeResult result = default;
 
                             IEnumerator enumerator = enumerable.GetEnumerator();
                             try
                             {
-                                while (enumerator.MoveNext())
+                                bool SafeMoveNext(ref SizeResult result)
                                 {
-                                    sz += CoreGet(enumerator.Current).Sz;
+                                    try
+                                    {
+                                        return enumerator.MoveNext();
+                                    }
+                                    catch (Exception e)
+                                    {
+                                        result += e;
+                                        return false;
+                                    }
+                                }
+
+                                while (SafeMoveNext(ref result))
+                                {
+                                    result += CoreGet(enumerator.Current);
                                 }
                             }
                             finally
@@ -883,42 +974,71 @@ internal sealed class SmartCache : ISmartCache
                                 (enumerator as IDisposable)?.Dispose();
                             }
 
-                            return (sz, false);
+                            return result;
                         }
 
-                        if (VariableCache.TryGetValue(type, out (long, IEnumerable<FieldInfo>) pair))
+                        if (VariableFieldCache.TryGetValue(type, out (long, IEnumerable<FieldInfo>) pair))
                         {
                             (long baseSz, IEnumerable<FieldInfo> fields) = pair;
-                            return (fields.Aggregate(baseSz, (sz, field) => sz + CoreGet(field.GetValue(current)).Sz), false);
+                            SizeResult result = new (baseSz);
+
+                            foreach (FieldInfo field in fields)
+                            {
+                                object? fieldValue;
+                                try
+                                {
+                                    fieldValue = field.GetValue(current);
+                                }
+                                catch (Exception e)
+                                {
+                                    result += e;
+                                    continue;
+                                }
+
+                                result += CoreGet(fieldValue);
+                            }
+
+                            return result;
                         }
 
-                        long fixedSz = 0;
-                        long variableSz = 0;
+                        SizeResult fixedResult = new (0, true);
+                        SizeResult variableResult = new (0, false);
 
                         FieldInfo[] allFields = type.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
                         ICollection<FieldInfo> variableFields = new List<FieldInfo>();
 
                         foreach (FieldInfo field in allFields)
                         {
-                            (long sz, bool fxd) = CoreGet(field.GetValue(current));
-                            if (fxd)
+                            object? fieldValue;
+                            try
                             {
-                                fixedSz += sz;
+                                fieldValue = field.GetValue(current);
+                            }
+                            catch (Exception e)
+                            {
+                                variableResult += e;
+                                continue;
+                            }
+
+                            SizeResult currentResult = CoreGet(fieldValue);
+                            if (currentResult.Fxd)
+                            {
+                                fixedResult += currentResult;
                             }
                             else
                             {
-                                variableSz += sz;
+                                variableResult += currentResult;
                                 variableFields.Add(field);
                             }
                         }
 
                         if (!variableFields.Any())
                         {
-                            return (fixedSz, true);
+                            return fixedResult;
                         }
 
-                        VariableCache[type] = (fixedSz, variableFields);
-                        return (fixedSz + variableSz, false);
+                        VariableFieldCache[type] = (fixedResult.Sz, variableFields);
+                        return fixedResult + variableResult;
                     }
                     finally
                     {
@@ -927,29 +1047,41 @@ internal sealed class SmartCache : ISmartCache
                 }
                 finally
                 {
-                    depth--;
+                    depthBox.Value--;
                 }
             }
 
-            return CoreGet(obj).Sz;
+            SizeResult result = CoreGet(obj);
+            return (result.Sz, result.Exc);
         }
 
         private static long? TryGetUnmanagedSize(Type type)
         {
             try
             {
-                return (long)GetUnmanagedSizeMethod.MakeGenericMethod(type).Invoke(null, [ ])!;
+                return IsUnmanaged(type)
+                    ? (long)GetUnmanagedSizeMethod.MakeGenericMethod(type).Invoke(null, [ ])!
+                    : null;
             }
             catch (Exception)
             {
                 return null;
             }
+
+            static bool IsUnmanaged(Type type)
+            {
+#if NET || NETSTANDARD2_1_OR_GREATER
+                return !(bool)IsReferenceOrContainsReferencesMethod.MakeGenericMethod(type).Invoke(null, [ ])!;
+#else
+                if (type.IsPrimitive || type.IsEnum || type.IsPointer)
+                    return true;
+                if (!type.IsValueType)
+                    return false;
+                return type.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance).All(static f => IsUnmanaged(f.FieldType));
+#endif
+            }
         }
 
-        private static unsafe long GetUnmanagedSize<T>()
-            where T : unmanaged
-        {
-            return sizeof(T);
-        }
+        private static unsafe long GetUnmanagedSize<T>() where T : unmanaged => sizeof(T);
     }
 }
