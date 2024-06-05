@@ -6,7 +6,6 @@
     <WarningsAsErrors>nullable</WarningsAsErrors>
     <LangVersion>12</LangVersion>
     <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
-
     <DiginsightCoreVersion>3.0.0-alpha.185</DiginsightCoreVersion>
   </PropertyGroup>
 
@@ -22,7 +21,6 @@
   <PropertyGroup Condition="'$(DiginsightCoreSolutionDirectory)' != ''">
     <DiginsightCoreSolutionDirectory>$([MSBuild]::EnsureTrailingSlash('$(DiginsightCoreSolutionDirectory)'))</DiginsightCoreSolutionDirectory>
   </PropertyGroup>
-
   <PropertyGroup Condition="'$(DiginsightCoreDirectImport)' == ''">
     <DiginsightCoreDirectImport>false</DiginsightCoreDirectImport>
   </PropertyGroup>
