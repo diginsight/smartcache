@@ -6,7 +6,7 @@
     <WarningsAsErrors>nullable</WarningsAsErrors>
     <LangVersion>12</LangVersion>
     <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
-    <DiginsightCoreVersion>3.0.0-alpha.190</DiginsightCoreVersion>
+    <DiginsightCoreVersion>3.0.0-alpha.191</DiginsightCoreVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(GITHUB_ACTIONS)' != 'true'">
