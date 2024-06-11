@@ -9,6 +9,7 @@ using System.Collections;
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics.Metrics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 
@@ -378,30 +379,42 @@ internal sealed class SmartCache : ISmartCache
         Expiration candidateSldExpiration = Choose(dynamicCoreOptions?.SlidingExpiration, sldExpiration, staticCoreOptions.SlidingExpiration);
         Expiration finalSldExpiration = candidateSldExpiration < finalAbsExpiration ? candidateSldExpiration : finalAbsExpiration;
 
-        long keySize;
-        Exception? sizeException;
-        using (SmartCacheObservability.Instruments.SizeComputationDuration.StartLap(SmartCacheObservability.Tags.Subject.Key))
+        long GetSize(object? obj, KeyValuePair<string, object?> lapTag, Histogram<long> histogram, string errorMessage)
         {
-            (keySize, sizeException) = Size.Get(key);
-        }
-        SmartCacheObservability.Instruments.KeyObjectSize.Record(keySize);
-        if (sizeException is not null)
-        {
-            logger.LogWarning(sizeException, "Error calculating key size");
+            long size;
+            using (SmartCacheObservability.Instruments.SizeComputationDuration.StartLap(lapTag))
+            {
+                try
+                {
+                    size = obj.GetSizeHeuristically();
+                }
+                catch (Exception exception)
+                {
+                    logger.LogWarning(exception, errorMessage);
+                    return long.MaxValue;
+                }
+            }
+
+            histogram.Record(size);
+            return size;
         }
 
-        long valueSize;
-        using (SmartCacheObservability.Instruments.SizeComputationDuration.StartLap(SmartCacheObservability.Tags.Subject.Value))
-        {
-            (valueSize, sizeException) = Size.Get(value);
-        }
-        SmartCacheObservability.Instruments.ValueObjectSize.Record(valueSize);
-        if (sizeException is not null)
-        {
-            logger.LogWarning(sizeException, "Error calculating key size");
-        }
+        long keySize = GetSize(
+            key, SmartCacheObservability.Tags.Subject.Key, SmartCacheObservability.Instruments.KeyObjectSize, "Error calculating key size"
+        );
+        long valueSize = GetSize(
+            value, SmartCacheObservability.Tags.Subject.Value, SmartCacheObservability.Instruments.ValueObjectSize, "Error calculating value size"
+        );
 
-        long size = SizeResult.SafeAdd(keySize, valueSize);
+        long size;
+        try
+        {
+            size = checked(keySize + valueSize);
+        }
+        catch (OverflowException)
+        {
+            size = long.MaxValue;
+        }
 
         CacheItemPriority priority =
             size >= coreOptions.LowPrioritySizeThreshold ? CacheItemPriority.Low
@@ -790,298 +803,5 @@ internal sealed class SmartCache : ISmartCache
         }
 
         public int CompareTo(Latency? other) => average.CompareTo(other?.average ?? double.PositiveInfinity);
-    }
-
-    private static class Size
-    {
-#if NET || NETSTANDARD2_1_OR_GREATER
-        private static readonly MethodInfo IsReferenceOrContainsReferencesMethod = typeof(RuntimeHelpers)
-            .GetMethod(nameof(RuntimeHelpers.IsReferenceOrContainsReferences), BindingFlags.Public | BindingFlags.Static)!;
-#endif
-        private static readonly MethodInfo GetUnmanagedSizeMethod = typeof(Size)
-            .GetMethod(nameof(GetUnmanagedSize), BindingFlags.NonPublic | BindingFlags.Static)!;
-
-        private static readonly IDictionary<Type, long> FixedSizes = new ConcurrentDictionary<Type, long>();
-        private static readonly IDictionary<Type, ValueTuple> ManagedTypes = new ConcurrentDictionary<Type, ValueTuple>();
-#if NET || NETSTANDARD2_1_OR_GREATER
-        private static readonly IDictionary<Type, (long, IEnumerable<int>)> VariableIndexCache =
-            new ConcurrentDictionary<Type, (long, IEnumerable<int>)>();
-#endif
-        private static readonly IDictionary<Type, (long, IEnumerable<FieldInfo>)> VariableFieldCache =
-            new ConcurrentDictionary<Type, (long, IEnumerable<FieldInfo>)>();
-
-        public static (long, Exception?) Get(object? obj, int depthLimit = 25)
-        {
-            ISet<object> seen = new HashSet<object>();
-            StrongBox<int> depthBox = new(0);
-
-            SizeResult CoreGet(object? current)
-            {
-                if (depthBox.Value++ > depthLimit)
-                {
-                    return new SizeResult(long.MaxValue, new InvalidOperationException("Size calculation recursion limit reached"));
-                }
-
-                try
-                {
-                    if (current is null)
-                    {
-                        return default;
-                    }
-
-                    if (current is Pointer or Delegate)
-                    {
-                        return new SizeResult(0, true);
-                    }
-
-                    Type type = current.GetType();
-                    if (FixedSizes.TryGetValue(type, out long fsz))
-                    {
-                        return new SizeResult(fsz, true);
-                    }
-
-                    if (!ManagedTypes.ContainsKey(type))
-                    {
-                        if (TryGetUnmanagedSize(type) is { } usz)
-                        {
-                            return new SizeResult(FixedSizes[type] = usz, true);
-                        }
-                        else
-                        {
-#if NET || NETSTANDARD2_1_OR_GREATER
-                            ManagedTypes.TryAdd(type, default);
-#else
-                            if (!ManagedTypes.ContainsKey(type))
-                            {
-                                ManagedTypes[type] = default;
-                            }
-#endif
-                        }
-                    }
-
-                    if (current is string str)
-                    {
-                        return new SizeResult(str.Length * sizeof(char));
-                    }
-
-#if NET || NETSTANDARD2_1_OR_GREATER
-                    if (current is ITuple tuple)
-                    {
-                        if (VariableIndexCache.TryGetValue(type, out (long, IEnumerable<int>) pair))
-                        {
-                            (long baseSz, IEnumerable<int> indexes) = pair;
-                            SizeResult result = new (baseSz);
-
-                            foreach (int index in indexes)
-                            {
-                                result += CoreGet(tuple[index]);
-                            }
-
-                            return result;
-                        }
-
-                        SizeResult fixedResult = new (0, true);
-                        SizeResult variableResult = new (0, false);
-
-                        ICollection<int> variableIndexes = new List<int>();
-
-                        for (int index = 0; index < tuple.Length; index++)
-                        {
-                            SizeResult currentResult = CoreGet(tuple[index]);
-                            if (currentResult.Fxd)
-                            {
-                                fixedResult += currentResult;
-                            }
-                            else
-                            {
-                                variableResult += currentResult;
-                                variableIndexes.Add(index);
-                            }
-                        }
-
-                        if (!variableIndexes.Any())
-                        {
-                            return fixedResult;
-                        }
-
-                        VariableIndexCache[type] = (fixedResult.Sz, variableIndexes);
-                        return fixedResult + variableResult;
-                    }
-#endif
-
-                    if (current is Type)
-                    {
-                        return new SizeResult(IntPtr.Size, true);
-                    }
-
-                    if (current is JToken jt)
-                    {
-                        return jt switch
-                        {
-                            JValue jv => ~CoreGet(jv.Value),
-                            JArray ja => ~CoreGet(ja.Children().ToArray()),
-                            JObject jo => ~CoreGet(jo.Properties().ToArray()),
-                            JProperty jp => ~(CoreGet(jp.Name) + CoreGet(jp.Value)),
-                            JConstructor jc => ~(CoreGet(jc.Name) + CoreGet(jc.Children().ToArray())),
-                            _ => new SizeResult(0, new UnreachableException($"Unsupported {nameof(JToken)} subclass")),
-                        };
-                    }
-
-                    if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Lazy<>))
-                    {
-                        return CoreGet(type.GetProperty(nameof(Lazy<object>.Value))!.GetValue(current));
-                    }
-
-                    if (!seen.Add(current))
-                    {
-                        return new SizeResult(IntPtr.Size);
-                    }
-
-                    try
-                    {
-                        if (current is IManualSize ms)
-                        {
-                            return ms.GetSize(CoreGet);
-                        }
-
-                        if (current is IEnumerable enumerable)
-                        {
-                            SizeResult result = default;
-
-                            IEnumerator enumerator = enumerable.GetEnumerator();
-                            try
-                            {
-                                bool SafeMoveNext(ref SizeResult result)
-                                {
-                                    try
-                                    {
-                                        return enumerator.MoveNext();
-                                    }
-                                    catch (Exception e)
-                                    {
-                                        result += e;
-                                        return false;
-                                    }
-                                }
-
-                                while (SafeMoveNext(ref result))
-                                {
-                                    result += CoreGet(enumerator.Current);
-                                }
-                            }
-                            finally
-                            {
-                                (enumerator as IDisposable)?.Dispose();
-                            }
-
-                            return result;
-                        }
-
-                        if (VariableFieldCache.TryGetValue(type, out (long, IEnumerable<FieldInfo>) pair))
-                        {
-                            (long baseSz, IEnumerable<FieldInfo> fields) = pair;
-                            SizeResult result = new (baseSz);
-
-                            foreach (FieldInfo field in fields)
-                            {
-                                object? fieldValue;
-                                try
-                                {
-                                    fieldValue = field.GetValue(current);
-                                }
-                                catch (Exception e)
-                                {
-                                    result += e;
-                                    continue;
-                                }
-
-                                result += CoreGet(fieldValue);
-                            }
-
-                            return result;
-                        }
-
-                        SizeResult fixedResult = new (0, true);
-                        SizeResult variableResult = new (0, false);
-
-                        FieldInfo[] allFields = type.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
-                        ICollection<FieldInfo> variableFields = new List<FieldInfo>();
-
-                        foreach (FieldInfo field in allFields)
-                        {
-                            object? fieldValue;
-                            try
-                            {
-                                fieldValue = field.GetValue(current);
-                            }
-                            catch (Exception e)
-                            {
-                                variableResult += e;
-                                continue;
-                            }
-
-                            SizeResult currentResult = CoreGet(fieldValue);
-                            if (currentResult.Fxd)
-                            {
-                                fixedResult += currentResult;
-                            }
-                            else
-                            {
-                                variableResult += currentResult;
-                                variableFields.Add(field);
-                            }
-                        }
-
-                        if (!variableFields.Any())
-                        {
-                            return fixedResult;
-                        }
-
-                        VariableFieldCache[type] = (fixedResult.Sz, variableFields);
-                        return fixedResult + variableResult;
-                    }
-                    finally
-                    {
-                        seen.Remove(current);
-                    }
-                }
-                finally
-                {
-                    depthBox.Value--;
-                }
-            }
-
-            SizeResult result = CoreGet(obj);
-            return (result.Sz, result.Exc);
-        }
-
-        private static long? TryGetUnmanagedSize(Type type)
-        {
-            try
-            {
-                return IsUnmanaged(type)
-                    ? (long)GetUnmanagedSizeMethod.MakeGenericMethod(type).Invoke(null, [ ])!
-                    : null;
-            }
-            catch (Exception)
-            {
-                return null;
-            }
-
-            static bool IsUnmanaged(Type type)
-            {
-#if NET || NETSTANDARD2_1_OR_GREATER
-                return !(bool)IsReferenceOrContainsReferencesMethod.MakeGenericMethod(type).Invoke(null, [ ])!;
-#else
-                if (type.IsPrimitive || type.IsEnum || type.IsPointer)
-                    return true;
-                if (!type.IsValueType)
-                    return false;
-                return type.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance).All(static f => IsUnmanaged(f.FieldType));
-#endif
-            }
-        }
-
-        private static unsafe long GetUnmanagedSize<T>() where T : unmanaged => sizeof(T);
     }
 }
