@@ -33,16 +33,16 @@ With `Diginsight.SmartCache` the cache entry lifetime may be indefinite, and a _
 <br><br>
 
 Accessing __configuration data or static data__ that is not frequently updated is a typical use case for all caching systems.<br>
-In this cases data doesn't change and the developer can request data with a __MaxAge of hours or days__ (eg. __MaxAge = 14400__, 4 hours).<br>
+In this cases data doesn't change and the developer can request data with a __MaxAge of hours or days__ (eg. __MaxAge = 00:04:00__, 4 hours).<br>
 
 __Data that is updated more frequently__ can be accessed with a __shorter MaxAge__ (eg. __MaxAge = 300__, 5 minutes).<br>
 A typical example for this scenario can be access to a __user profile__ or to __user permissions__.<br>
 By default, changes to the User Profile or the User Permissions will not be perceived by the application for a latency of 5 minutes.<br>
 
 In some circunstances the developer may need to be sure about the exact value of such data.<br>
-In these cases, the developer can just raise a request with __MaxAge = 0__.<br> 
+In these cases, the developer can just raise a request with __MaxAge = 00:00__.<br> 
 It may happen that, notifications are available for changes to the cached __user profile__ or the __user permissions__.<br> 
-Upon such notifications, the developer may __invalidate the cache entry__ or raise a request with __MaxAge = 0__ to load a cache entry for the same user, with the updated data.<br>
+Upon such notifications, the developer may __invalidate the cache entry__ or raise a request with __MaxAge = 00:00__ to load a cache entry for the same user, with the updated data.<br>
 __When change notifications are handled properly__, even if data changes frequently, the developer can use a __longer MaxAge__ (eg. hours or days) and take maximum benefit from the cache, __still without delays upon data changes__.<br>
 
 Age sensitive data management becomes very useful when __data changes very frequently__.<br>
@@ -50,8 +50,11 @@ As an example, consider an application showing notifications, messages or real t
 When navigating across the pages speed of navigation may be a priority, so __using cached data may be a good choice__ (still with a shorter MaxAge (eg. 120 secs)).
 
 In these cases navigation will take benefit from the cache hits.<br>
-After the navigation completes, the developer may raise a request with __MaxAge = 0__ to load fresh data for the user.<br>
+After the navigation completes, the developer may raise a request with __MaxAge = 00:00__ to load fresh data for the user.<br>
 In this way navigation will take advantage of cache hits speed and the user will still see fresh data, when the navigation ends.<br>
+
+# AN OPPORTUNITY FOR PERFORMANCE: CACHE WITH PRELOADING
+
 
 # AN OPPORTUNITY FOR PERFORMANCE: MAXAGE PROMOTION
 Sometimes, data from the past is immutable (eg. realtime data, user or devices messages).<br>
