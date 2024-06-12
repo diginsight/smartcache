@@ -4,13 +4,10 @@ using Diginsight.SmartCache.Externalization;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Newtonsoft.Json.Linq;
-using System.Collections;
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Metrics;
-using System.Reflection;
 using System.Runtime.CompilerServices;
 
 namespace Diginsight.SmartCache;

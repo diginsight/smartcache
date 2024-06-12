@@ -53,6 +53,10 @@ internal sealed class ServiceBusCacheCompanion : BackgroundService, ICacheCompan
 
     public IEnumerable<PassiveCacheLocation> PassiveLocations { get; }
 
+    private bool IsEnabled => !string.IsNullOrEmpty(serviceBusOptions.ConnectionString)
+        && !string.IsNullOrEmpty(serviceBusOptions.TopicName)
+        && !string.IsNullOrEmpty(serviceBusOptions.SubscriptionName);
+
     private ISmartCache SmartCache => smartCacheLazy.Value;
 
     public ServiceBusCacheCompanion(
@@ -152,29 +156,31 @@ internal sealed class ServiceBusCacheCompanion : BackgroundService, ICacheCompan
 
         public ServiceBusClient GetClient(CancellationToken cancellationToken)
         {
-            mreUtils.Wait(mre ?? throw new ObjectDisposedException(nameof(ClientHolder)), cancellationToken, "Client");
+            mreUtils.Wait(mre ?? throw new ObjectDisposedException(nameof(ClientHolder)), cancellationToken, "Client holder - Client");
             return client!;
         }
 
-        public async Task SendMessageAsync(ServiceBusMessage message, CancellationToken cancellationToken)
+        public async Task<bool> SendMessageAsync(ServiceBusMessage message, CancellationToken cancellationToken)
         {
             // ReSharper disable once LocalVariableHidesMember
             ManualResetEventSlim mre = this.mre ?? throw new ObjectDisposedException(nameof(ClientHolder));
 
             try
             {
-                if (!mreUtils.Wait(mre, SenderTimeout, cancellationToken, "Sender"))
+                if (!mreUtils.Wait(mre, SenderTimeout, cancellationToken, "Client holder - Sender"))
                 {
                     logger.LogWarning("Message not sent due to initialization timeout");
-                    return;
+                    return false;
                 }
             }
             catch (OperationCanceledException)
             {
                 logger.LogWarning("Message not sent due to stopping");
+                return false;
             }
 
             await sender!.SendMessageAsync(message, CancellationToken.None);
+            return true;
         }
 
         public void Invalidate()
@@ -290,12 +296,6 @@ internal sealed class ServiceBusCacheCompanion : BackgroundService, ICacheCompan
 
             _ = InnerGetOrAdd(messageId).Set(body, chunkIndex, chunkCount);
         }
-    }
-
-    public override async Task StartAsync(CancellationToken cancellationToken)
-    {
-        await InstallAsync(cancellationToken);
-        await base.StartAsync(cancellationToken);
     }
 
     private async Task InstallAsync(CancellationToken cancellationToken)
@@ -428,6 +428,11 @@ internal sealed class ServiceBusCacheCompanion : BackgroundService, ICacheCompan
         }
     }
 
+    public override Task StartAsync(CancellationToken cancellationToken)
+    {
+        return IsEnabled ? base.StartAsync(cancellationToken) : Task.CompletedTask;
+    }
+
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         string topicName = serviceBusOptions.TopicName;
@@ -438,6 +443,8 @@ internal sealed class ServiceBusCacheCompanion : BackgroundService, ICacheCompan
         {
             while (!stoppingToken.IsCancellationRequested)
             {
+                await InstallAsync(stoppingToken);
+
                 logger.LogDebug("Starting messages listen loop");
 
                 try
@@ -471,11 +478,6 @@ internal sealed class ServiceBusCacheCompanion : BackgroundService, ICacheCompan
                 {
                     clientHolder.Invalidate();
                 }
-
-                if (stoppingToken.IsCancellationRequested)
-                    break;
-
-                await InstallAsync(stoppingToken);
             }
         }
         finally
@@ -569,7 +571,7 @@ internal sealed class ServiceBusCacheCompanion : BackgroundService, ICacheCompan
                         }
                     }
 
-                    await SendMessageAsync(
+                    _ = await SendMessageAsync(
                         outgoingBody,
                         GetResponseMessageSubject,
                         emitter,
@@ -637,7 +639,7 @@ internal sealed class ServiceBusCacheCompanion : BackgroundService, ICacheCompan
         }
     }
 
-    private async Task SendMessageAsync(
+    private async Task<bool> SendMessageAsync(
         byte[]? body, string subject, string? destination, Func<ServiceBusMessage>? makeMessage, CancellationToken cancellationToken
     )
     {
@@ -663,9 +665,8 @@ internal sealed class ServiceBusCacheCompanion : BackgroundService, ICacheCompan
 
         if (body is null)
         {
-            LogSending(1, 1);
-            await clientHolder.SendMessageAsync(MakeMessage(), cancellationToken);
-            return;
+            LogSending(0, 1);
+            return await clientHolder.SendMessageAsync(MakeMessage(), cancellationToken);
         }
 
         const int chunkLength = 200 << 10;
@@ -677,41 +678,33 @@ internal sealed class ServiceBusCacheCompanion : BackgroundService, ICacheCompan
             ServiceBusMessage message = MakeMessage();
             message.Body = BinaryData.FromBytes(body);
 
-            LogSending(1, 1);
-            await clientHolder.SendMessageAsync(message, cancellationToken);
-            return;
+            LogSending(0, 1);
+            return await clientHolder.SendMessageAsync(message, cancellationToken);
         }
 
-#if NET
-        await Parallel.ForEachAsync(
-            Enumerable.Range(0, chunkCount),
-            CancellationToken.None,
-            async (chunkIndex, _) =>
-#else
+        async Task<bool> SendChunkAsync(int chunkIndex)
         {
-            for (int chunkIndex = 0; chunkIndex < chunkCount; chunkIndex++)
-#endif
-            {
-                ServiceBusMessage message = MakeMessage();
-                message.ApplicationProperties[ChunkIndexPropertyName] = chunkIndex + 1;
-                message.ApplicationProperties[ChunkCountPropertyName] = chunkCount;
+            ServiceBusMessage message = MakeMessage();
+            message.ApplicationProperties[ChunkIndexPropertyName] = chunkIndex + 1;
+            message.ApplicationProperties[ChunkCountPropertyName] = chunkCount;
 
-                Range range = (chunkLength * chunkIndex)..Math.Min(chunkLength * (chunkIndex + 1), bodyLength);
-                (int rangeOffset, int rangeLength) = range.GetOffsetAndLength(bodyLength);
-                message.Body = BinaryData.FromBytes(body.AsMemory(rangeOffset, rangeLength));
+            Range range = (chunkLength * chunkIndex)..Math.Min(chunkLength * (chunkIndex + 1), bodyLength);
+            (int rangeOffset, int rangeLength) = range.GetOffsetAndLength(bodyLength);
+            message.Body = BinaryData.FromBytes(body.AsMemory(rangeOffset, rangeLength));
 
-                LogSending(chunkIndex, chunkCount);
-                await clientHolder.SendMessageAsync(message, cancellationToken);
-            }
-#if NET
-        );
-#else
+            LogSending(chunkIndex, chunkCount);
+            return await clientHolder.SendMessageAsync(message, cancellationToken);
         }
-#endif
+
+        return (await Task.WhenAll(Enumerable.Range(0, chunkCount).Select(SendChunkAsync)))
+            .Any(static sent => !sent);
     }
 
     public override async Task StopAsync(CancellationToken cancellationToken)
     {
+        if (!IsEnabled)
+            return;
+
         try
         {
             await base.StopAsync(cancellationToken);
@@ -816,7 +809,7 @@ internal sealed class ServiceBusCacheCompanion : BackgroundService, ICacheCompan
             byte[] body;
             using (lap.Start())
             {
-                await companion.SendMessageAsync(
+                bool sent = await companion.SendMessageAsync(
                     keyHolder.GetAsBytes(),
                     GetRequestSubject,
                     Id,
@@ -824,14 +817,21 @@ internal sealed class ServiceBusCacheCompanion : BackgroundService, ICacheCompan
                     cancellationToken
                 );
 
-                try
+                if (sent)
                 {
-                    CancellationToken combinedCancellationToken = CancellationTokenSource
-                        .CreateLinkedTokenSource(cancellationToken, new CancellationTokenSource(companion.serviceBusOptions.RequestTimeout).Token)
-                        .Token;
-                    body = companion.getResponseDictionary.Get(messageId, combinedCancellationToken);
+                    try
+                    {
+                        CancellationToken combinedCancellationToken = CancellationTokenSource
+                            .CreateLinkedTokenSource(cancellationToken, new CancellationTokenSource(companion.serviceBusOptions.RequestTimeout).Token)
+                            .Token;
+                        body = companion.getResponseDictionary.Get(messageId, combinedCancellationToken);
+                    }
+                    catch (OperationCanceledException oce) when (oce.CancellationToken != cancellationToken)
+                    {
+                        body = [ ];
+                    }
                 }
-                catch (OperationCanceledException oce) when (oce.CancellationToken != cancellationToken)
+                else
                 {
                     body = [ ];
                 }
@@ -890,11 +890,11 @@ internal sealed class ServiceBusCacheCompanion : BackgroundService, ICacheCompan
             return NotifyAsync(descriptorHolder, InvalidateMessageSubject);
         }
 
-        private Task NotifyAsync(ICachePayloadHolder descriptorHolder, string subject)
+        private async Task NotifyAsync(ICachePayloadHolder descriptorHolder, string subject)
         {
             logger.LogDebug("Sending message for '{Subject}' event notification", subject);
 
-            return companion.SendMessageAsync(descriptorHolder.GetAsBytes(), subject, null, null, applicationLifetime.ApplicationStopping);
+            _ = await companion.SendMessageAsync(descriptorHolder.GetAsBytes(), subject, null, null, applicationLifetime.ApplicationStopping);
         }
     }
 }
