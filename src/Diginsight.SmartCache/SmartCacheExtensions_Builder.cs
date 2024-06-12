@@ -23,8 +23,10 @@ public static partial class SmartCacheExtensions
         }
 
         uninstaller.Uninstall?.Invoke();
-        installer.Install(builder.Services, out Action uninstall);
-        uninstaller.Uninstall = uninstall;
+        if (installer.Install(builder.Services, builder.Configuration, builder.HostEnvironment, builder.LoggerFactory, out Action? uninstall))
+        {
+            uninstaller.Uninstall = uninstall;
+        }
 
         return builder;
     }

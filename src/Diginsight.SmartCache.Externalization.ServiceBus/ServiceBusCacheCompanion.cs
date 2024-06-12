@@ -53,10 +53,6 @@ internal sealed class ServiceBusCacheCompanion : BackgroundService, ICacheCompan
 
     public IEnumerable<PassiveCacheLocation> PassiveLocations { get; }
 
-    private bool IsEnabled => !string.IsNullOrEmpty(serviceBusOptions.ConnectionString)
-        && !string.IsNullOrEmpty(serviceBusOptions.TopicName)
-        && !string.IsNullOrEmpty(serviceBusOptions.SubscriptionName);
-
     private ISmartCache SmartCache => smartCacheLazy.Value;
 
     public ServiceBusCacheCompanion(
@@ -428,11 +424,6 @@ internal sealed class ServiceBusCacheCompanion : BackgroundService, ICacheCompan
         }
     }
 
-    public override Task StartAsync(CancellationToken cancellationToken)
-    {
-        return IsEnabled ? base.StartAsync(cancellationToken) : Task.CompletedTask;
-    }
-
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         string topicName = serviceBusOptions.TopicName;
@@ -702,9 +693,6 @@ internal sealed class ServiceBusCacheCompanion : BackgroundService, ICacheCompan
 
     public override async Task StopAsync(CancellationToken cancellationToken)
     {
-        if (!IsEnabled)
-            return;
-
         try
         {
             await base.StopAsync(cancellationToken);

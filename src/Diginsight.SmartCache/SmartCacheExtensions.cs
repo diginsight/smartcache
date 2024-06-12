@@ -1,5 +1,8 @@
 ﻿using Diginsight.SmartCache.Externalization;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using System.Collections;
 using System.Reflection;
@@ -12,14 +15,20 @@ public static partial class SmartCacheExtensions
     private static readonly MethodInfo UnwrapAsArrayMethod = typeof(SmartCacheExtensions)
         .GetMethod(nameof(UnwrapAsArray), BindingFlags.NonPublic | BindingFlags.Static)!;
 
-    public static SmartCacheBuilder AddSmartCache(this IServiceCollection services, Action<SmartCacheCoreOptions>? configureOptions = null)
+    public static SmartCacheBuilder AddSmartCache(
+        this IServiceCollection services,
+        IConfiguration configuration,
+        IHostEnvironment hostEnvironment,
+        ILoggerFactory? loggerFactory = null,
+        Action<SmartCacheCoreOptions>? configureOptions = null
+    )
     {
         if (configureOptions is not null)
         {
             services.Configure(configureOptions);
         }
 
-        return new SmartCacheBuilder(services)
+        return new SmartCacheBuilder(services, configuration, hostEnvironment, loggerFactory)
             .SetSizeLimit(10_000_000)
             .SetLocalCompanion();
     }
