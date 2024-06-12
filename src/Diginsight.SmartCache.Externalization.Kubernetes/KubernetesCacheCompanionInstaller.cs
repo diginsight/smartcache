@@ -1,17 +1,36 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Diginsight.SmartCache.Externalization.Kubernetes;
 
 public sealed class KubernetesCacheCompanionInstaller : ICacheCompanionInstaller
 {
-    public static readonly ICacheCompanionInstaller Instance = new KubernetesCacheCompanionInstaller();
+    private readonly Func<IConfiguration, IHostEnvironment, bool>? isEnabled;
 
-    private KubernetesCacheCompanionInstaller() { }
-
-    public void Install(IServiceCollection services, out Action uninstall)
+    public KubernetesCacheCompanionInstaller(Func<IConfiguration, IHostEnvironment, bool>? isEnabled = null)
     {
+        this.isEnabled = isEnabled;
+    }
+
+    public bool Install(
+        IServiceCollection services,
+        IConfiguration configuration,
+        IHostEnvironment hostEnvironment,
+        ILoggerFactory? loggerFactory,
+        [MaybeNullWhen(false)] out Action uninstall
+    )
+    {
+        if (isEnabled?.Invoke(configuration, hostEnvironment) == false)
+        {
+            uninstall = null;
+            return false;
+        }
+
         services
             .AddHttpClient(nameof(KubernetesCacheCompanion))
             .ConfigureHttpClient(
@@ -28,6 +47,7 @@ public sealed class KubernetesCacheCompanionInstaller : ICacheCompanionInstaller
         services.TryAddEnumerable(ServiceDescriptor.Singleton<IValidateOptions<SmartCacheKubernetesOptions>, ValidateSmartCacheKubernetesOptions>());
 
         uninstall = Uninstall;
+        return true;
 
         void Uninstall()
         {

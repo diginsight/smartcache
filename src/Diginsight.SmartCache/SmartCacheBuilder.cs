@@ -1,6 +1,9 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Http;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace Diginsight.SmartCache;
@@ -8,8 +11,11 @@ namespace Diginsight.SmartCache;
 public sealed class SmartCacheBuilder
 {
     public IServiceCollection Services { get; }
+    public IConfiguration Configuration { get; }
+    public IHostEnvironment HostEnvironment { get; }
+    public ILoggerFactory? LoggerFactory { get; }
 
-    internal SmartCacheBuilder(IServiceCollection services)
+    internal SmartCacheBuilder(IServiceCollection services, IConfiguration configuration, IHostEnvironment hostEnvironment, ILoggerFactory? loggerFactory)
     {
         services.AddMemoryCache();
         services.AddClassAwareOptions();
@@ -21,6 +27,9 @@ public sealed class SmartCacheBuilder
         services.TryAddSingleton<SmartCacheDownstreamSettings>();
 
         Services = services;
+        Configuration = configuration;
+        HostEnvironment = hostEnvironment;
+        LoggerFactory = loggerFactory;
     }
 
     private sealed class ValidateSmartCacheCoreOptions : IValidateOptions<SmartCacheCoreOptions>

@@ -1,18 +1,36 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Diginsight.SmartCache.Externalization.ServiceBus;
 
 public sealed class ServiceBusCacheCompanionInstaller : ICacheCompanionInstaller
 {
-    public static readonly ICacheCompanionInstaller Instance = new ServiceBusCacheCompanionInstaller();
+    private readonly Func<IConfiguration, IHostEnvironment, bool>? isEnabled;
 
-    private ServiceBusCacheCompanionInstaller() { }
-
-    public void Install(IServiceCollection services, out Action uninstall)
+    public ServiceBusCacheCompanionInstaller(Func<IConfiguration, IHostEnvironment, bool>? isEnabled = null)
     {
+        this.isEnabled = isEnabled;
+    }
+
+    public bool Install(
+        IServiceCollection services,
+        IConfiguration configuration,
+        IHostEnvironment hostEnvironment,
+        ILoggerFactory? loggerFactory,
+        [MaybeNullWhen(false)] out Action uninstall
+    )
+    {
+        if (isEnabled?.Invoke(configuration, hostEnvironment) == false)
+        {
+            uninstall = null;
+            return false;
+        }
+
         ServiceDescriptor sd0 = ServiceDescriptor.Singleton<ServiceBusCacheCompanion, ServiceBusCacheCompanion>();
         services.TryAdd(sd0);
 
@@ -25,6 +43,7 @@ public sealed class ServiceBusCacheCompanionInstaller : ICacheCompanionInstaller
         services.TryAddEnumerable(ServiceDescriptor.Singleton<IValidateOptions<SmartCacheServiceBusOptions>, ValidateSmartCacheServiceBusOptions>());
 
         uninstall = Uninstall;
+        return true;
 
         void Uninstall()
         {
