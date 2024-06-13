@@ -18,7 +18,7 @@ public static class SmartCacheAspNetCoreExtensions
 
     public static SmartCacheBuilder AddHttpHeaderSupport(this SmartCacheBuilder builder)
     {
-        builder.Services.PostConfigureClassAwareFromHttpRequestHeaders<SmartCacheCoreOptions>();
+        builder.Services.PostConfigureClassAwareFromHttpRequestHeaders<DynamicSmartCacheCoreOptions>();
 
         return builder;
     }

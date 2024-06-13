@@ -8,12 +8,12 @@ internal sealed class SmartCacheDownstreamSettings
 
     public IDisposable WithZeroMaxAge()
     {
-        return With(new KeyValuePair<string, string>(nameof(ISmartCacheCoreOptions.MaxAge), "0"));
+        return With(new KeyValuePair<string, string>(nameof(IDynamicSmartCacheCoreOptions.MaxAge), "0"));
     }
 
     public IDisposable WithMinimumCreationDate(DateTimeOffset minimumCreationDate)
     {
-        return With(new KeyValuePair<string, string>(nameof(ISmartCacheCoreOptions.MinimumCreationDate), minimumCreationDate.ToString("O")));
+        return With(new KeyValuePair<string, string>(nameof(IDynamicSmartCacheCoreOptions.MinimumCreationDate), minimumCreationDate.ToString("O")));
     }
 
     private IDisposable With(KeyValuePair<string, string> header)

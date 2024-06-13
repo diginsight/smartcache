@@ -16,13 +16,13 @@ internal sealed class SmartCache : ISmartCache
 {
     private readonly ILogger logger;
     private readonly ICacheCompanion companion;
-    private readonly IClassAwareOptionsMonitor<SmartCacheCoreOptions> coreOptionsMonitor;
+    private readonly ISmartCacheCoreOptions coreOptions;
+    private readonly IClassAwareOptionsMonitor<DynamicSmartCacheCoreOptions> dynamicCoreOptionsMonitor;
     private readonly SmartCacheDownstreamSettings downstreamSettings;
     private readonly TimeProvider timeProvider;
 
     private readonly IMemoryCache memoryCache;
     private readonly IReadOnlyDictionary<string, PassiveCacheLocation> passiveLocations;
-    private readonly ISmartCacheCoreOptions staticCoreOptions;
 
     private readonly IDictionary<object, ValueTuple> keys = new ConcurrentDictionary<object, ValueTuple>();
     private readonly ExternalMissDictionary externalMissDictionary = new ();
@@ -34,7 +34,8 @@ internal sealed class SmartCache : ISmartCache
     public SmartCache(
         ILogger<SmartCache> logger,
         ICacheCompanion companion,
-        IClassAwareOptionsMonitor<SmartCacheCoreOptions> coreOptionsMonitor,
+        IOptions<SmartCacheCoreOptions> coreOptions,
+        IClassAwareOptionsMonitor<DynamicSmartCacheCoreOptions> dynamicCoreOptionsMonitor,
         IOptionsMonitor<MemoryCacheOptions> memoryCacheOptionsMonitor,
         ILoggerFactory loggerFactory,
         SmartCacheDownstreamSettings downstreamSettings,
@@ -43,15 +44,14 @@ internal sealed class SmartCache : ISmartCache
     {
         this.logger = logger;
         this.companion = companion;
-        this.coreOptionsMonitor = coreOptionsMonitor;
+        this.coreOptions = coreOptions.Value;
+        this.dynamicCoreOptionsMonitor = dynamicCoreOptionsMonitor;
         this.downstreamSettings = downstreamSettings;
         this.timeProvider = timeProvider ?? TimeProvider.System;
 
         memoryCache = new MemoryCache(memoryCacheOptionsMonitor.Get(nameof(SmartCache)), loggerFactory);
 
         passiveLocations = companion.PassiveLocations.ToDictionary(static x => x.Id);
-
-        staticCoreOptions = coreOptionsMonitor.CurrentValue;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -89,11 +89,11 @@ internal sealed class SmartCache : ISmartCache
             }
         }
 
-        ISmartCacheCoreOptions coreOptions = coreOptionsMonitor.Get(finalCallerType);
+        IDynamicSmartCacheCoreOptions dynamicCoreOptions = dynamicCoreOptionsMonitor.Get(finalCallerType);
 
         Expiration? maxAge = finalOperationOptions.MaxAge;
         DateTimeOffset timestamp = Truncate(timeProvider.GetUtcNow());
-        DateTimeOffset minimumCreationDate = GetMinimumCreationDate(ref maxAge, timestamp, coreOptions);
+        DateTimeOffset minimumCreationDate = GetMinimumCreationDate(ref maxAge, timestamp, dynamicCoreOptions);
         bool forceFetch = maxAge.Value == Expiration.Zero || minimumCreationDate >= timestamp;
 
         using (forceFetch ? downstreamSettings.WithZeroMaxAge() : downstreamSettings.WithMinimumCreationDate(minimumCreationDate))
@@ -105,18 +105,20 @@ internal sealed class SmartCache : ISmartCache
                 forceFetch ? null : minimumCreationDate,
                 finalOperationOptions.AbsoluteExpiration,
                 finalOperationOptions.SlidingExpiration,
-                coreOptions,
+                dynamicCoreOptions,
                 cancellationToken
             );
         }
     }
 
-    private DateTimeOffset GetMinimumCreationDate([NotNull] ref Expiration? maxAge, DateTimeOffset timestamp, ISmartCacheCoreOptions coreOptions)
+    private DateTimeOffset GetMinimumCreationDate([NotNull] ref Expiration? maxAge, DateTimeOffset timestamp, IDynamicSmartCacheCoreOptions dynamicCoreOptions)
     {
-        Expiration finalMaxAge = coreOptions.ForceDynamicMaxAge ? coreOptions.MaxAge : Choose(coreOptions.MaxAge, maxAge, staticCoreOptions.MaxAge);
+        Expiration finalMaxAge = dynamicCoreOptions is { ForceDynamicMaxAge: true, MaxAge: { } dynamicMaxAge }
+            ? dynamicMaxAge
+            : Choose(dynamicCoreOptions.MaxAge, maxAge, coreOptions.MaxAge);
 
         DateTimeOffset minimumCreationDate = finalMaxAge.IsNever ? DateTimeOffset.MinValue : timestamp - finalMaxAge.Value;
-        if (coreOptions.MinimumCreationDate is { } dynamicMinimumCreationDate && dynamicMinimumCreationDate > minimumCreationDate)
+        if (dynamicCoreOptions.MinimumCreationDate is { } dynamicMinimumCreationDate && dynamicMinimumCreationDate > minimumCreationDate)
         {
             minimumCreationDate = dynamicMinimumCreationDate;
         }
@@ -133,7 +135,7 @@ internal sealed class SmartCache : ISmartCache
         DateTimeOffset? maybeMinimumCreationDate,
         Expiration? absExpiration,
         Expiration? sldExpiration,
-        ISmartCacheCoreOptions coreOptions,
+        IDynamicSmartCacheCoreOptions dynamicCoreOptions,
         CancellationToken cancellationToken
     )
     {
@@ -182,7 +184,7 @@ internal sealed class SmartCache : ISmartCache
 
             logger.LogDebug("Fetched in {LatencyMsec} ms", latencyMsec);
 
-            SetValue(keyHolder, value, timestamp, coreOptions, absExpiration, sldExpiration);
+            SetValue(keyHolder, value, timestamp, dynamicCoreOptions, absExpiration, sldExpiration);
             return value;
         }
 
@@ -274,7 +276,7 @@ internal sealed class SmartCache : ISmartCache
                     SmartCacheObservability.Instruments.CompanionFetchDuration.Underlying.Record(latencyMsec, metricTag);
                     SmartCacheObservability.Instruments.CompanionFetchRelativeDuration.Record(latencyMsec / valueSerializedSize * 1000, metricTag);
 
-                    SetValue(keyHolder, item, othersCreationDate, coreOptions, absExpiration, sldExpiration);
+                    SetValue(keyHolder, item, othersCreationDate, dynamicCoreOptions, absExpiration, sldExpiration);
                     return item!;
                 }
             }
@@ -324,7 +326,7 @@ internal sealed class SmartCache : ISmartCache
         CachePayloadHolder<object> keyHolder,
         T value,
         DateTimeOffset creationDate,
-        ISmartCacheCoreOptions? dynamicCoreOptions,
+        IDynamicSmartCacheCoreOptions? dynamicCoreOptions,
         Expiration? absExpiration = null,
         Expiration? sldExpiration = null,
         bool skipNotify = false
@@ -338,7 +340,7 @@ internal sealed class SmartCache : ISmartCache
         Type valueType,
         object? value,
         DateTimeOffset creationDate,
-        ISmartCacheCoreOptions? dynamicCoreOptions = null,
+        IDynamicSmartCacheCoreOptions? dynamicCoreOptions = null,
         Expiration? absExpiration = null,
         Expiration? sldExpiration = null,
         bool skipNotify = false
@@ -355,13 +357,12 @@ internal sealed class SmartCache : ISmartCache
 
         IValueEntry entry = ValueEntry.Create(value, valueType, creationDate);
 
-        Expiration finalAbsExpiration = Choose(dynamicCoreOptions?.AbsoluteExpiration, absExpiration, staticCoreOptions.AbsoluteExpiration);
+        Expiration finalAbsExpiration = Choose(dynamicCoreOptions?.AbsoluteExpiration, absExpiration, coreOptions.AbsoluteExpiration);
 
-        ISmartCacheCoreOptions coreOptions = dynamicCoreOptions ?? staticCoreOptions;
         SmartCacheMode mode;
         if (passiveLocations.Count > 1)
         {
-            mode = coreOptions.Mode;
+            mode = dynamicCoreOptions?.Mode ?? coreOptions.Mode;
         }
         else
         {
@@ -373,7 +374,7 @@ internal sealed class SmartCache : ISmartCache
             mode = SmartCacheMode.InMemory;
         }
 
-        Expiration candidateSldExpiration = Choose(dynamicCoreOptions?.SlidingExpiration, sldExpiration, staticCoreOptions.SlidingExpiration);
+        Expiration candidateSldExpiration = Choose(dynamicCoreOptions?.SlidingExpiration, sldExpiration, coreOptions.SlidingExpiration);
         Expiration finalSldExpiration = candidateSldExpiration < finalAbsExpiration ? candidateSldExpiration : finalAbsExpiration;
 
         long GetSize(object? obj, KeyValuePair<string, object?> lapTag, Histogram<long> histogram, string errorMessage)
@@ -447,14 +448,16 @@ internal sealed class SmartCache : ISmartCache
         if (skipNotify)
             return;
 
+        int missValueSizeThreshold = dynamicCoreOptions?.MissValueSizeThreshold ?? coreOptions.MissValueSizeThreshold;
+
         switch (mode)
         {
             case SmartCacheMode.InMemory:
-                NotifyMiss(keyHolder, creationDate, valueType, value, (vt, v) => IsSmallValue(vt, v, coreOptions.MissValueSizeThreshold));
+                NotifyMiss(keyHolder, creationDate, valueType, value, (vt, v) => IsSmallValue(vt, v, missValueSizeThreshold));
                 break;
 
             case SmartCacheMode.MixedPassive:
-                if (!IsSmallValue(valueType, value, coreOptions.MissValueSizeThreshold))
+                if (!IsSmallValue(valueType, value, missValueSizeThreshold))
                 {
                     goto case SmartCacheMode.PurePassive;
                 }
