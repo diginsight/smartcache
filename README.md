@@ -106,11 +106,11 @@ The image below shows `Diginsight.SmartCache` settings with default `MaxAge` and
 
 ```json
 "SmartCache": {
-    "MaxAge": "00:05",
-    //"MaxAge@...": "00:01",
-    //"MaxAge@...": "00:10",
+    "MaxAge": "00:05:00",
+    //"MaxAge@...": "00:01:00",
+    //"MaxAge@...": "00:10:00",
     "AbsoluteExpiration": "1.00:00",
-    "SlidingExpiration": "04:00",
+    "SlidingExpiration": "04:00:00",
     "ServiceBus": {
     "ConnectionString": "", // Key Vault
     "TopicName": "smartcache-commonapi"
