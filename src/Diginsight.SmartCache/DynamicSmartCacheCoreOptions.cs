@@ -6,7 +6,7 @@ using System.Text.RegularExpressions;
 
 namespace Diginsight.SmartCache;
 
-internal sealed class DynamicSmartCacheCoreOptions : IDynamicSmartCacheCoreOptions, IDynamicallyPostConfigurable
+internal sealed class DynamicSmartCacheCoreOptions : IDynamicSmartCacheCoreOptions, IDynamicallyConfigurable
 {
     public SmartCacheMode? Mode { get; private set; }
 
@@ -19,7 +19,7 @@ internal sealed class DynamicSmartCacheCoreOptions : IDynamicSmartCacheCoreOptio
 
     public int? MissValueSizeThreshold { get; private set; }
 
-    object IDynamicallyPostConfigurable.MakeFiller() => new Filler(this);
+    object IDynamicallyConfigurable.MakeFiller() => new Filler(this);
 
     [SuppressMessage("ReSharper", "UnusedMember.Local")]
     private sealed class Filler
