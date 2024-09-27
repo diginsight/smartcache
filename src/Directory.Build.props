@@ -9,7 +9,7 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <DiginsightCoreVersion>3.0.0-alpha.203</DiginsightCoreVersion>
+    <DiginsightCoreVersion>3.0.0-alpha.205</DiginsightCoreVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(GITHUB_ACTIONS)' != 'true'">
