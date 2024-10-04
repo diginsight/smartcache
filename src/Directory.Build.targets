@@ -54,7 +54,7 @@
       <Pack>True</Pack>
       <PackagePath></PackagePath>
     </None>
-    <None Include="$(MSBuildThisFileDirectory)Diginsight.SmartCache.png">
+    <None Include="$(MSBuildThisFileDirectory)$(PackageIcon)" Condition="'$(PackageIcon)' != ''">
       <Visible>false</Visible>
       <Pack>True</Pack>
       <PackagePath></PackagePath>
