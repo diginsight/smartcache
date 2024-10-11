@@ -10,6 +10,7 @@
     <PackageReference Include="Microsoft.Extensions.Http" Version="8.*">
       <PrivateAssets>contentfiles; analyzers; build; compile</PrivateAssets>
     </PackageReference>
+    <PackageReference Include="Newtonsoft.Json" Version="13.*" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(DiginsightCoreDirectImport)' == 'true'">

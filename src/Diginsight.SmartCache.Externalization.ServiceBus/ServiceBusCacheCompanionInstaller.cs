@@ -57,7 +57,7 @@ public sealed class ServiceBusCacheCompanionInstaller : ICacheCompanionInstaller
     {
         public ValidateOptionsResult Validate(string? name, SmartCacheServiceBusOptions options)
         {
-            if (name != Options.DefaultName)
+            if (name != Microsoft.Extensions.Options.Options.DefaultName)
             {
                 return ValidateOptionsResult.Skip;
             }

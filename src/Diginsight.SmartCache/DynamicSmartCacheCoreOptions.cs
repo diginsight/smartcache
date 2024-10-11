@@ -1,4 +1,4 @@
-﻿using Diginsight.CAOptions;
+﻿using Diginsight.Options;
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;

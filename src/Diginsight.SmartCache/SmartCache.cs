@@ -1,5 +1,6 @@
-﻿using Diginsight.CAOptions;
-using Diginsight.Diagnostics;
+﻿using Diginsight.Diagnostics;
+using Diginsight.Options;
+using Diginsight.Runtime;
 using Diginsight.SmartCache.Externalization;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
@@ -251,6 +252,7 @@ internal sealed class SmartCache : ISmartCache
                         taskFactories.ToArray(),
                         coreOptions.LocationPrefetchCount,
                         coreOptions.LocationMaxParallelism,
+                        Expiration.Never,
                         // ReSharper disable once AsyncApostle.AsyncWait
                         isValid: static t => new ValueTask<bool>(t.Status != TaskStatus.RanToCompletion || t.Result is not null),
                         cancellationToken: cancellationToken
@@ -772,7 +774,7 @@ internal sealed class SmartCache : ISmartCache
             {
                 if (!underlying.TryGetValue(key, out Entry? entry) || entry.Timestamp < timestamp)
                 {
-                    underlying[key] = new Entry(timestamp, new[] { location });
+                    underlying[key] = new Entry(timestamp, [ location ]);
                 }
                 else if (!(entry.Timestamp > timestamp))
                 {

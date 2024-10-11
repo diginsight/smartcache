@@ -59,7 +59,7 @@ public sealed class KubernetesCacheCompanionInstaller : ICacheCompanionInstaller
     {
         public ValidateOptionsResult Validate(string? name, SmartCacheKubernetesOptions options)
         {
-            if (name != Options.DefaultName)
+            if (name != Microsoft.Extensions.Options.Options.DefaultName)
             {
                 return ValidateOptionsResult.Skip;
             }

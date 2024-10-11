@@ -11,7 +11,7 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <DiginsightCoreVersion>3.0.0-alpha.206</DiginsightCoreVersion>
+    <DiginsightCoreVersion>3.1.0.0</DiginsightCoreVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(GITHUB_ACTIONS)' != 'true'">

@@ -24,7 +24,7 @@ public static class SmartCacheHttpExtensions
     {
         public ValidateOptionsResult Validate(string? name, SmartCacheHttpOptions options)
         {
-            if (name != Options.DefaultName)
+            if (name != Microsoft.Extensions.Options.Options.DefaultName)
             {
                 return ValidateOptionsResult.Skip;
             }

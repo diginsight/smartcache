@@ -1,4 +1,4 @@
-﻿using Diginsight.CAOptions;
+﻿using Diginsight.Options;
 
 namespace Diginsight.SmartCache;
 

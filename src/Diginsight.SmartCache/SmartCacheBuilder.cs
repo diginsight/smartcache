@@ -36,7 +36,7 @@ public sealed class SmartCacheBuilder
     {
         public ValidateOptionsResult Validate(string? name, SmartCacheCoreOptions options)
         {
-            if (name != Options.DefaultName)
+            if (name != Microsoft.Extensions.Options.Options.DefaultName)
             {
                 return ValidateOptionsResult.Skip;
             }
