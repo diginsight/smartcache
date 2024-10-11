@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Serialization;
+using System.Collections.Immutable;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -9,22 +10,26 @@ namespace Diginsight.SmartCache.Externalization;
 
 public static class SmartCacheSerialization
 {
-    private static readonly JsonSerializer Serializer = JsonSerializer.CreateDefault(
-        new JsonSerializerSettings()
-        {
-            TypeNameHandling = TypeNameHandling.Auto,
-            TypeNameAssemblyFormatHandling = TypeNameAssemblyFormatHandling.Full,
-            SerializationBinder = new MySerializationBinder(),
-            Converters = new JsonConverter[]
+    private static readonly Lazy<JsonSerializer> SerializerLazy = new (
+        static () => JsonSerializer.CreateDefault(
+            new JsonSerializerSettings()
             {
-                new MyTypeConverter(),
-                new MyEnumeratorConverter(),
-            },
-            DateTimeZoneHandling = DateTimeZoneHandling.Utc,
-            DateParseHandling = DateParseHandling.None,
-            DateFormatString = "O",
-        }
+                TypeNameHandling = TypeNameHandling.Auto,
+                TypeNameAssemblyFormatHandling = TypeNameAssemblyFormatHandling.Full,
+                SerializationBinder = new MySerializationBinder(),
+                Converters =
+                [
+                    new MyTypeConverter(),
+                    new MyEnumeratorConverter(),
+                ],
+                DateTimeZoneHandling = DateTimeZoneHandling.Utc,
+                DateParseHandling = DateParseHandling.None,
+                DateFormatString = "O",
+            }
+        )
     );
+
+    private static JsonSerializer Serializer => SerializerLazy.Value;
 
     public static readonly Encoding Encoding = new UTF8Encoding(false);
 
@@ -113,10 +118,10 @@ public static class SmartCacheSerialization
 
     private sealed class MySerializationBinder : ISerializationBinder
     {
-        private static readonly IReadOnlyDictionary<string, Assembly> NameToAssemblyMap;
-        private static readonly IReadOnlyDictionary<Assembly, string> AssemblyToNameMap;
-        private static readonly IReadOnlyDictionary<string, Type> NameToTypeMap;
-        private static readonly IReadOnlyDictionary<Type, string> TypeToNameMap;
+        private static readonly Lazy<IReadOnlyDictionary<string, Assembly>> NameToAssemblyMapLazy;
+        private static readonly Lazy<IReadOnlyDictionary<Assembly, string>> AssemblyToNameMapLazy;
+        private static readonly Lazy<IReadOnlyDictionary<string, Type>> NameToTypeMapLazy;
+        private static readonly Lazy<IReadOnlyDictionary<Type, string>> TypeToNameMapLazy;
 
         private static readonly Regex TypeArgsRegex = new (
             """
@@ -161,75 +166,114 @@ public static class SmartCacheSerialization
             RegexOptions.IgnorePatternWhitespace
         );
 
+        private static IReadOnlyDictionary<string, Assembly> NameToAssemblyMap => NameToAssemblyMapLazy.Value;
+        private static IReadOnlyDictionary<Assembly, string> AssemblyToNameMap => AssemblyToNameMapLazy.Value;
+        private static IReadOnlyDictionary<string, Type> NameToTypeMap => NameToTypeMapLazy.Value;
+        private static IReadOnlyDictionary<Type, string> TypeToNameMap => TypeToNameMapLazy.Value;
+
         static MySerializationBinder()
         {
             Assembly[] assemblies = AppDomain.CurrentDomain.GetAssemblies();
 
-            IEnumerable<ValueTuple<string, Assembly>> ownAssemblyPairs = assemblies
-                .Where(static a => a.IsDefined(typeof(CacheInterchangeNameAttribute)))
-                .Select(static a => (a.GetCustomAttribute<CacheInterchangeNameAttribute>()!.Name, a));
+            NameToAssemblyMapLazy = new Lazy<IReadOnlyDictionary<string, Assembly>>(
+                () =>
+                {
+                    IEnumerable<ValueTuple<string, Assembly>> ownAssemblyPairs = assemblies
+                        .Where(static a => a.IsDefined(typeof(CacheInterchangeNameAttribute)))
+                        .Select(static a => (a.GetCustomAttribute<CacheInterchangeNameAttribute>()!.Name, a));
 
-            IEnumerable<ValueTuple<string, Assembly>> externalAssemblyPairs = assemblies
-                .SelectMany(static a => a.GetCustomAttributes<CacheInterchangeExternalNameAttribute>())
-                .Where(static x => x.TargetAssembly is not null)
-                .Select(
-                    static x =>
+                    IEnumerable<ValueTuple<string, Assembly>> externalAssemblyPairs = assemblies
+                        .SelectMany(static a => a.GetCustomAttributes<CacheInterchangeExternalNameAttribute>())
+                        .Where(static x => x.TargetAssembly is not null)
+                        .Select(
+                            static x =>
+                            {
+                                try
+                                {
+                                    return (x.Name, Assembly.Load(x.TargetAssembly!));
+                                }
+                                catch (Exception)
+                                {
+                                    return (ValueTuple<string, Assembly>?)null;
+                                }
+                            }
+                        )
+                        .OfType<ValueTuple<string, Assembly>>();
+
+                    try
                     {
-                        try
-                        {
-                            return (x.Name, Assembly.Load(x.TargetAssembly!));
-                        }
-                        catch (Exception)
-                        {
-                            return (ValueTuple<string, Assembly>?)null;
-                        }
+                        return ownAssemblyPairs.Concat(externalAssemblyPairs).ToDictionary(static x => x.Item1, static x => x.Item2);
                     }
-                )
-                .OfType<ValueTuple<string, Assembly>>();
-
-            try
-            {
-                NameToAssemblyMap = ownAssemblyPairs.Concat(externalAssemblyPairs).ToDictionary(static x => x.Item1, static x => x.Item2);
-                AssemblyToNameMap = NameToAssemblyMap.ToDictionary(static x => x.Value, static x => x.Key);
-            }
-            catch (ArgumentException)
-            {
-                NameToAssemblyMap = new Dictionary<string, Assembly>();
-                AssemblyToNameMap = new Dictionary<Assembly, string>();
-            }
-
-            IEnumerable<ValueTuple<string, Type>> ownTypePairs = assemblies
-                .SelectMany(
-                    static a =>
+                    catch (ArgumentException)
                     {
-                        try
-                        {
-                            return a.GetTypes();
-                        }
-                        catch (ReflectionTypeLoadException)
-                        {
-                            return [ ];
-                        }
+                        return ImmutableDictionary<string, Assembly>.Empty;
                     }
-                )
-                .Where(static t => t.IsDefined(typeof(CacheInterchangeNameAttribute)))
-                .Select(static t => (t.GetCustomAttribute<CacheInterchangeNameAttribute>()!.Name, t));
+                }
+            );
 
-            IEnumerable<ValueTuple<string, Type>> externalTypePairs = assemblies
-                .SelectMany(static a => a.GetCustomAttributes<CacheInterchangeExternalNameAttribute>())
-                .Where(static x => x.TargetType is not null)
-                .Select(static x => (x.Name, x.TargetType!));
+            AssemblyToNameMapLazy = new Lazy<IReadOnlyDictionary<Assembly, string>>(
+                static () =>
+                {
+                    try
+                    {
+                        return NameToAssemblyMap.ToDictionary(static x => x.Value, static x => x.Key);
+                    }
+                    catch (ArgumentException)
+                    {
+                        return ImmutableDictionary<Assembly, string>.Empty;
+                    }
+                }
+            );
 
-            try
-            {
-                NameToTypeMap = ownTypePairs.Concat(externalTypePairs).ToDictionary(static x => x.Item1, static x => x.Item2);
-                TypeToNameMap = NameToTypeMap.ToDictionary(static x => x.Value, static x => x.Key);
-            }
-            catch (ArgumentException)
-            {
-                NameToTypeMap = new Dictionary<string, Type>();
-                TypeToNameMap = new Dictionary<Type, string>();
-            }
+            NameToTypeMapLazy = new Lazy<IReadOnlyDictionary<string, Type>>(
+                () =>
+                {
+                    IEnumerable<ValueTuple<string, Type>> ownTypePairs = assemblies
+                        .SelectMany(
+                            static a =>
+                            {
+                                try
+                                {
+                                    return a.GetTypes();
+                                }
+                                catch (ReflectionTypeLoadException rtle)
+                                {
+                                    return rtle.Types.OfType<Type>();
+                                }
+                            }
+                        )
+                        .Where(static t => t.IsDefined(typeof(CacheInterchangeNameAttribute)))
+                        .Select(static t => (t.GetCustomAttribute<CacheInterchangeNameAttribute>()!.Name, t));
+
+                    IEnumerable<ValueTuple<string, Type>> externalTypePairs = assemblies
+                        .SelectMany(static a => a.GetCustomAttributes<CacheInterchangeExternalNameAttribute>())
+                        .Where(static x => x.TargetType is not null)
+                        .Select(static x => (x.Name, x.TargetType!));
+
+                    try
+                    {
+                        return ownTypePairs.Concat(externalTypePairs).ToDictionary(static x => x.Item1, static x => x.Item2);
+                    }
+                    catch (ArgumentException)
+                    {
+                        return ImmutableDictionary<string, Type>.Empty;
+                    }
+                }
+            );
+
+            TypeToNameMapLazy = new Lazy<IReadOnlyDictionary<Type, string>>(
+                static () =>
+                {
+                    try
+                    {
+                        return NameToTypeMap.ToDictionary(static x => x.Value, static x => x.Key);
+                    }
+                    catch (ArgumentException)
+                    {
+                        return ImmutableDictionary<Type, string>.Empty;
+                    }
+                }
+            );
         }
 
         public Type BindToType(string? assemblyName, string typeName) => BindToType(assemblyName, typeName.AsSpan());
