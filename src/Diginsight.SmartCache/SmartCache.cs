@@ -432,7 +432,7 @@ internal sealed class SmartCache : ISmartCache
         entryOptions.RegisterPostEvictionCallback(
             (k, v, r, _) =>
             {
-                using (ActivityUtils.UnsetCurrent())
+                using (ActivityUtils.WithCurrent(null))
                 {
                     Interlocked.Add(ref memoryCacheSize, -size);
                     SmartCacheObservability.Instruments.TotalSize.Add(-size);
