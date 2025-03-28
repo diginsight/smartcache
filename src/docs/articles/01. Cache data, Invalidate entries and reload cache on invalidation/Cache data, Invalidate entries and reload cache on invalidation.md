@@ -1,0 +1,145 @@
+# INTRODUCTION 
+diginsight `SmartCache` provides __hybrid, distributed, multilevel caching__ based on __age sensitive data management__.<br> 
+
+This article discusses how we can use `SmartCache` to:
+- Cache data from a call and associate a suitable key to it
+- Invalidate entries 
+- reload cache entries upon invalidation
+
+The code snippets below are available as working samples within the [smartcache.samples](https://github.com/diginsight/smartcache.samples) repository.
+
+
+# STEP 01 - Cache data from a call and associate a suitable key to it
+
+Let's assume we need to cache data from a long latency operation such as:
+```c#
+public async Task<Plant> GetPlantByIdImplAsync([FromRoute] Guid id)
+{
+    using var activity = Program.ActivitySource.StartMethodActivity(logger, new { id });
+
+    var result = default(IEnumerable<Plant>);
+
+    // ... implementation ...
+
+    activity?.SetOutput(plant);
+    return plant;
+}
+```
+
+result from the method execution can be cached with the following steps:
+- inject `smartCache` and `cacheKeyService` into the current class<br>
+![alt text](<01.b inject smartCache and cacheKeyService.png>)
+
+- create a new method `GetPlantByIdAsync` calling `GetPlantByIdImplAsync` by means of smartCache service<br>
+
+    ```c#
+    public async Task<Plant> GetPlantByIdAsync([FromRoute] Guid plantId)
+    {
+        using var activity = Program.ActivitySource.StartMethodActivity(logger);
+
+        var options = new SmartCacheOperationOptions() { MaxAge = TimeSpan.FromMinutes(10) };
+        var cacheKey = new MethodCallCacheKey(cacheKeyService, typeof(PlantsController), nameof(GetPlantByIdAsync), plantId);
+
+        var plant = await smartCache.GetAsync(cacheKey, _ => GetPlantByIdImplAsync(plantId), options);
+
+        activity?.SetOutput(plant);
+        return plant;
+    }
+    ```
+
+the `smartCache.GetAsyc()` call manages cached call to `GetPlantByIdImplAsync`:
+- __cacheKey__: is the __cache key__ class associated to the cache entry
+- __delegate__ with the call to `GetPlantByIdImplAsync` is used to fetch values in case of cache miss
+- (opt) __options__ with required __MaxAge__ allows requesting data specifying a specific age criteria: cache hit will happen only if available data is within the requested age.
+
+calling `GetPlantByIdAsync` twice, you will get the following log where:
+- the first call is a __cache miss__ with latency of >1sec
+- the first call is a __cache hit__ with latency of few ms
+
+![alt text](<01.2 Cache miss cache hit log.png>)
+
+# STEP 02 - Add Invalidation support to cached calls
+
+Assume you are calling a cached method with the following code
+```c#
+public async Task<IEnumerable<Plant>> GetPlantsAsync()
+{
+    using var activity = Program.ActivitySource.StartMethodActivity(logger);
+
+    var options = new SmartCacheOperationOptions() { MaxAge = TimeSpan.FromMinutes(10) };
+    var cacheKey = new GetPlantByIdCacheKey(Guid.Empty);
+
+    Task<IEnumerable<Plant>> getCachedValuesAsync() =>
+        smartCache.GetAsync(cacheKey, _ => GetPlantsImplAsync(), options);
+
+    var plants = await getCachedValuesAsync();
+    activity?.SetOutput(plants);
+    return plants;
+}
+```
+You can add support to invalidation deriving your key from `IInvalidatable`:
+```c#
+internal sealed record GetPlantByIdCacheKey(Guid PlantId) : IInvalidatable
+{
+    public bool IsInvalidatedBy(IInvalidationRule invalidationRule, out Func<Task> ic)
+    {
+        ic = null;
+        if (invalidationRule is PlantInvalidationRule pir && (PlantId == Guid.Empty || pir.PlantId == PlantId))
+        {
+            return true;
+        }
+        return false;
+    }
+}
+```
+Upon plant __creation/update/delete__, you can trigger invalidation by means of `smartCache.Invalidate();` call:
+
+![alt text](<02.01a Invalidate data upon plant creation or update.png>)
+
+When Invalidating a plantId, all keys will be enumerated and those invalidated by the ID will be dismissed by the cache. 
+
+Calling `GetPlantsAsync` after an update to the Plant, you will get a __cache miss__ as the entry associated to the call has been dismissed.
+
+The image below shows that:
+- after updating a Plant 
+- the `GetPlantsAsync` call gets a __cache miss__ call as its cache entry has been invalidated
+
+
+![alt text](<02.02 cache miss after invalidation log.png>)
+
+# STEP 03 - Add automatic reload support to cached calls
+
+Assume you are calling a cached method with the following code
+```c#
+public async Task<IEnumerable<Plant>> GetPlantsAsync()
+{
+    using var activity = Program.ActivitySource.StartMethodActivity(logger);
+
+    var options = new SmartCacheOperationOptions() { MaxAge = TimeSpan.FromMinutes(10) };
+    var cacheKey = new GetPlantByIdCacheKey(cacheKeyService, Guid.Empty);
+
+    Task<IEnumerable<Plant>> getCachedValuesAsync() =>
+        smartCache.GetAsync(cacheKey, _ => GetPlantsImplAsync(), options);
+    cacheKey.ReloadAsync = getCachedValuesAsync; 
+
+    var plants = await getCachedValuesAsync();
+    activity?.SetOutput(plants);
+    return plants;
+}
+```
+In this case, `getCachedValuesAsync` delegate is used to load data.<br>
+Also, `getCachedValuesAsync` is assigned to `cacheKey.ReloadAsync` property to __enable cache entry reload__, after invalidation.
+
+When Invalidating a plantId, all keys will be enumerated and those invalidated by the ID will be dismissed by the cache.
+If `ReloadAsync` delegate is available, __after invalidation, the delegate is invoked to load the cache entry again__.
+
+Calling `GetPlantsAsync` after an update to the Plant, this time you will get a __cache hit__ as the entry associated to the call has been reloaded after invalidation.
+
+The image below shows that:
+- after updating a Plant 
+- the `GetPlantsAsync` call gets a __cache hit__ call as its cache entry has been reloaded, after invalidation
+
+![alt text](<03.02 cache hit after invalidation and reloadlog.png>)
+
+
+

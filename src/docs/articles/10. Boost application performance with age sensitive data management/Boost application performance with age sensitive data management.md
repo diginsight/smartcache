@@ -1,0 +1,93 @@
+# BOOST APPLICATION PERFORMANCE WITH AGE SENSITIVE DATA MANAGEMENT 
+`Diginsight.SmartCache` introduces __age sensitive data management__: a new approach to managing data.<br><br> 
+In highly distributed environments, data is inherently __disconnected__ and __often loaded across multiple boundaries__.<br>
+For this reasons, loading data may be an __expensive operation__ and __loading data efficiently__ may become __a critical challenge__.<br>
+
+Not always fresh data data is strictly needed in our applications, to obtain the expected behaviour.<br>
+In many conditions, applications may work with data that is __not up to date__.<br><br>
+This is a great opportunity to __boost applications performance__: when fresh data is not strictly required data cached from previous calls or data pre-loaded in background may be used to ensure the shortest possible latencies.<br> 
+<br>
+
+# WHAT IS AGE SENSITIVE DATA MANAGEMENT 
+With __age sensitive data management__, when loading data __every entry is tagged with its `Creation Date`__.<br>
+Also, when accessing data, a developer can specify the __maximum age__ that is required for it.<br>
+
+In `Diginsight.SmartCache` this can be done by means of the following notation:<br>
+
+```c#
+var options = new SmartCacheOperationOptions() { MaxAge = TimeSpan.FromSeconds(600) };
+var userProfile = await userProfileService.FindUserByEmailAddressAsync(context.Account.Email, options).ConfigureAwait(false);
+```
+
+If the `required age` for a data request is compatible with the creation date of the corresponding cache entry, data is returned from the cache (__cache hit__).<br>
+In case the `required age` is not compatible with the creation date of the corresponding cache entry, the data is loaded from the remote location (__cache miss__) and the cache entry is updated.<br>
+
+In `common caching systems`, the __cache entries lifetime is defined at startup__ (or cache entry set time) __and it cannot be changed across different calls__.<br> __A cache hit or a cache miss is determined by the static cache entry lifetime__.<br>
+With `Diginsight.SmartCache` the cache entry lifetime may be indefinite, and a __cache hit or a cache miss is determined by the `required age`, provided by the developer, at every single call__, depending on the application need.<br>
+
+# USE CASES
+`Diginsight.SmartCache` can be used with the following type of data:
+- data that is __not frequently updated__ (eg. configuration data or static data)
+- data that is __updated more frequently__ (eg. user profile or user permissions)
+- data that is __updated very frequently__ (eg. notifications, messages or real time data)
+<br><br>
+
+Accessing __configuration data or static data__ that is not frequently updated is a typical use case for all caching systems.<br>
+In this cases data doesn't change and the developer can request data with a __MaxAge of hours or days__ (eg. __MaxAge = 00:04:00__, 4 hours).<br>
+
+__Data that is updated more frequently__ can be accessed with a __shorter MaxAge__ (eg. __MaxAge = 300__, 5 minutes).<br>
+A typical example for this scenario can be access to a __user profile__ or to __user permissions__.<br>
+By default, changes to the User Profile or the User Permissions will not be perceived by the application for a latency of 5 minutes.<br>
+
+In some circunstances the developer may need to be sure about the exact value of such data.<br>
+In these cases, the developer can just raise a request with __MaxAge = 00:00__.<br> 
+It may happen that, notifications are available for changes to the cached __user profile__ or the __user permissions__.<br> 
+Upon such notifications, the developer may __invalidate the cache entry__ or raise a request with __MaxAge = 00:00__ to load a cache entry for the same user, with the updated data.<br>
+__When change notifications are handled properly__, even if data changes frequently, the developer can use a __longer MaxAge__ (eg. hours or days) and take maximum benefit from the cache, __still without delays upon data changes__.<br>
+
+Age sensitive data management becomes very useful when __data changes very frequently__.<br>
+As an example, consider an application showing notifications, messages or real time data.<br>
+When navigating across the pages speed of navigation may be a priority, so __using cached data may be a good choice__ (still with a shorter MaxAge (eg. 120 secs)).
+
+In these cases navigation will take benefit from the cache hits.<br>
+After the navigation completes, the developer may raise a request with __MaxAge = 00:00__ to load fresh data for the user.<br>
+In this way navigation will take advantage of cache hits speed and the user will still see fresh data, when the navigation ends.<br>
+
+# AN OPPORTUNITY FOR PERFORMANCE: CACHE WITH PRELOADING
+
+
+# AN OPPORTUNITY FOR PERFORMANCE: MAXAGE PROMOTION
+Sometimes, data from the past is immutable (eg. realtime data, user or devices messages).<br>
+In such cases, an automatic rule can be applied to __promote MaxAge to a long or indefinite value__ (__MaxAge promotion__).<br>
+
+It may happen that a query or an API call loads data from the present together with data from the past.<br>
+When this happpens the request can be split automatically:<br>
+- Data from the present must be loaded with the MaxAge specified by the developer.<br>
+- Data from the past will take advantage of MaxAge promotion to a long or indefinite value.<br>
+
+Queries to the backend will be faster and with smaller payloads.<br>
+
+# A OPPORTUNITY FOR PERFORMANCE: (AUTOMATIC) DATA PRELOADING
+With __age sensitive data management__ a new opportunity for performance is uncovered.<br><br>
+The `required age` specified by the developer is of course used to determine if a __cache hit__ or a __cache miss__ can occur.<br>
+Such `required age` can also be used as __a time window, in the past__, to __preload data in background__ and __ensure a cache hit will be obtained__, when the application needs it.<br><br>
+`Diginsight.SmartCache` captures this opportunity leveraging the application log to anticipate `the required entries`, `the required maxage` for them and __anticipate entries preload__ in time for the application need.<br>
+
+# SUMMARY
+`Diginsight.SmartCache` introduces __age sensitive data management__: a new approach to managing data: 
+
+When loading data a developer can specify the __maximum age__ that is required for it.<br>
+A __cache hit or a cache miss is determined by the `required age`, provided at every single call__ and not by the cache entries lifetime that is defined at startup.<br>
+
+This __allows using cache with non static data__ and __data that is updated frequently__ without requiring delays in showing data changes, and always allowing easy access to fresh data whenever required.<br>
+
+`Diginsight.SmartCache` allows __MaxAge promotion__ and __(automatic) data preloading__ techniques as great opportunities to boost application performance.<br>
+
+
+
+
+.
+
+
+
+

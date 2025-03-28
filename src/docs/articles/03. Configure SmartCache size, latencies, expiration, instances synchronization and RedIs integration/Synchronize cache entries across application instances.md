@@ -1,0 +1,2 @@
+# INTRODUCTION 
+diginsight `SmartCache` provides __hybrid, distributed, multilevel caching__ based on __age sensitive data management__.<br> 
