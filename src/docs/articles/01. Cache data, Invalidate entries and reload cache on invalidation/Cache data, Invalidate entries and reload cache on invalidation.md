@@ -4,9 +4,9 @@ diginsight `SmartCache` provides __hybrid, distributed, multilevel caching__ bas
 This article discusses how we can use `SmartCache` to:
 - Cache data from a call and associate a suitable key to it
 - Invalidate entries 
-- reload cache entries upon invalidation
+- Reload cache entries upon invalidation
 
-The code snippets below are available as working samples within the [smartcache.samples](https://github.com/diginsight/smartcache.samples) repository.
+The __code snippets__ and __images__ below are taken from the __SampleWebAPI__ working samples within the [smartcache.samples](https://github.com/diginsight/smartcache.samples) repository.
 
 
 # STEP 01 - Cache data from a call and associate a suitable key to it
