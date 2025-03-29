@@ -4,10 +4,17 @@ diginsight `SmartCache` provides __hybrid, distributed, multilevel caching__ bas
 In-memory cache ensure __0-latency__ for most recently used data and ensures __low pressure (and reduced cost)__ on the external RedIs database.
 - `SmartCache` is __distributed__ as cache entries on different nodes of a multiinstance application are sinchronized automatically, to avoid flickering of values when querying the same data on different nodes.
 - `SmartCache` is based on __age sensitive data management__ as cache entries are returned based on a requested __MaxAge__ parameter.<br>
-__Data is returned from the cache if the requested MaxAge is compatible with the cache entry__.<br>Otherwise data is requested to the real data provider.
-<br>This allows requesting data with __different MaxAge criteria, according to the specific application condition__.<br>
-Data loaded by any request, is made available for the benefit of further requests (as long as compatible with their MaxAge requirement).
-![alt text](<src/docs/001.02 SmartCache Basic Tenets.png>)
+Data is returned from the cache __if the cache entry corresponding to the request is compatible with the requested MaxAge__.<br>Otherwise data is obtained by the cache __data source provided as a delegate__.
+<br>Any application, at any time, can access data with __different age criteria, according to the specific use for which data is requested__.<br>
+
+    The image bleow illustrates shows an application __requesting data with age 5 minutes__ to a multinode application:<br>
+    ![alt text](<src/docs/001.02 SmartCache Basic Tenets.png>)
+
+
+    Data loaded by any request, is made available for the benefit of further requests (as long as compatible with their MaxAge requirement).<br>
+    As an example, an __immediately successive request__ for the same data with __age 1 minute__ will be satisfied by the cache entry loaded by the first request.
+
+
 
 - `SmartCache` is __Multilevel__: The same entries can be cached in multiple levels (frontend, backend or further levels). <br>At any level, __data is returned from the cache if the requested MaxAge is compatible with the cache entry__. otherwise data is requested to the further levels.<br>
 In case all levels entries contains old data, incompatible with the request MaxAge requirement, data is requested to the real data provider.
@@ -51,10 +58,13 @@ discusses basic steps to start using `Diginsight.SmartCache`.<br>
 
 
 # STEPS TO USE SMARTCACHE
+The __steps__, __code snippets__ and __images__ below were created by means of the working __SampleWebAPI__ available into [smartcache.samples](https://github.com/diginsight/smartcache.samples) repository.<br>
+
+![alt text](<src/docs/00.1 SampleWebAPI sample.png>)
 
 ## STEP 01: add a reference to `Diginsight.SmartCache`
 In the first step you can just add a `Diginsight.SmartCache` reference to your code:<br>
-![alt text](<src/docs/01. Add a reference to Diginsight.SmartCache.png>)<br>
+![alt text](<src/docs/01.1 Add a reference to Diginsight.SmartCache.png>)
 
 In case of multiinstance applications `Diginsight.SmartCache.Externalization.ServiceBus` may be needed to support instances synchronization.
 In case of AspNetCore applications `Diginsight.SmartCache.Externalization.AspNetCore` may be useful to support dynamic `MaxAge` specification from http request headers.
@@ -68,33 +78,30 @@ The code snippets below are available as working samples within the [smartcache.
 public void ConfigureServices(IServiceCollection services)
 {
     ...
-
-    services.ConfigureRedisCacheSettings(configuration); // reads RedIs connection string
-
+    // (optional) reads RedIs connection string
+    services.ConfigureRedisCacheSettings(configuration); 
     ...
+    // configures Diginsight:SmartCache config section with default             
+    services.ConfigureClassAware<SmartCacheCoreOptions>(configuration.GetSection("Diginsight:SmartCache"));
+    var smartCacheBuilder = services.AddSmartCache(configuration, environment, loggerFactory)
+                                    .AddHttp();
 
-    // configures Diginsight:SmartCache config section with default settings
-    // supports Dynamic-Configuration for MaxAge, expirations etc
-    services.Configure<SmartCacheCoreOptions>(configuration.GetSection("Diginsight:SmartCache"))
-            .PostConfigureClassAwareFromHttpRequestHeaders<SmartCacheCoreOptions>();
-
-    // adds smartCache services (ISmartCache, ICacheKeyService and other internal services)
-    SmartCacheBuilder smartCacheBuilder = services.AddSmartCache().AddHttpHeaderSupport();
-
-    // reads ServiceBus configuration so support instances synchronization
-    IConfigurationSection smartCacheServiceBusConfiguration = 
-                          configuration.GetSection("Diginsight:SmartCache:ServiceBus");
-    if (!string.IsNullOrEmpty(smartCacheServiceBusConfiguration["ConnectionString"]) &&
-        !string.IsNullOrEmpty(smartCacheServiceBusConfiguration["TopicName"]))
+    // (optional) ServiceBus connection 
+    IConfigurationSection smartCacheServiceBusConfiguration = configuration.GetSection("Diginsight:SmartCache:ServiceBus");
+    if (!string.IsNullOrEmpty(smartCacheServiceBusConfiguration[nameof(SmartCacheServiceBusOptions.ConnectionString)]) && !string.IsNullOrEmpty(smartCacheServiceBusConfiguration[nameof(SmartCacheServiceBusOptions.TopicName)]))
     {
         smartCacheBuilder.SetServiceBusCompanion(
-                sbo =>
-                {
-                    smartCacheServiceBusConfiguration.Bind(sbo);
-                    // add a GUID as a service bus subscription
-                    sbo.SubscriptionName = SmartCacheServiceBusSubscriptionName; 
-                }
-            );
+            static (c, _) =>
+            {
+                IConfiguration sbc = c.GetSection("Diginsight:SmartCache:ServiceBus");
+                return !string.IsNullOrEmpty(sbc[nameof(SmartCacheServiceBusOptions.ConnectionString)])
+                    && !string.IsNullOrEmpty(sbc[nameof(SmartCacheServiceBusOptions.TopicName)]);
+            },
+            sbo =>
+            {
+                configuration.GetSection("Diginsight:SmartCache:ServiceBus").Bind(sbo);
+                sbo.SubscriptionName = SmartCacheServiceBusSubscriptionName;
+            });
     }
 
     services.TryAddSingleton<ICacheKeyProvider, MyCacheKeyProvider>();
@@ -119,7 +126,7 @@ The image below shows `Diginsight.SmartCache` settings with default `MaxAge` and
 ```
 
 > NB. 
-> - __ServiceBus configuration__ is required only in case of __multiinstance applications__ where instances cache entries need to be synchronized
+> - __ServiceBus configuration__ is required only in case of __multiinstance applications__ where instances cache entries need to be synchronized.
 > - __RedIs configuration__ is required only in case external backing storage is available to save evicted cache entries. this allows __reducing cache miss rate__ and __mininize access to data sources__.
 
 
@@ -161,7 +168,7 @@ public async Task<IEnumerable<Plant>> GetPlantsCachedAsync()
 the image below show the log of the `SampleWebApi` `GetPlantsCachedAsync` method.<br>
 The first call finds a `cache miss` and resolves to calling the `GetPlantsAsync` method.
 the following calla find a `cache miss` obtaining the result in __2/3ms__ instead of more than __1sec__ (about __1 to 1000 ratio__).
-![alt text](<src/docs/03.01 cached call log with cache miss and cache hit.png>)
+![alt text](<src/docs/03.01a cached call log with cache miss and cache hit.png>)
 
 
 # Reference 
