@@ -174,16 +174,16 @@ the following calla find a `cache miss` obtaining the result in __2/3ms__ instea
 # Reference 
 The following articles discuss the details of `Diginsight.SmartCache` use and configuration:
 
-- [HowTo: Cache data, Invalidate entries and reload cache on invalidation](<src/docs/articles/01. Concepts/01. Cache data, Invalidate entries and reload cache on invalidation.md>)<br>
+- [HowTo: Cache data, Invalidate entries and reload cache on invalidation](<src/docs/articles/01. Cache data, Invalidate entries and reload cache on invalidation.md>)<br>
 discusses how to cache calls, and add support for invalidation and reload to cached data. 
 
-- [HowTo: Synchronize cache entries across application instances with ServiceBusCompanion or KubernetesCompanion](<src/docs/articles/01. Concepts/02. Synchronize cache entries across application instances.md>).<br>
+- [HowTo: Synchronize cache entries across application instances with ServiceBusCompanion or KubernetesCompanion](<src/docs/articles/02. Synchronize cache entries across application instances.md>).<br>
 discusses how to configure the ServiceBusCompanion or the KubernetesCompanion to support distributed cache entries across application instances. 
 
-- [HowTo: Configure SmartCache size, latencies, expiration, instances synchronization and RedIs integration](<src/docs/articles/01. Concepts/03. Configure SmartCache size, latencies, expiration, instances synchronization and RedIs integration.md>).<br>
+- [HowTo: Configure SmartCache size, latencies, expiration, instances synchronization and RedIs integration](<src/docs/articles/03. Configure SmartCache size, latencies, expiration, instances synchronization and RedIs integration.md>).<br>
 discusses how to configure cache size, expiration latencies and connection to external RedIs backing storage. 
 
-- [HowTo: Boost application performance with age sensitive data management](<src/docs/articles/01. Concepts/10. Boost application performance with age sensitive data management.md>).<br>
+- [HowTo: Boost application performance with age sensitive data management](<src/docs/articles/10. Boost application performance with age sensitive data management.md>).<br>
 discusses how performance of our applications can be boosted by using smartcache. 
 
 - [HowTo: Enable data preloading by means of AI assisted algorithms.md]<br> 
