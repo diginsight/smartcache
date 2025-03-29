@@ -1,18 +1,19 @@
 # INTRODUCTION 
-diginsight `SmartCache` provides __hybrid, distributed, multilevel caching__ based on __age sensitive data management__.<br> 
+diginsight `SmartCache` provides __hybrid, distributed, multilevel caching__ based on __age sensitive data management__.<br>
 - `SmartCache` is __hybrid__ as it caches data __in-memory__ and on __external RedIs databases__.<br>
-In-memory cache ensure __0-latency__ for most recently used data and ensures __low pressure (and reduced cost)__ on the external RedIs database.
-- `SmartCache` is __distributed__ as cache entries on different nodes of a multiinstance application are sinchronized automatically, to avoid flickering of values when querying the same data on different nodes.
+In-memory cache ensure __0-latency__ for most recently used data and ensures __low pressure (and reduced cost)__ on the external RedIs database.<br>
+- `SmartCache` is __distributed__ as cache entries on different nodes of a multiinstance application are sinchronized automatically, to avoid flickering of values when querying the same data on different nodes.<br>
 - `SmartCache` is based on __age sensitive data management__ as cache entries are returned based on a requested __MaxAge__ parameter.<br>
-Data is returned from the cache __if the cache entry corresponding to the request is compatible with the requested MaxAge__.<br>Otherwise data is obtained by the cache __data source provided as a delegate__.
+Data is returned from the cache __if the cache entry corresponding to the request is compatible with the requested MaxAge__.<br>
+Otherwise data is obtained by the cache __data source provided as a delegate__.
 <br>Any application, at any time, can access data with __different age criteria, according to the specific use for which data is requested__.<br>
 
-    The image bleow illustrates shows an application __requesting data with age 5 minutes__ to a multinode application:<br>
+The image bleow illustrates shows an application __requesting data with age 5 minutes__ to a multinode application:<br>
     ![alt text](<src/docs/001.02 SmartCache Basic Tenets.png>)
 
 
-    Data loaded by any request, is made available for the benefit of further requests (as long as compatible with their MaxAge requirement).<br>
-    As an example, an __immediately successive request__ for the same data with __age 1 minute__ will be satisfied by the cache entry loaded by the first request.
+Data loaded by any request, is made available for the benefit of further requests (as long as compatible with their MaxAge requirement).<br>
+As an example, an __immediately successive request__ for the same data with __age 1 minute__ will be satisfied by the cache entry loaded by the first request.
 
 
 
@@ -24,7 +25,9 @@ In case all levels entries contains old data, incompatible with the request MaxA
     - __Minimizes use of external backing storage__ (e.g. RedIS) => it is __cheaper__ and __scalable__ as accesses to the backing storage are minimized
     - Replicas synchronize always __keys__ and __small values__, __bigger values__ are synchronized on demand
     - SmartCache supports __data preloading__ and __automatic invalidation__ of the cache entries so, __data load latencies can be cut since the first call__.
-<br><br>
+<br>
+<br>
+
 > SmartCache supports caching data with __low cost__ and __high performance__.<br>
 > In particular, __0 latency__ is ensured on in-memory cache hits.
 > also, __pressure on external RedIS resource is low__ as most frequently used entries are managed in-memory.
@@ -37,11 +40,12 @@ the following image illustrates the five SmartCache tenets:
 
 
 # ADDITIONAL INFORMATION 
-Using Smartcache the following events are involved when interacting with data:
-- __Cache hit__ or __cache miss__: 
+Using Smartcache the following events are involved when interacting with data:<br>
+
+- __Cache hit__ or __cache miss__:
     - a  __cache hit__: occurs when a __cache entry__ exists with key and age compatible with the requested data.<br>
-    In case the cache value is taken from the External (RedIs) backing storage, we call it a  __hybrid cache hit__.
-    - a  __cache miss__: occurs when no __cache entry__ exists for the key or its age is older than requested __MaxAge__ for data.
+    In case the cache value is taken from the External (RedIs) backing storage, we call it a  __hybrid cache hit__.<br>
+    - a  __cache miss__: occurs when no __cache entry__ exists for the key or its age is older than requested __MaxAge__ for data.<br>
 - __Miss notification__: every time a __cache miss__ occurs, __all instances are notified__ about it so that in case they receive a request for the same key, they can obtain the value from the instance that owns it, without need to retrieve it from the server again. 
 - __Entry eviction__: every time the in-memory cache eccedes the __configured quota__ older and bigger entries are __evicted__, and __off-loaded to the external (RedIs) backing storage__.
 - __Entry invalidation__: specific application conditions, may requires cache entries to be invalidated.
@@ -174,17 +178,17 @@ the following calla find a `cache miss` obtaining the result in __2/3ms__ instea
 # Reference 
 The following articles discuss the details of `Diginsight.SmartCache` use and configuration:
 
-- [HowTo: Cache data, Invalidate entries and reload cache on invalidation](<src/docs/articles/01. Cache data, Invalidate entries and reload cache on invalidation.md>)<br>
+- [HowTo: Cache data, Invalidate entries and reload cache on invalidation](<src/docs/articles/01. Concepts/01. Cache data, Invalidate entries and reload cache on invalidation.md>)<br>
 discusses how to cache calls, and add support for invalidation and reload to cached data. 
 
-- [HowTo: Synchronize cache entries across application instances with ServiceBusCompanion or KubernetesCompanion](<src/docs/articles/02. Synchronize cache entries across application instances.md>).<br>
+- [HowTo: Synchronize cache entries across application instances with ServiceBusCompanion or KubernetesCompanion](<src/docs/articles/01. Concepts/02. Synchronize cache entries across application instances.md>).<br>
 discusses how to configure the ServiceBusCompanion or the KubernetesCompanion to support distributed cache entries across application instances. 
 
-- [HowTo: Configure SmartCache size, latencies, expiration, instances synchronization and RedIs integration](<src/docs/articles/03. Configure SmartCache size, latencies, expiration, instances synchronization and RedIs integration.md>).<br>
+- [HowTo: Configure SmartCache size, latencies, expiration, instances synchronization and RedIs integration](<src/docs/articles/01. Concepts/03. Configure SmartCache size, latencies, expiration, instances synchronization and RedIs integration.md>).<br>
 discusses how to configure cache size, expiration latencies and connection to external RedIs backing storage. 
 
-- [HowTo: Boost application performance with age sensitive data management](<src/docs/articles/10. Boost application performance with age sensitive data management.md>).<br>
-discusses how performance of our applications can be boosted by using smartcache. 
+- [HowTo: Boost application performance with age sensitive data management](<src/docs/articles/01. Concepts/10. Boost application performance with age sensitive data management.md>).<br>
+discusses how performance of our applications can be boosted by using smartcache.  
 
 - [HowTo: Enable data preloading by means of AI assisted algorithms.md]<br> 
 (TODO): explores how to enable AI assisted preloading to improve data preloading efficiency.<br><br>

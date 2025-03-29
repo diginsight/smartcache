@@ -188,7 +188,7 @@ discusses how to configure the ServiceBusCompanion or the KubernetesCompanion to
 discusses how to configure cache size, expiration latencies and connection to external RedIs backing storage. 
 
 - [HowTo: Boost application performance with age sensitive data management](<src/docs/articles/01. Concepts/10. Boost application performance with age sensitive data management.md>).<br>
-discusses how performance of our applications can be boosted by using smartcache. 
+discusses how performance of our applications can be boosted by using smartcache.  
 
 - [HowTo: Enable data preloading by means of AI assisted algorithms.md]<br> 
 (TODO): explores how to enable AI assisted preloading to improve data preloading efficiency.<br><br>
