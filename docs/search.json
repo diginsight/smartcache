@@ -93,5 +93,41 @@
       "Concepts",
       "Configure SmartCache"
     ]
+  },
+  {
+    "objectID": "src/docs/05. About/about.html",
+    "href": "src/docs/05. About/about.html",
+    "title": "Team",
+    "section": "",
+    "text": "Diginsight is a free opensource project. Diginsight team is a team of friends (engineers, scientists…) with passion for technology, experimenting ideas and excellence.",
+    "crumbs": [
+      "Home",
+      "About",
+      "Team"
+    ]
+  },
+  {
+    "objectID": "src/docs/05. About/about.html#project-members",
+    "href": "src/docs/05. About/about.html#project-members",
+    "title": "Team",
+    "section": "Project members",
+    "text": "Project members\n\n\n\n\n\n\n\n\n\nFilippo Mineo\nMilan, Italy\n\n\n\nAlessandro Avila\nMilan, Italy\n\n\n\nDario Airoldi\nMilan, Italy",
+    "crumbs": [
+      "Home",
+      "About",
+      "Team"
+    ]
+  },
+  {
+    "objectID": "src/docs/05. About/about.html#other-contributors",
+    "href": "src/docs/05. About/about.html#other-contributors",
+    "title": "Team",
+    "section": "Other Contributors",
+    "text": "Other Contributors\nChayashree Gollahalli | Bhangalore, India Carlo Bollini | Milan, Italy Metushi Margil | Milan, Italy Maurizio Iacovella | Milan, Italy Matteo Delli Rocioli | Milan, Italy Raffaele Fanizzi | Milan, Italy",
+    "crumbs": [
+      "Home",
+      "About",
+      "Team"
+    ]
   }
 ]
