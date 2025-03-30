@@ -11,7 +11,6 @@ Otherwise data is obtained by the cache __data source provided as a delegate__.
 The image bleow illustrates shows an application __requesting data with age 5 minutes__ to a multinode application:<br>
     ![alt text](<src/docs/001.02 SmartCache Basic Tenets.png>)
 
-
 Data loaded by any request, is made available for the benefit of further requests (as long as compatible with their MaxAge requirement).<br>
 As an example, an __immediately successive request__ for the same data with __age 1 minute__ will be satisfied by the cache entry loaded by the first request.
 
@@ -21,7 +20,7 @@ As an example, an __immediately successive request__ for the same data with __ag
 In case all levels entries contains old data, incompatible with the request MaxAge requirement, data is requested to the real data provider.
 
 - `SmartCache` is __Optimized__: as:
-    - Privileges __In-memory cache__ => it is faster as in memory cache hits are __'0-Latency'__
+    - It privileges __In-memory cache__ => it is faster as in memory cache hits are __'0-Latency'__
     - __Minimizes use of external backing storage__ (e.g. RedIS) => it is __cheaper__ and __scalable__ as accesses to the backing storage are minimized
     - Replicas synchronize always __keys__ and __small values__, __bigger values__ are synchronized on demand
     - SmartCache supports __data preloading__ and __automatic invalidation__ of the cache entries so, __data load latencies can be cut since the first call__.
@@ -178,16 +177,16 @@ the following calla find a `cache miss` obtaining the result in __2/3ms__ instea
 # Reference 
 The following articles discuss the details of `Diginsight.SmartCache` use and configuration:
 
-- [HowTo: Cache data, Invalidate entries and reload cache on invalidation](<src/docs/articles/01. Concepts/01. Cache data, Invalidate entries and reload cache on invalidation.md>)<br>
+- [HowTo: Cache data, Invalidate entries and reload cache on invalidation](<src/docs/01. Concepts/01. Cache data, Invalidate entries and reload cache on invalidation.md>)<br>
 discusses how to cache calls, and add support for invalidation and reload to cached data. 
 
-- [HowTo: Synchronize cache entries across application instances with ServiceBusCompanion or KubernetesCompanion](<src/docs/articles/01. Concepts/02. Synchronize cache entries across application instances.md>).<br>
+- [HowTo: Synchronize cache entries across application instances with ServiceBusCompanion or KubernetesCompanion](<src/docs/01. Concepts/02. Synchronize cache entries across application instances.md>).<br>
 discusses how to configure the ServiceBusCompanion or the KubernetesCompanion to support distributed cache entries across application instances. 
 
-- [HowTo: Configure SmartCache size, latencies, expiration, instances synchronization and RedIs integration](<src/docs/articles/01. Concepts/03. Configure SmartCache size, latencies, expiration, instances synchronization and RedIs integration.md>).<br>
+- [HowTo: Configure SmartCache size, latencies, expiration, instances synchronization and RedIs integration](<src/docs/01. Concepts/03. Configure SmartCache size, latencies, expiration, instances synchronization and RedIs integration.md>).<br>
 discusses how to configure cache size, expiration latencies and connection to external RedIs backing storage. 
 
-- [HowTo: Boost application performance with age sensitive data management](<src/docs/articles/01. Concepts/10. Boost application performance with age sensitive data management.md>).<br>
+- [HowTo: Boost application performance with age sensitive data management](<src/docs/01. Concepts/10. Boost application performance with age sensitive data management.md>).<br>
 discusses how performance of our applications can be boosted by using smartcache.  
 
 - [HowTo: Enable data preloading by means of AI assisted algorithms.md]<br> 
