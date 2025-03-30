@@ -20,7 +20,7 @@ As an example, an __immediately successive request__ for the same data with __ag
 In case all levels entries contains old data, incompatible with the request MaxAge requirement, data is requested to the real data provider.
 
 - `SmartCache` is __Optimized__: as:
-    - Privileges __In-memory cache__ => it is faster as in memory cache hits are __'0-Latency'__
+    - It privileges __In-memory cache__ => it is faster as in memory cache hits are __'0-Latency'__
     - __Minimizes use of external backing storage__ (e.g. RedIS) => it is __cheaper__ and __scalable__ as accesses to the backing storage are minimized
     - Replicas synchronize always __keys__ and __small values__, __bigger values__ are synchronized on demand
     - SmartCache supports __data preloading__ and __automatic invalidation__ of the cache entries so, __data load latencies can be cut since the first call__.

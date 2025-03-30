@@ -325,7 +325,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li><p><code>SmartCache</code> is <strong>Multilevel</strong>: The same entries can be cached in multiple levels (frontend, backend or further levels). <br>At any level, <strong>data is returned from the cache if the requested MaxAge is compatible with the cache entry</strong>. otherwise data is requested to the further levels.<br> In case all levels entries contains old data, incompatible with the request MaxAge requirement, data is requested to the real data provider.</p></li>
 <li><p><code>SmartCache</code> is <strong>Optimized</strong>: as:</p>
 <ul>
-<li>Privileges <strong>In-memory cache</strong> =&gt; it is faster as in memory cache hits are <strong>‘0-Latency’</strong></li>
+<li>It privileges <strong>In-memory cache</strong> =&gt; it is faster as in memory cache hits are <strong>‘0-Latency’</strong></li>
 <li><strong>Minimizes use of external backing storage</strong> (e.g.&nbsp;RedIS) =&gt; it is <strong>cheaper</strong> and <strong>scalable</strong> as accesses to the backing storage are minimized</li>
 <li>Replicas synchronize always <strong>keys</strong> and <strong>small values</strong>, <strong>bigger values</strong> are synchronized on demand</li>
 <li>SmartCache supports <strong>data preloading</strong> and <strong>automatic invalidation</strong> of the cache entries so, <strong>data load latencies can be cut since the first call</strong>. <br> <br></li>
