@@ -106,7 +106,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <link rel="stylesheet" href="styles.css">
 <meta property="og:title" content="Cache, invalidation and reload –  smartcache">
 <meta property="og:description" content="">
-<meta property="og:image" content="01.b inject smartCache and cacheKeyService.png">
+<meta property="og:image" content="01. Cache data, Invalidate entries and reload cache on invalidation/01.b inject smartCache and cacheKeyService.png">
 <meta property="og:site_name" content="<i class=&quot;bi bi-lightbulb-fill&quot; style=&quot;vertical-align: middle; margin-left: 0px;margin-right: 15px;&quot;></i> smartcache">
 <meta property="og:image:alt" content="alt text">
 </head>
@@ -345,7 +345,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>    activity<span class="op">?.</span><span class="fu">SetOutput</span><span class="op">(</span>plant<span class="op">);</span></span>
 <span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>    <span class="kw">return</span> plant<span class="op">;</span></span>
 <span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>result from the method execution can be cached with the following steps: - inject <code>smartCache</code> and <code>cacheKeyService</code> into the current class<br> <img src="01.b inject smartCache and cacheKeyService.png" class="img-fluid" alt="alt text"></p>
+<p>result from the method execution can be cached with the following steps: - inject <code>smartCache</code> and <code>cacheKeyService</code> into the current class<br> <img src="01. Cache data, Invalidate entries and reload cache on invalidation/01.b inject smartCache and cacheKeyService.png" class="img-fluid" alt="alt text"></p>
 <ul>
 <li><p>create a new method <code>GetPlantByIdAsync</code> calling <code>GetPlantByIdImplAsync</code> by means of <strong>smartCache</strong> service<br></p>
 <div class="sourceCode" id="cb2"><pre class="sourceCode c# code-with-copy"><code class="sourceCode cs"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> async Task<span class="op">&lt;</span>Plant<span class="op">&gt;</span> <span class="fu">GetPlantByIdAsync</span><span class="op">([</span>FromRoute<span class="op">]</span> Guid plantId<span class="op">)</span></span>
@@ -363,7 +363,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </ul>
 <p>the <code>smartCache.GetAsyc()</code> call manages cached call to <code>GetPlantByIdImplAsync</code>: - <strong>cacheKey</strong>: is the <strong>cache key</strong> class associated to the cache entry - <strong>delegate</strong> with the call to <code>GetPlantByIdImplAsync</code> is used to fetch values in case of cache miss - (opt) <strong>options</strong> with required <strong>MaxAge</strong> allows requesting data specifying a specific age criteria: cache hit will happen only if available data is within the requested age.</p>
 <p>calling <code>GetPlantByIdAsync</code> twice, you will get the following log where: - the first call is a <strong>cache miss</strong> with latency of &gt;1sec - the first call is a <strong>cache hit</strong> with latency of few ms</p>
-<pre><code>![alt text](&lt;01.2 Cache miss cache hit log.png&gt;)</code></pre>
+<pre><code>![alt text](&lt;01. Cache data, Invalidate entries and reload cache on invalidation/01.2 Cache miss cache hit log.png&gt;)</code></pre>
 </section>
 <section id="step-02---add-invalidation-support-to-cached-calls" class="level1">
 <h1>STEP 02 - Add Invalidation support to cached calls</h1>
@@ -398,7 +398,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>Upon plant <strong>creation/update/delete</strong>, you can trigger invalidation by means of <code>smartCache.Invalidate();</code> call:</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="02.01a Invalidate data upon plant creation or update.png" class="img-fluid figure-img"></p>
+<p><img src="01. Cache data, Invalidate entries and reload cache on invalidation/02.01a Invalidate data upon plant creation or update.png" class="img-fluid figure-img"></p>
 <figcaption>alt text</figcaption>
 </figure>
 </div>
@@ -407,7 +407,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>The image below shows that: - after updating a Plant - the <code>GetPlantsAsync</code> call gets a <strong>cache miss</strong> call as its cache entry has been invalidated</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="02.02 cache miss after invalidation log.png" class="img-fluid figure-img"></p>
+<p><img src="01. Cache data, Invalidate entries and reload cache on invalidation/02.02 cache miss after invalidation log.png" class="img-fluid figure-img"></p>
 <figcaption>alt text</figcaption>
 </figure>
 </div>
@@ -436,7 +436,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>The image below shows that: - after updating a Plant - the <code>GetPlantsAsync</code> call gets a <strong>cache hit</strong> call as its cache entry has been reloaded, after invalidation</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="03.02 cache hit after invalidation and reloadlog.png" class="img-fluid figure-img"></p>
+<p><img src="01. Cache data, Invalidate entries and reload cache on invalidation/03.02 cache hit after invalidation and reloadlog.png" class="img-fluid figure-img"></p>
 <figcaption>alt text</figcaption>
 </figure>
 </div>
