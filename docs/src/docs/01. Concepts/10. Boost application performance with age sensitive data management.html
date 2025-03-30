@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Cache data with invalidation and reload –  smartcache</title>
+<title>Boost application performance –  smartcache</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -57,23 +57,23 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </style>
 
 
-<script src="../../../../site_libs/quarto-nav/quarto-nav.js"></script>
-<script src="../../../../site_libs/quarto-nav/headroom.min.js"></script>
-<script src="../../../../site_libs/clipboard/clipboard.min.js"></script>
-<script src="../../../../site_libs/quarto-search/autocomplete.umd.js"></script>
-<script src="../../../../site_libs/quarto-search/fuse.min.js"></script>
-<script src="../../../../site_libs/quarto-search/quarto-search.js"></script>
-<meta name="quarto:offset" content="../../../../">
-<link href="../../../../diginsight.jpg" rel="icon" type="image/jpeg">
-<script src="../../../../site_libs/quarto-html/quarto.js"></script>
-<script src="../../../../site_libs/quarto-html/popper.min.js"></script>
-<script src="../../../../site_libs/quarto-html/tippy.umd.min.js"></script>
-<script src="../../../../site_libs/quarto-html/anchor.min.js"></script>
-<link href="../../../../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../../../../site_libs/quarto-html/quarto-syntax-highlighting-2f5df379a58b258e96c21c0638c20c03.css" rel="stylesheet" id="quarto-text-highlighting-styles">
-<script src="../../../../site_libs/bootstrap/bootstrap.min.js"></script>
-<link href="../../../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../../../../site_libs/bootstrap/bootstrap-75fb367c5d51c42ff50931c5402632e6.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script src="../../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../../">
+<link href="../../../diginsight.jpg" rel="icon" type="image/jpeg">
+<script src="../../../site_libs/quarto-html/quarto.js"></script>
+<script src="../../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../../site_libs/quarto-html/quarto-syntax-highlighting-2f5df379a58b258e96c21c0638c20c03.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../../site_libs/bootstrap/bootstrap-75fb367c5d51c42ff50931c5402632e6.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -104,11 +104,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 
 <link rel="stylesheet" href="styles.css">
-<meta property="og:title" content="Cache data with invalidation and reload –  smartcache">
+<meta property="og:title" content="Boost application performance –  smartcache">
 <meta property="og:description" content="">
-<meta property="og:image" content="01.b inject smartCache and cacheKeyService.png">
+<meta property="og:image" content="diginsight.jpg">
 <meta property="og:site_name" content="<i class=&quot;bi bi-lightbulb-fill&quot; style=&quot;vertical-align: middle; margin-left: 0px;margin-right: 15px;&quot;></i> smartcache">
-<meta property="og:image:alt" content="alt text">
 </head>
 
 <body class="nav-sidebar docked nav-fixed">
@@ -118,7 +117,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
-    <a class="navbar-brand" href="../../../../index.html">
+    <a class="navbar-brand" href="../../../index.html">
     <span class="navbar-title"><i class="bi bi-lightbulb-fill" style="vertical-align: middle; margin-left: 0px;margin-right: 15px;"></i> smartcache</span>
     </a>
   </div>
@@ -129,11 +128,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
           <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav navbar-nav-scroll me-auto">
   <li class="nav-item">
-    <a class="nav-link active" href="../../../../index.html" aria-current="page"> 
+    <a class="nav-link active" href="../../../index.html" aria-current="page"> 
 <span class="menu-text">Home</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link" href="../../../../src/docs/01. Cache data, Invalidate entries and reload cache on invalidation.md"> 
+    <a class="nav-link" href="../../../src/docs/01. Cache data, Invalidate entries and reload cache on invalidation.md"> 
 <span class="menu-text">Concepts</span></a>
   </li>  
   <li class="nav-item dropdown ">
@@ -142,11 +141,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     </a>
     <ul class="dropdown-menu" aria-labelledby="nav-menu-about">    
         <li>
-    <a class="dropdown-item" href="../../../../src/docs/05. About/about.md">
+    <a class="dropdown-item" href="../../../src/docs/05. About/about.md">
  <span class="dropdown-text">About</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="../../../../src/LICENSE.html">
+    <a class="dropdown-item" href="../../../src/LICENSE.html">
  <span class="dropdown-text">License</span></a>
   </li>  
     </ul>
@@ -187,7 +186,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item">Cache data with invalidation and reload</li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../../src/docs/01. Concepts/01. Cache data, Invalidate entries and reload cache on invalidation.html">Concepts</a></li><li class="breadcrumb-item"><a href="../../../src/docs/01. Concepts/10. Boost application performance with age sensitive data management.html">Boost application performance</a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
     </div>
@@ -221,21 +220,52 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <ul class="list-unstyled mt-1">
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../../../../index.html" class="sidebar-item-text sidebar-link">
+  <a href="../../../index.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Home</span></a>
   </div>
 </li>
         <li class="px-0"><hr class="sidebar-divider hi "></li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../../../../index.md?tab=readme-ov-file#steps-to-use-smartcache" class="sidebar-item-text sidebar-link">
+  <a href="../../../index?tab=readme-ov-file#steps-to-use-smartcache" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Getting Started</span></a>
   </div>
 </li>
         <li class="px-0"><hr class="sidebar-divider hi "></li>
         <li class="sidebar-item sidebar-item-section">
-      <span class="sidebar-item-text sidebar-link text-start">
- <span class="menu-text">Concepts</span></span>
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text">Concepts</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../src/docs/01. Concepts/01. Cache data, Invalidate entries and reload cache on invalidation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Cache data with invalidation and reload</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../src/docs/01. Concepts/02. Synchronize cache entries across application instances.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Synchronize cache entries across application instances</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../src/docs/01. Concepts/03. Configure SmartCache size, latencies, expiration, instances synchronization and RedIs integration.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Configure SmartCache</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../../../src/docs/01. Concepts/10. Boost application performance with age sensitive data management.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">Boost application performance</span></a>
+  </div>
+</li>
+      </ul>
   </li>
         <li class="px-0"><hr class="sidebar-divider hi "></li>
         <li class="sidebar-item sidebar-item-section">
@@ -252,19 +282,22 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction">INTRODUCTION</a></li>
-  <li><a href="#step-01---cache-data-from-a-call-and-associate-a-suitable-key-to-it" id="toc-step-01---cache-data-from-a-call-and-associate-a-suitable-key-to-it" class="nav-link" data-scroll-target="#step-01---cache-data-from-a-call-and-associate-a-suitable-key-to-it">STEP 01 - Cache data from a call and associate a suitable key to it</a></li>
-  <li><a href="#step-02---add-invalidation-support-to-cached-calls" id="toc-step-02---add-invalidation-support-to-cached-calls" class="nav-link" data-scroll-target="#step-02---add-invalidation-support-to-cached-calls">STEP 02 - Add Invalidation support to cached calls</a></li>
-  <li><a href="#step-03---add-automatic-reload-support-to-cached-calls" id="toc-step-03---add-automatic-reload-support-to-cached-calls" class="nav-link" data-scroll-target="#step-03---add-automatic-reload-support-to-cached-calls">STEP 03 - Add automatic reload support to cached calls</a></li>
+  <li><a href="#boost-application-performance-with-age-sensitive-data-management" id="toc-boost-application-performance-with-age-sensitive-data-management" class="nav-link active" data-scroll-target="#boost-application-performance-with-age-sensitive-data-management">BOOST APPLICATION PERFORMANCE WITH AGE SENSITIVE DATA MANAGEMENT</a></li>
+  <li><a href="#what-is-age-sensitive-data-management" id="toc-what-is-age-sensitive-data-management" class="nav-link" data-scroll-target="#what-is-age-sensitive-data-management">WHAT IS AGE SENSITIVE DATA MANAGEMENT</a></li>
+  <li><a href="#use-cases" id="toc-use-cases" class="nav-link" data-scroll-target="#use-cases">USE CASES</a></li>
+  <li><a href="#an-opportunity-for-performance-cache-with-preloading" id="toc-an-opportunity-for-performance-cache-with-preloading" class="nav-link" data-scroll-target="#an-opportunity-for-performance-cache-with-preloading">AN OPPORTUNITY FOR PERFORMANCE: CACHE WITH PRELOADING</a></li>
+  <li><a href="#an-opportunity-for-performance-maxage-promotion" id="toc-an-opportunity-for-performance-maxage-promotion" class="nav-link" data-scroll-target="#an-opportunity-for-performance-maxage-promotion">AN OPPORTUNITY FOR PERFORMANCE: MAXAGE PROMOTION</a></li>
+  <li><a href="#a-opportunity-for-performance-automatic-data-preloading" id="toc-a-opportunity-for-performance-automatic-data-preloading" class="nav-link" data-scroll-target="#a-opportunity-for-performance-automatic-data-preloading">A OPPORTUNITY FOR PERFORMANCE: (AUTOMATIC) DATA PRELOADING</a></li>
+  <li><a href="#summary" id="toc-summary" class="nav-link" data-scroll-target="#summary">SUMMARY</a></li>
   </ul>
 </nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
-<header id="title-block-header" class="quarto-title-block default">
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../../../src/docs/01. Concepts/01. Cache data, Invalidate entries and reload cache on invalidation.html">Concepts</a></li><li class="breadcrumb-item"><a href="../../../src/docs/01. Concepts/10. Boost application performance with age sensitive data management.html">Boost application performance</a></li></ol></nav>
 <div class="quarto-title">
-<h1 class="title">Cache data with invalidation and reload</h1>
+<h1 class="title">Boost application performance</h1>
 </div>
 
 
@@ -281,121 +314,49 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<section id="introduction" class="level1">
-<h1>INTRODUCTION</h1>
-<p>diginsight <code>SmartCache</code> provides <strong>hybrid, distributed, multilevel caching</strong> based on <strong>age sensitive data management</strong>.<br></p>
-<p>This article discusses how we can use <code>SmartCache</code> to: - Cache data from a call and associate a suitable key to it - Invalidate entries - Reload cache entries upon invalidation</p>
-<p>The <strong>code snippets</strong> and <strong>images</strong> below are taken from the <strong>SampleWebAPI</strong> working samples within the <a href="https://github.com/diginsight/smartcache.samples">smartcache.samples</a> repository.</p>
+<section id="boost-application-performance-with-age-sensitive-data-management" class="level1">
+<h1>BOOST APPLICATION PERFORMANCE WITH AGE SENSITIVE DATA MANAGEMENT</h1>
+<p><code>Diginsight.SmartCache</code> introduces <strong>age sensitive data management</strong>: a new approach to managing data.<br><br> In highly distributed environments, data is inherently <strong>disconnected</strong> and <strong>often loaded across multiple boundaries</strong>.<br> For this reasons, loading data may be an <strong>expensive operation</strong> and <strong>loading data efficiently</strong> may become <strong>a critical challenge</strong>.<br></p>
+<p>Not always fresh data data is strictly needed in our applications, to obtain the expected behaviour.<br> In many conditions, applications may work with data that is <strong>not up to date</strong>.<br><br> This is a great opportunity to <strong>boost applications performance</strong>: when fresh data is not strictly required data cached from previous calls or data pre-loaded in background may be used to ensure the shortest possible latencies.<br> <br></p>
 </section>
-<section id="step-01---cache-data-from-a-call-and-associate-a-suitable-key-to-it" class="level1">
-<h1>STEP 01 - Cache data from a call and associate a suitable key to it</h1>
-<p>Let’s assume we need to cache data from a long latency operation such as:</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode c# code-with-copy"><code class="sourceCode cs"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> async Task<span class="op">&lt;</span>Plant<span class="op">&gt;</span> <span class="fu">GetPlantByIdImplAsync</span><span class="op">([</span>FromRoute<span class="op">]</span> Guid id<span class="op">)</span></span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">using</span> <span class="dt">var</span> activity <span class="op">=</span> Program<span class="op">.</span><span class="fu">ActivitySource</span><span class="op">.</span><span class="fu">StartMethodActivity</span><span class="op">(</span>logger<span class="op">,</span> <span class="kw">new</span> <span class="op">{</span> id <span class="op">});</span></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    <span class="dt">var</span> result <span class="op">=</span> <span class="kw">default</span><span class="op">(</span>IEnumerable<span class="op">&lt;</span>Plant<span class="op">&gt;);</span></span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    <span class="co">// ... implementation ...</span></span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>    activity<span class="op">?.</span><span class="fu">SetOutput</span><span class="op">(</span>plant<span class="op">);</span></span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>    <span class="kw">return</span> plant<span class="op">;</span></span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>result from the method execution can be cached with the following steps: - inject <code>smartCache</code> and <code>cacheKeyService</code> into the current class<br> <img src="01.b inject smartCache and cacheKeyService.png" class="img-fluid" alt="alt text"></p>
-<ul>
-<li><p>create a new method <code>GetPlantByIdAsync</code> calling <code>GetPlantByIdImplAsync</code> by means of <strong>smartCache</strong> service<br></p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode c# code-with-copy"><code class="sourceCode cs"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> async Task<span class="op">&lt;</span>Plant<span class="op">&gt;</span> <span class="fu">GetPlantByIdAsync</span><span class="op">([</span>FromRoute<span class="op">]</span> Guid plantId<span class="op">)</span></span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">using</span> <span class="dt">var</span> activity <span class="op">=</span> Program<span class="op">.</span><span class="fu">ActivitySource</span><span class="op">.</span><span class="fu">StartMethodActivity</span><span class="op">(</span>logger<span class="op">);</span></span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    <span class="dt">var</span> options <span class="op">=</span> <span class="kw">new</span> <span class="fu">SmartCacheOperationOptions</span><span class="op">()</span> <span class="op">{</span> MaxAge <span class="op">=</span> TimeSpan<span class="op">.</span><span class="fu">FromMinutes</span><span class="op">(</span><span class="dv">10</span><span class="op">)</span> <span class="op">};</span></span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    <span class="dt">var</span> cacheKey <span class="op">=</span> <span class="kw">new</span> <span class="fu">MethodCallCacheKey</span><span class="op">(</span>cacheKeyService<span class="op">,</span> <span class="kw">typeof</span><span class="op">(</span>PlantsController<span class="op">),</span> <span class="fu">nameof</span><span class="op">(</span>GetPlantByIdAsync<span class="op">),</span> plantId<span class="op">);</span></span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    <span class="dt">var</span> plant <span class="op">=</span> await smartCache<span class="op">.</span><span class="fu">GetAsync</span><span class="op">(</span>cacheKey<span class="op">,</span> _ <span class="op">=&gt;</span> <span class="fu">GetPlantByIdImplAsync</span><span class="op">(</span>plantId<span class="op">),</span> options<span class="op">);</span></span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>    activity<span class="op">?.</span><span class="fu">SetOutput</span><span class="op">(</span>plant<span class="op">);</span></span>
-<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>    <span class="kw">return</span> plant<span class="op">;</span></span>
-<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div></li>
-</ul>
-<p>the <code>smartCache.GetAsyc()</code> call manages cached call to <code>GetPlantByIdImplAsync</code>: - <strong>cacheKey</strong>: is the <strong>cache key</strong> class associated to the cache entry - <strong>delegate</strong> with the call to <code>GetPlantByIdImplAsync</code> is used to fetch values in case of cache miss - (opt) <strong>options</strong> with required <strong>MaxAge</strong> allows requesting data specifying a specific age criteria: cache hit will happen only if available data is within the requested age.</p>
-<p>calling <code>GetPlantByIdAsync</code> twice, you will get the following log where: - the first call is a <strong>cache miss</strong> with latency of &gt;1sec - the first call is a <strong>cache hit</strong> with latency of few ms</p>
-<pre><code>![alt text](&lt;01.2 Cache miss cache hit log.png&gt;)</code></pre>
+<section id="what-is-age-sensitive-data-management" class="level1">
+<h1>WHAT IS AGE SENSITIVE DATA MANAGEMENT</h1>
+<p>With <strong>age sensitive data management</strong>, when loading data <strong>every entry is tagged with its <code>Creation Date</code></strong>.<br> Also, when accessing data, a developer can specify the <strong>maximum age</strong> that is required for it.<br></p>
+<p>In <code>Diginsight.SmartCache</code> this can be done by means of the following notation:<br></p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode c# code-with-copy"><code class="sourceCode cs"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="dt">var</span> options <span class="op">=</span> <span class="kw">new</span> <span class="fu">SmartCacheOperationOptions</span><span class="op">()</span> <span class="op">{</span> MaxAge <span class="op">=</span> TimeSpan<span class="op">.</span><span class="fu">FromSeconds</span><span class="op">(</span><span class="dv">600</span><span class="op">)</span> <span class="op">};</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="dt">var</span> userProfile <span class="op">=</span> await userProfileService<span class="op">.</span><span class="fu">FindUserByEmailAddressAsync</span><span class="op">(</span>context<span class="op">.</span><span class="fu">Account</span><span class="op">.</span><span class="fu">Email</span><span class="op">,</span> options<span class="op">).</span><span class="fu">ConfigureAwait</span><span class="op">(</span><span class="kw">false</span><span class="op">);</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>If the <code>required age</code> for a data request is compatible with the creation date of the corresponding cache entry, data is returned from the cache (<strong>cache hit</strong>).<br> In case the <code>required age</code> is not compatible with the creation date of the corresponding cache entry, the data is loaded from the remote location (<strong>cache miss</strong>) and the cache entry is updated.<br></p>
+<p>In <code>common caching systems</code>, the <strong>cache entries lifetime is defined at startup</strong> (or cache entry set time) <strong>and it cannot be changed across different calls</strong>.<br> <strong>A cache hit or a cache miss is determined by the static cache entry lifetime</strong>.<br> With <code>Diginsight.SmartCache</code> the cache entry lifetime may be indefinite, and a <strong>cache hit or a cache miss is determined by the <code>required age</code>, provided by the developer, at every single call</strong>, depending on the application need.<br></p>
 </section>
-<section id="step-02---add-invalidation-support-to-cached-calls" class="level1">
-<h1>STEP 02 - Add Invalidation support to cached calls</h1>
-<p>Assume you are calling a cached method with the following code</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode c# code-with-copy"><code class="sourceCode cs"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> async Task<span class="op">&lt;</span>IEnumerable<span class="op">&lt;</span>Plant<span class="op">&gt;&gt;</span> <span class="fu">GetPlantsAsync</span><span class="op">()</span></span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">using</span> <span class="dt">var</span> activity <span class="op">=</span> Program<span class="op">.</span><span class="fu">ActivitySource</span><span class="op">.</span><span class="fu">StartMethodActivity</span><span class="op">(</span>logger<span class="op">);</span></span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    <span class="dt">var</span> options <span class="op">=</span> <span class="kw">new</span> <span class="fu">SmartCacheOperationOptions</span><span class="op">()</span> <span class="op">{</span> MaxAge <span class="op">=</span> TimeSpan<span class="op">.</span><span class="fu">FromMinutes</span><span class="op">(</span><span class="dv">10</span><span class="op">)</span> <span class="op">};</span></span>
-<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    <span class="dt">var</span> cacheKey <span class="op">=</span> <span class="kw">new</span> <span class="fu">GetPlantByIdCacheKey</span><span class="op">(</span>Guid<span class="op">.</span><span class="fu">Empty</span><span class="op">);</span></span>
-<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    Task<span class="op">&lt;</span>IEnumerable<span class="op">&lt;</span>Plant<span class="op">&gt;&gt;</span> <span class="fu">getCachedValuesAsync</span><span class="op">()</span> <span class="op">=&gt;</span></span>
-<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>        smartCache<span class="op">.</span><span class="fu">GetAsync</span><span class="op">(</span>cacheKey<span class="op">,</span> _ <span class="op">=&gt;</span> <span class="fu">GetPlantsImplAsync</span><span class="op">(),</span> options<span class="op">);</span></span>
-<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>    <span class="dt">var</span> plants <span class="op">=</span> await <span class="fu">getCachedValuesAsync</span><span class="op">();</span></span>
-<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>    activity<span class="op">?.</span><span class="fu">SetOutput</span><span class="op">(</span>plants<span class="op">);</span></span>
-<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>    <span class="kw">return</span> plants<span class="op">;</span></span>
-<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>You can add support to invalidation deriving your key from <code>IInvalidatable</code>:</p>
-<div class="sourceCode" id="cb5"><pre class="sourceCode c# code-with-copy"><code class="sourceCode cs"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">internal</span> <span class="kw">sealed</span> record <span class="fu">GetPlantByIdCacheKey</span><span class="op">(</span>Guid PlantId<span class="op">)</span> <span class="op">:</span> IInvalidatable</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> <span class="dt">bool</span> <span class="fu">IsInvalidatedBy</span><span class="op">(</span>IInvalidationRule invalidationRule<span class="op">,</span> <span class="kw">out</span> Func<span class="op">&lt;</span>Task<span class="op">&gt;</span> ic<span class="op">)</span></span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    <span class="op">{</span></span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>        ic <span class="op">=</span> <span class="kw">null</span><span class="op">;</span></span>
-<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>        <span class="kw">if</span> <span class="op">(</span>invalidationRule <span class="kw">is</span> PlantInvalidationRule pir <span class="op">&amp;&amp;</span> <span class="op">(</span>PlantId <span class="op">==</span> Guid<span class="op">.</span><span class="fu">Empty</span> <span class="op">||</span> pir<span class="op">.</span><span class="fu">PlantId</span> <span class="op">==</span> PlantId<span class="op">))</span></span>
-<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>        <span class="op">{</span></span>
-<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>            <span class="kw">return</span> <span class="kw">true</span><span class="op">;</span></span>
-<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
-<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>        <span class="kw">return</span> <span class="kw">false</span><span class="op">;</span></span>
-<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
-<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>Upon plant <strong>creation/update/delete</strong>, you can trigger invalidation by means of <code>smartCache.Invalidate();</code> call:</p>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="02.01a Invalidate data upon plant creation or update.png" class="img-fluid figure-img"></p>
-<figcaption>alt text</figcaption>
-</figure>
-</div>
-<p>When Invalidating a plantId, <strong>all keys will be enumerated and those invalidated by the ID will be dismissed</strong> by the cache.</p>
-<p>Calling <code>GetPlantsAsync</code> after an update to the Plant, you will get a <strong>cache miss</strong> as the entry associated to the call has been dismissed.</p>
-<p>The image below shows that: - after updating a Plant - the <code>GetPlantsAsync</code> call gets a <strong>cache miss</strong> call as its cache entry has been invalidated</p>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="02.02 cache miss after invalidation log.png" class="img-fluid figure-img"></p>
-<figcaption>alt text</figcaption>
-</figure>
-</div>
+<section id="use-cases" class="level1">
+<h1>USE CASES</h1>
+<p><code>Diginsight.SmartCache</code> can be used with the following type of data: - data that is <strong>not frequently updated</strong> (eg. configuration data or static data) - data that is <strong>updated more frequently</strong> (eg. user profile or user permissions) - data that is <strong>updated very frequently</strong> (eg. notifications, messages or real time data) <br><br></p>
+<p>Accessing <strong>configuration data or static data</strong> that is not frequently updated is a typical use case for all caching systems.<br> In this cases data doesn’t change and the developer can request data with a <strong>MaxAge of hours or days</strong> (eg. <strong>MaxAge = 00:04:00</strong>, 4 hours).<br></p>
+<p><strong>Data that is updated more frequently</strong> can be accessed with a <strong>shorter MaxAge</strong> (eg. <strong>MaxAge = 300</strong>, 5 minutes).<br> A typical example for this scenario can be access to a <strong>user profile</strong> or to <strong>user permissions</strong>.<br> By default, changes to the User Profile or the User Permissions will not be perceived by the application for a latency of 5 minutes.<br></p>
+<p>In some circunstances the developer may need to be sure about the exact value of such data.<br> In these cases, the developer can just raise a request with <strong>MaxAge = 00:00</strong>.<br> It may happen that, notifications are available for changes to the cached <strong>user profile</strong> or the <strong>user permissions</strong>.<br> Upon such notifications, the developer may <strong>invalidate the cache entry</strong> or raise a request with <strong>MaxAge = 00:00</strong> to load a cache entry for the same user, with the updated data.<br> <strong>When change notifications are handled properly</strong>, even if data changes frequently, the developer can use a <strong>longer MaxAge</strong> (eg. hours or days) and take maximum benefit from the cache, <strong>still without delays upon data changes</strong>.<br></p>
+<p>Age sensitive data management becomes very useful when <strong>data changes very frequently</strong>.<br> As an example, consider an application showing notifications, messages or real time data.<br> When navigating across the pages speed of navigation may be a priority, so <strong>using cached data may be a good choice</strong> (still with a shorter MaxAge (eg. 120 secs)).</p>
+<p>In these cases navigation will take benefit from the cache hits.<br> After the navigation completes, the developer may raise a request with <strong>MaxAge = 00:00</strong> to load fresh data for the user.<br> In this way navigation will take advantage of cache hits speed and the user will still see fresh data, when the navigation ends.<br></p>
 </section>
-<section id="step-03---add-automatic-reload-support-to-cached-calls" class="level1">
-<h1>STEP 03 - Add automatic reload support to cached calls</h1>
-<p>Assume you are calling a cached method with the following code</p>
-<div class="sourceCode" id="cb6"><pre class="sourceCode c# code-with-copy"><code class="sourceCode cs"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> async Task<span class="op">&lt;</span>IEnumerable<span class="op">&lt;</span>Plant<span class="op">&gt;&gt;</span> <span class="fu">GetPlantsAsync</span><span class="op">()</span></span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">using</span> <span class="dt">var</span> activity <span class="op">=</span> Program<span class="op">.</span><span class="fu">ActivitySource</span><span class="op">.</span><span class="fu">StartMethodActivity</span><span class="op">(</span>logger<span class="op">);</span></span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    <span class="dt">var</span> options <span class="op">=</span> <span class="kw">new</span> <span class="fu">SmartCacheOperationOptions</span><span class="op">()</span> <span class="op">{</span> MaxAge <span class="op">=</span> TimeSpan<span class="op">.</span><span class="fu">FromMinutes</span><span class="op">(</span><span class="dv">10</span><span class="op">)</span> <span class="op">};</span></span>
-<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    <span class="dt">var</span> cacheKey <span class="op">=</span> <span class="kw">new</span> <span class="fu">GetPlantByIdCacheKey</span><span class="op">(</span>cacheKeyService<span class="op">,</span> Guid<span class="op">.</span><span class="fu">Empty</span><span class="op">);</span></span>
-<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>    Task<span class="op">&lt;</span>IEnumerable<span class="op">&lt;</span>Plant<span class="op">&gt;&gt;</span> <span class="fu">getCachedValuesAsync</span><span class="op">()</span> <span class="op">=&gt;</span></span>
-<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>        smartCache<span class="op">.</span><span class="fu">GetAsync</span><span class="op">(</span>cacheKey<span class="op">,</span> _ <span class="op">=&gt;</span> <span class="fu">GetPlantsImplAsync</span><span class="op">(),</span> options<span class="op">);</span></span>
-<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>    cacheKey<span class="op">.</span><span class="fu">ReloadAsync</span> <span class="op">=</span> getCachedValuesAsync<span class="op">;</span> </span>
-<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>    <span class="dt">var</span> plants <span class="op">=</span> await <span class="fu">getCachedValuesAsync</span><span class="op">();</span></span>
-<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>    activity<span class="op">?.</span><span class="fu">SetOutput</span><span class="op">(</span>plants<span class="op">);</span></span>
-<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>    <span class="kw">return</span> plants<span class="op">;</span></span>
-<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>In this case, <code>getCachedValuesAsync</code> delegate is used to load data.<br> Also, <code>getCachedValuesAsync</code> is assigned to <code>cacheKey.ReloadAsync</code> property to <strong>enable cache entry reload</strong>, after invalidation.</p>
-<p>When Invalidating a plantId, all keys will be enumerated and those invalidated by the ID will be dismissed by the cache. If <code>ReloadAsync</code> delegate is available, <strong>after invalidation, the delegate is invoked to load the cache entry again</strong>.</p>
-<p>Calling <code>GetPlantsAsync</code> after an update to the Plant, this time you will get a <strong>cache hit</strong> as the entry associated to the call has been reloaded after invalidation.</p>
-<p>The image below shows that: - after updating a Plant - the <code>GetPlantsAsync</code> call gets a <strong>cache hit</strong> call as its cache entry has been reloaded, after invalidation</p>
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="03.02 cache hit after invalidation and reloadlog.png" class="img-fluid figure-img"></p>
-<figcaption>alt text</figcaption>
-</figure>
-</div>
+<section id="an-opportunity-for-performance-cache-with-preloading" class="level1">
+<h1>AN OPPORTUNITY FOR PERFORMANCE: CACHE WITH PRELOADING</h1>
+</section>
+<section id="an-opportunity-for-performance-maxage-promotion" class="level1">
+<h1>AN OPPORTUNITY FOR PERFORMANCE: MAXAGE PROMOTION</h1>
+<p>Sometimes, data from the past is immutable (eg. realtime data, user or devices messages).<br> In such cases, an automatic rule can be applied to <strong>promote MaxAge to a long or indefinite value</strong> (<strong>MaxAge promotion</strong>).<br></p>
+<p>It may happen that a query or an API call loads data from the present together with data from the past.<br> When this happpens the request can be split automatically:<br> - Data from the present must be loaded with the MaxAge specified by the developer.<br> - Data from the past will take advantage of MaxAge promotion to a long or indefinite value.<br></p>
+<p>Queries to the backend will be faster and with smaller payloads.<br></p>
+</section>
+<section id="a-opportunity-for-performance-automatic-data-preloading" class="level1">
+<h1>A OPPORTUNITY FOR PERFORMANCE: (AUTOMATIC) DATA PRELOADING</h1>
+<p>With <strong>age sensitive data management</strong> a new opportunity for performance is uncovered.<br><br> The <code>required age</code> specified by the developer is of course used to determine if a <strong>cache hit</strong> or a <strong>cache miss</strong> can occur.<br> Such <code>required age</code> can also be used as <strong>a time window, in the past</strong>, to <strong>preload data in background</strong> and <strong>ensure a cache hit will be obtained</strong>, when the application needs it.<br><br> <code>Diginsight.SmartCache</code> captures this opportunity leveraging the application log to anticipate <code>the required entries</code>, <code>the required maxage</code> for them and <strong>anticipate entries preload</strong> in time for the application need.<br></p>
+</section>
+<section id="summary" class="level1">
+<h1>SUMMARY</h1>
+<p><code>Diginsight.SmartCache</code> introduces <strong>age sensitive data management</strong>: a new approach to managing data:</p>
+<p>When loading data a developer can specify the <strong>maximum age</strong> that is required for it.<br> A <strong>cache hit or a cache miss is determined by the <code>required age</code>, provided at every single call</strong> and not by the cache entries lifetime that is defined at startup.<br></p>
+<p>This <strong>allows using cache with non static data</strong> and <strong>data that is updated frequently</strong> without requiring delays in showing data changes, and always allowing easy access to fresh data whenever required.<br></p>
+<p><code>Diginsight.SmartCache</code> allows <strong>MaxAge promotion</strong> and <strong>(automatic) data preloading</strong> techniques as great opportunities to boost application performance.<br></p>
+<p>.</p>
 
 
 </section>

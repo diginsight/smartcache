@@ -62,7 +62,7 @@ website:
       href:  index.md
     - text: "---"
     - text: Getting Started
-      href:  "index.md?tab=readme-ov-file#steps-to-use-smartcache"
+      href:  "index?tab=readme-ov-file#steps-to-use-smartcache"
     - text: "---"
     - section: Concepts
       contents: "src/docs/01. Concepts/**"
