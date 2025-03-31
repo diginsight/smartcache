@@ -1,4 +1,4 @@
-# INTRODUCTION 
+# Introduction 
 diginsight `SmartCache` provides __hybrid, distributed, multilevel caching__ based on __age sensitive data management__.<br>
 - `SmartCache` is __hybrid__ as it caches data __in-memory__ and on __external RedIs databases__.<br>
 In-memory cache ensure __0-latency__ for most recently used data and ensures __low pressure (and reduced cost)__ on the external RedIs database.<br>
@@ -38,7 +38,7 @@ the following image illustrates the five SmartCache tenets:
 ![alt text](<src/docs/001.03a SmartCache Tenets Full.png>)
 
 
-# ADDITIONAL INFORMATION 
+# Additional Information 
 Using Smartcache the following events are involved when interacting with data:<br>
 
 - __Cache hit__ or __cache miss__:
@@ -56,11 +56,10 @@ The following image illustrates the described SmartCache events:<br>
 ![alt text](<src/docs/002.01 SmartCache events.png>)
 
 The following paragraph:<br>
-[STEPS TO USE SMARTCACHE](#steps-to-use-smartcache) <br>
+[Steps to use Smartcache](#steps-to-use-smartcache) <br>
 discusses basic steps to start using `Diginsight.SmartCache`.<br>
 
-
-# STEPS TO USE SMARTCACHE
+# Steps to use Smartcache
 The __steps__, __code snippets__ and __images__ below were created by means of the working __SampleWebAPI__ available into [smartcache.samples](https://github.com/diginsight/smartcache.samples) repository.<br>
 
 ![alt text](<src/docs/00.1 SampleWebAPI sample.png>)
