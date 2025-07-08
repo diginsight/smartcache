@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Azure.Messaging.ServiceBus" Version="1.*" />
+    <PackageReference Include="Azure.Messaging.ServiceBus" Version="7.*" />
     <PackageReference Include="Polly.Core" Version="8.*" />
     <PackageReference Include="System.Security.Cryptography.X509Certificates" Version="4.*" />
   </ItemGroup>
