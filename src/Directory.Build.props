@@ -18,4 +18,16 @@
     <NoWarn>$(NoWarn);NU5104</NoWarn>
   </PropertyGroup>
 
+  <Import Project="$(MSBuildThisFileDirectory)Directory.build.props.user" Condition="Exists('$(MSBuildThisFileDirectory)Directory.build.props.user')" />
+
+  <PropertyGroup Condition="'$(DiginsightCoreSolutionDirectory)' == ''">
+    <DiginsightCoreDirectImport>false</DiginsightCoreDirectImport>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(DiginsightCoreSolutionDirectory)' != ''">
+    <DiginsightCoreSolutionDirectory>$([MSBuild]::EnsureTrailingSlash('$(DiginsightCoreSolutionDirectory)'))</DiginsightCoreSolutionDirectory>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(DiginsightCoreDirectImport)' == ''">
+    <DiginsightCoreDirectImport>false</DiginsightCoreDirectImport>
+  </PropertyGroup>
+
 </Project>
