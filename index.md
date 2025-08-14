@@ -1,12 +1,18 @@
+![main build](https://github.com/diginsight/smartcache/actions/workflows/v3.yml/badge.svg?branch=main)<br>
+![main build](https://github.com/diginsight/smartcache/actions/workflows/quarto-publish.yml/badge.svg?branch=main)
+
 # Introduction 
-diginsight `SmartCache` provides __hybrid, distributed, multilevel caching__ based on __age sensitive data management__.<br>
-- `SmartCache` is __hybrid__ as it caches data __in-memory__ and on __external RedIs databases__.<br>
-In-memory cache ensure __0-latency__ for most recently used data and ensures __low pressure (and reduced cost)__ on the external RedIs database.<br>
-- `SmartCache` is __distributed__ as cache entries on different nodes of a multiinstance application are sinchronized automatically, to avoid flickering of values when querying the same data on different nodes.<br>
-- `SmartCache` is based on __age sensitive data management__ as cache entries are returned based on a requested __MaxAge__ parameter.<br>
-Data is returned from the cache __if the cache entry corresponding to the request is compatible with the requested MaxAge__.<br>
+diginsight `SmartCache` provides __hybrid, distributed, multilevel caching__ based on __age sensitive data management__.
+
+- `SmartCache` is __hybrid__ as it caches data __in-memory__ and on __external RedIs databases__.
+In-memory cache ensure __0-latency__ for most recently used data and ensures __low pressure (and reduced cost)__ on the external RedIs database.
+
+- `SmartCache` is __distributed__ as cache entries on different nodes of a multiinstance application are sinchronized automatically, to avoid flickering of values when querying the same data on different nodes.
+
+- `SmartCache` is based on __age sensitive data management__ as cache entries are returned based on a requested __MaxAge__ parameter
+Data is returned from the cache __if the cache entry corresponding to the request is compatible with the requested MaxAge__.
 Otherwise data is obtained by the cache __data source provided as a delegate__.
-<br>Any application, at any time, can access data with __different age criteria, according to the specific use for which data is requested__.<br>
+Any application, at any time, can access data with __different age criteria, according to the specific use for which data is requested__.<br>
 
 The image bleow illustrates shows an application __requesting data with age 5 minutes__ to a multinode application:<br>
     ![alt text](<src/docs/001.02 SmartCache Basic Tenets.png>)
