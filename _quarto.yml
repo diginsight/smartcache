@@ -8,13 +8,13 @@ project:
   - "!ignore-dir/"
 
 website:
-  title: '<i class="bi bi-lightbulb-fill" style="vertical-align: middle; margin-left: 0px;margin-right: 15px;"></i> smartcache'
+  title: 'Diginsight Smartcache'
   back-to-top-navigation: true
   reader-mode: true
-  favicon: diginsight.jpg
+  favicon: diginsight.bulb.svg
   search: true
   open-graph: true
-  image: diginsight.jpg
+  image: diginsight.bulb.svg
   announcement: 
     icon: info-circle
     dismissable: true
