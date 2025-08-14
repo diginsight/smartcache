@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title> smartcache</title>
+<title>Diginsight Smartcache</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -64,7 +64,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="site_libs/quarto-search/fuse.min.js"></script>
 <script src="site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="./">
-<link href="./diginsight.jpg" rel="icon" type="image/jpeg">
+<link href="./diginsight.bulb.svg" rel="icon" type="image/svg+xml">
 <script src="site_libs/quarto-html/quarto.js"></script>
 <script src="site_libs/quarto-html/popper.min.js"></script>
 <script src="site_libs/quarto-html/tippy.umd.min.js"></script>
@@ -106,10 +106,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 
 <link rel="stylesheet" href="styles.css">
-<meta property="og:title" content=" smartcache">
+<meta property="og:title" content="Diginsight Smartcache">
 <meta property="og:description" content="">
 <meta property="og:image" content="src/docs/001.02 SmartCache Basic Tenets.png">
-<meta property="og:site_name" content="<i class=&quot;bi bi-lightbulb-fill&quot; style=&quot;vertical-align: middle; margin-left: 0px;margin-right: 15px;&quot;></i> smartcache">
+<meta property="og:site_name" content="Diginsight Smartcache">
 <meta property="og:image:alt" content="alt text">
 </head>
 
@@ -121,7 +121,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
     <a class="navbar-brand" href="./index.html">
-    <span class="navbar-title"><i class="bi bi-lightbulb-fill" style="vertical-align: middle; margin-left: 0px;margin-right: 15px;"></i> smartcache</span>
+    <span class="navbar-title">Diginsight Smartcache</span>
     </a>
   </div>
             <div id="quarto-search" class="" title="Search"></div>
@@ -319,9 +319,15 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 
 
+<p><img src="https://github.com/diginsight/smartcache/actions/workflows/v3.yml/badge.svg?branch=main" class="img-fluid" alt="main build"><br> <img src="https://github.com/diginsight/smartcache/actions/workflows/quarto-publish.yml/badge.svg?branch=main" class="img-fluid" alt="main build"></p>
 <section id="introduction" class="level1">
 <h1>Introduction</h1>
-<p>diginsight <code>SmartCache</code> provides <strong>hybrid, distributed, multilevel caching</strong> based on <strong>age sensitive data management</strong>.<br> - <code>SmartCache</code> is <strong>hybrid</strong> as it caches data <strong>in-memory</strong> and on <strong>external RedIs databases</strong>.<br> In-memory cache ensure <strong>0-latency</strong> for most recently used data and ensures <strong>low pressure (and reduced cost)</strong> on the external RedIs database.<br> - <code>SmartCache</code> is <strong>distributed</strong> as cache entries on different nodes of a multiinstance application are sinchronized automatically, to avoid flickering of values when querying the same data on different nodes.<br> - <code>SmartCache</code> is based on <strong>age sensitive data management</strong> as cache entries are returned based on a requested <strong>MaxAge</strong> parameter.<br> Data is returned from the cache <strong>if the cache entry corresponding to the request is compatible with the requested MaxAge</strong>.<br> Otherwise data is obtained by the cache <strong>data source provided as a delegate</strong>. <br>Any application, at any time, can access data with <strong>different age criteria, according to the specific use for which data is requested</strong>.<br></p>
+<p>diginsight <code>SmartCache</code> provides <strong>hybrid, distributed, multilevel caching</strong> based on <strong>age sensitive data management</strong>.</p>
+<ul>
+<li><p><code>SmartCache</code> is <strong>hybrid</strong> as it caches data <strong>in-memory</strong> and on <strong>external RedIs databases</strong>. In-memory cache ensure <strong>0-latency</strong> for most recently used data and ensures <strong>low pressure (and reduced cost)</strong> on the external RedIs database.</p></li>
+<li><p><code>SmartCache</code> is <strong>distributed</strong> as cache entries on different nodes of a multiinstance application are sinchronized automatically, to avoid flickering of values when querying the same data on different nodes.</p></li>
+<li><p><code>SmartCache</code> is based on <strong>age sensitive data management</strong> as cache entries are returned based on a requested <strong>MaxAge</strong> parameter Data is returned from the cache <strong>if the cache entry corresponding to the request is compatible with the requested MaxAge</strong>. Otherwise data is obtained by the cache <strong>data source provided as a delegate</strong>. Any application, at any time, can access data with <strong>different age criteria, according to the specific use for which data is requested</strong>.<br></p></li>
+</ul>
 <p>The image bleow illustrates shows an application <strong>requesting data with age 5 minutes</strong> to a multinode application:<br> <img src="src/docs/001.02 SmartCache Basic Tenets.png" class="img-fluid" alt="alt text"></p>
 <p>Data loaded by any request, is made available for the benefit of further requests (as long as compatible with their MaxAge requirement).<br> As an example, an <strong>immediately successive request</strong> for the same data with <strong>age 1 minute</strong> will be satisfied by the cache entry loaded by the first request.</p>
 <ul>
