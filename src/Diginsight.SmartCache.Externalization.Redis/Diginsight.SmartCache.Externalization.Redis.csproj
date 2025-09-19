@@ -7,23 +7,14 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Diginsight.Diagnostics" Version="$(DiginsightCoreVersion)">
+      <PrivateAssets>contentfiles; analyzers; build; compile</PrivateAssets>
+    </PackageReference>
     <PackageReference Include="StackExchange.Redis" Version="2.*" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Diginsight.SmartCache\Diginsight.SmartCache.csproj" />
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(DiginsightCoreDirectImport)' == 'true'">
-    <ProjectReference Include="$(DiginsightCoreSolutionDirectory)Diginsight.Diagnostics\Diginsight.Diagnostics.csproj">
-      <PrivateAssets>contentfiles; analyzers; build; compile</PrivateAssets>
-    </ProjectReference>
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(DiginsightCoreDirectImport)' != 'true'">
-    <PackageReference Include="Diginsight.Diagnostics" Version="$(DiginsightCoreVersion)">
-      <PrivateAssets>contentfiles; analyzers; build; compile</PrivateAssets>
-    </PackageReference>
   </ItemGroup>
 
 </Project>

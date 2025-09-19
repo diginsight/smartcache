@@ -6,6 +6,13 @@
     <PackageTags>$(PackageTags);externalization;aspnetcore</PackageTags>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Diginsight.AspNetCore" Version="$(DiginsightCoreVersion)" />
+    <PackageReference Include="Diginsight.Diagnostics" Version="$(DiginsightCoreVersion)">
+      <PrivateAssets>contentfiles; analyzers; build; compile</PrivateAssets>
+    </PackageReference>
+  </ItemGroup>
+
   <Choose>
     <When Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net6.0'))">
       <ItemGroup>
@@ -23,20 +30,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Diginsight.SmartCache.Externalization.Http\Diginsight.SmartCache.Externalization.Http.csproj" />
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(DiginsightCoreDirectImport)' == 'true'">
-    <ProjectReference Include="$(DiginsightCoreSolutionDirectory)Diginsight.AspNetCore\Diginsight.AspNetCore.csproj" />
-    <ProjectReference Include="$(DiginsightCoreSolutionDirectory)Diginsight.Diagnostics\Diginsight.Diagnostics.csproj">
-      <PrivateAssets>contentfiles; analyzers; build; compile</PrivateAssets>
-    </ProjectReference>
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(DiginsightCoreDirectImport)' != 'true'">
-    <PackageReference Include="Diginsight.AspNetCore" Version="$(DiginsightCoreVersion)" />
-    <PackageReference Include="Diginsight.Diagnostics" Version="$(DiginsightCoreVersion)">
-      <PrivateAssets>contentfiles; analyzers; build; compile</PrivateAssets>
-    </PackageReference>
   </ItemGroup>
 
 </Project>

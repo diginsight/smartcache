@@ -6,6 +6,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Diginsight.Core" Version="$(DiginsightCoreVersion)" />
+    <PackageReference Include="Diginsight.Diagnostics" Version="$(DiginsightCoreVersion)">
+      <PrivateAssets>contentfiles; analyzers; build; compile</PrivateAssets>
+    </PackageReference>
     <PackageReference Include="Newtonsoft.Json" Version="13.*" />
   </ItemGroup>
 
@@ -37,13 +41,6 @@
     <ProjectReference Include="$(DiginsightCoreSolutionDirectory)Diginsight.Diagnostics\Diginsight.Diagnostics.csproj">
       <PrivateAssets>contentfiles; analyzers; build; compile</PrivateAssets>
     </ProjectReference>
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(DiginsightCoreDirectImport)' != 'true'">
-    <PackageReference Include="Diginsight.Core" Version="$(DiginsightCoreVersion)" />
-    <PackageReference Include="Diginsight.Diagnostics" Version="$(DiginsightCoreVersion)">
-      <PrivateAssets>contentfiles; analyzers; build; compile</PrivateAssets>
-    </PackageReference>
   </ItemGroup>
 
 </Project>

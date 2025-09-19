@@ -8,6 +8,9 @@
 
   <ItemGroup>
     <PackageReference Include="Azure.Messaging.ServiceBus" Version="7.*" />
+    <PackageReference Include="Diginsight.Diagnostics" Version="$(DiginsightCoreVersion)">
+      <PrivateAssets>contentfiles; analyzers; build; compile</PrivateAssets>
+    </PackageReference>
     <PackageReference Include="Polly.Core" Version="8.*" />
     <PackageReference Include="System.Security.Cryptography.X509Certificates" Version="4.*" />
   </ItemGroup>
@@ -31,18 +34,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Diginsight.SmartCache\Diginsight.SmartCache.csproj" />
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(DiginsightCoreDirectImport)' == 'true'">
-    <ProjectReference Include="$(DiginsightCoreSolutionDirectory)Diginsight.Diagnostics\Diginsight.Diagnostics.csproj">
-      <PrivateAssets>contentfiles; analyzers; build; compile</PrivateAssets>
-    </ProjectReference>
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(DiginsightCoreDirectImport)' != 'true'">
-    <PackageReference Include="Diginsight.Diagnostics" Version="$(DiginsightCoreVersion)">
-      <PrivateAssets>contentfiles; analyzers; build; compile</PrivateAssets>
-    </PackageReference>
   </ItemGroup>
 
 </Project>

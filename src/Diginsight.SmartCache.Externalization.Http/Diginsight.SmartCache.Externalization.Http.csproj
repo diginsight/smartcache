@@ -6,6 +6,12 @@
     <PackageTags>$(PackageTags);externalization;http</PackageTags>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Diginsight.Diagnostics" Version="$(DiginsightCoreVersion)">
+      <PrivateAssets>contentfiles; analyzers; build; compile</PrivateAssets>
+    </PackageReference>
+  </ItemGroup>
+
   <Choose>
     <When Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net8.0'))">
 
@@ -25,18 +31,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Diginsight.SmartCache\Diginsight.SmartCache.csproj" />
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(DiginsightCoreDirectImport)' == 'true'">
-    <ProjectReference Include="$(DiginsightCoreSolutionDirectory)Diginsight.Diagnostics\Diginsight.Diagnostics.csproj">
-      <PrivateAssets>contentfiles; analyzers; build; compile</PrivateAssets>
-    </ProjectReference>
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(DiginsightCoreDirectImport)' != 'true'">
-    <PackageReference Include="Diginsight.Diagnostics" Version="$(DiginsightCoreVersion)">
-      <PrivateAssets>contentfiles; analyzers; build; compile</PrivateAssets>
-    </PackageReference>
   </ItemGroup>
 
 </Project>
