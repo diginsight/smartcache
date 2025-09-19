@@ -4,8 +4,6 @@ namespace Diginsight.SmartCache;
 
 public sealed class SmartCacheCoreOptions : ISmartCacheCoreOptions, IVolatilelyConfigurable
 {
-    private TimeSpan localEntryTolerance = TimeSpan.FromSeconds(10);
-
     public SmartCacheMode Mode { get; set; }
 
     public Expiration MaxAge { get; set; } = Expiration.Never;
@@ -23,9 +21,9 @@ public sealed class SmartCacheCoreOptions : ISmartCacheCoreOptions, IVolatilelyC
 
     public TimeSpan LocalEntryTolerance
     {
-        get => localEntryTolerance;
-        set => localEntryTolerance = value >= TimeSpan.Zero ? value : TimeSpan.Zero;
-    }
+        get;
+        set => field = value >= TimeSpan.Zero ? value : TimeSpan.Zero;
+    } = TimeSpan.FromSeconds(10);
 
     object IVolatilelyConfigurable.MakeFiller() => new Filler(this);
 

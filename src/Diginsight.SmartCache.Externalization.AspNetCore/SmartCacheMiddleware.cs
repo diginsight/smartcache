@@ -113,7 +113,7 @@ internal sealed class SmartCacheMiddleware : IMiddleware
             null,
             static () =>
             {
-                if (tempDirectory == null)
+                if (tempDirectory is null)
                 {
                     string str = Environment.GetEnvironmentVariable("ASPNETCORE_TEMP") ?? Path.GetTempPath();
                     tempDirectory = Directory.Exists(str) ? str : throw new DirectoryNotFoundException(str);

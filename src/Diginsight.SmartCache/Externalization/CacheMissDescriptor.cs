@@ -6,8 +6,6 @@ namespace Diginsight.SmartCache.Externalization;
 
 public sealed class CacheMissDescriptor
 {
-    private readonly object? value;
-
     public string Emitter { get; }
 
     public object Key { get; }
@@ -18,7 +16,7 @@ public sealed class CacheMissDescriptor
 
     public Type? ValueType { get; }
 
-    public object? Value => HasValue ? value : throw new InvalidOperationException("descriptor contains no value");
+    public object? Value => HasValue ? field : throw new InvalidOperationException("descriptor contains no value");
 
     [JsonIgnore]
     private bool HasValue => ValueType is not null;
@@ -48,7 +46,7 @@ public sealed class CacheMissDescriptor
         Timestamp = timestamp;
         Location = location;
         ValueType = valueType;
-        this.value = value;
+        Value = value;
     }
 
     [EditorBrowsable(EditorBrowsableState.Never)]

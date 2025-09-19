@@ -260,7 +260,7 @@ internal sealed class SmartCache : ISmartCache
                 }
                 catch (InvalidOperationException)
                 {
-                    maybeOutputTagged = default;
+                    maybeOutputTagged = null;
                 }
                 finally
                 {
