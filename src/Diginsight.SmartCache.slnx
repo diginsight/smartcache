@@ -1,0 +1,16 @@
+<Solution>
+  <Folder Name="/SmartCache/">
+    <Project Path="Diginsight.SmartCache.Externalization.AspNetCore/Diginsight.SmartCache.Externalization.AspNetCore.csproj" />
+    <Project Path="Diginsight.SmartCache.Externalization.Http/Diginsight.SmartCache.Externalization.Http.csproj" />
+    <Project Path="Diginsight.SmartCache.Externalization.Kubernetes/Diginsight.SmartCache.Externalization.Kubernetes.csproj" />
+    <Project Path="Diginsight.SmartCache.Externalization.Redis/Diginsight.SmartCache.Externalization.Redis.csproj" />
+    <Project Path="Diginsight.SmartCache.Externalization.ServiceBus/Diginsight.SmartCache.Externalization.ServiceBus.csproj" />
+    <Project Path="Diginsight.SmartCache/Diginsight.SmartCache.csproj" />
+  </Folder>
+  <Folder Name="/Solution Items/">
+    <File Path=".gitignore" />
+    <File Path="Directory.Build.props" />
+    <File Path="Directory.Build.targets" />
+    <File Path="global.json" />
+  </Folder>
+</Solution>
