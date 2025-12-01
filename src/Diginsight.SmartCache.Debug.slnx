@@ -1,0 +1,29 @@
+<Solution>
+  <Folder Name="/SmartCache/">
+    <Project Path="Diginsight.SmartCache.Externalization.AspNetCore/Diginsight.SmartCache.Externalization.AspNetCore.csproj" />
+    <Project Path="Diginsight.SmartCache.Externalization.Http/Diginsight.SmartCache.Externalization.Http.csproj" />
+    <Project Path="Diginsight.SmartCache.Externalization.Kubernetes/Diginsight.SmartCache.Externalization.Kubernetes.csproj" />
+    <Project Path="Diginsight.SmartCache.Externalization.Redis/Diginsight.SmartCache.Externalization.Redis.csproj" />
+    <Project Path="Diginsight.SmartCache.Externalization.ServiceBus/Diginsight.SmartCache.Externalization.ServiceBus.csproj" />
+    <Project Path="Diginsight.SmartCache/Diginsight.SmartCache.csproj" />
+  </Folder>
+  <Folder Name="/Solution Items/">
+    <File Path=".gitignore" />
+    <File Path="Directory.Build.props" />
+    <File Path="Directory.Build.targets" />
+    <File Path="global.json" />
+  </Folder>
+  <Folder Name="/_ext/">
+    <File Path="../../telemetry/src/Diginsight.Diagnostics.OpenTelemetry/Diginsight.Diagnostics.OpenTelemetry.csproj" />
+    <Project Path="../../telemetry/src/Diginsight.AspNetCore/Diginsight.AspNetCore.csproj" />
+    <Project Path="../../telemetry/src/Diginsight.Atomify/Diginsight.Atomify.csproj" />
+    <Project Path="../../telemetry/src/Diginsight.Core/Diginsight.Core.csproj" />
+    <Project Path="../../telemetry/src/Diginsight.Diagnostics.AspNetCore.OpenTelemetry/Diginsight.Diagnostics.AspNetCore.OpenTelemetry.csproj" />
+    <Project Path="../../telemetry/src/Diginsight.Diagnostics.AspNetCore/Diginsight.Diagnostics.AspNetCore.csproj" />
+    <Project Path="../../telemetry/src/Diginsight.Diagnostics.Log4Net/Diginsight.Diagnostics.Log4Net.csproj" />
+    <Project Path="../../telemetry/src/Diginsight.Diagnostics/Diginsight.Diagnostics.csproj" />
+    <Project Path="../../telemetry/src/Diginsight.Json/Diginsight.Json.csproj" />
+    <Project Path="../../telemetry/src/Diginsight.Polyfills/Diginsight.Polyfills.csproj" />
+    <Project Path="../../telemetry/src/Diginsight.Stringify/Diginsight.Stringify.csproj" />
+  </Folder>
+</Solution>

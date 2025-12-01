@@ -104,10 +104,14 @@ public sealed class RedisCacheLocation : PassiveCacheLocation
             rawEntry = SmartCacheSerialization.SerializeToBytes(entry);
         }
 
+        var expiry = expiration.IsNever ? StackExchange.Redis.Expiration.Default : new StackExchange.Redis.Expiration(expiration.Value);
+
         await redisDatabase.StringSetAsync(
             redisKey.Prepend(smartCacheRedisOptions.KeyPrefix),
             rawEntry,
-            expiry: expiration.IsNever ? null : expiration.Value
+            
+            expiry: expiry
+            //flags: CommandFlags.None
         );
 
         sw.Stop();

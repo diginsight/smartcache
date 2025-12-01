@@ -1,46 +1,53 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFrameworks>netstandard2.0;netstandard2.1;net6.0;net7.0;net8.0;net9.0</TargetFrameworks>
-    <Title>Diginsight SmartCache</Title>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFrameworks>netstandard2.0;netstandard2.1;net6.0;net7.0;net8.0;net9.0;net10.0</TargetFrameworks>
+		<Title>Diginsight SmartCache</Title>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Diginsight.Core" Version="$(DiginsightCoreVersion)" />
-    <PackageReference Include="Diginsight.Diagnostics" Version="$(DiginsightCoreVersion)">
-      <PrivateAssets>contentfiles; analyzers; build; compile</PrivateAssets>
-    </PackageReference>
-    <PackageReference Include="Newtonsoft.Json" Version="13.*" />
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="Diginsight.Core" Version="$(DiginsightCoreVersion)" />
+		<PackageReference Include="Diginsight.Diagnostics" Version="$(DiginsightCoreVersion)">
+			<PrivateAssets>contentfiles; analyzers; build; compile</PrivateAssets>
+		</PackageReference>
+		<PackageReference Include="Newtonsoft.Json" Version="13.*" />
+	</ItemGroup>
 
-  <Choose>
-    <When Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net8.0'))">
+	<Choose>
+		<When Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net8.0'))">
 
-      <ItemGroup>
-        <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="9.*" />
-        <PackageReference Include="Microsoft.Extensions.Http" Version="9.*">
-          <PrivateAssets>contentfiles; analyzers; build; compile</PrivateAssets>
-        </PackageReference>
-      </ItemGroup>
+			<ItemGroup>
+				<PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="9.*" />
+				<PackageReference Include="Microsoft.Extensions.Http" Version="9.*">
+					<PrivateAssets>contentfiles; analyzers; build; compile</PrivateAssets>
+				</PackageReference>
+			</ItemGroup>
 
-    </When>
-    <Otherwise>
+		</When>
+		<Otherwise>
 
-      <ItemGroup>
-        <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="8.*" />
-        <PackageReference Include="Microsoft.Extensions.Http" Version="8.*">
-          <PrivateAssets>contentfiles; analyzers; build; compile</PrivateAssets>
-        </PackageReference>
-      </ItemGroup>
+			<ItemGroup>
+				<PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="8.*" />
+				<PackageReference Include="Microsoft.Extensions.Http" Version="8.*">
+					<PrivateAssets>contentfiles; analyzers; build; compile</PrivateAssets>
+				</PackageReference>
+			</ItemGroup>
 
-    </Otherwise>
-  </Choose>
+		</Otherwise>
+	</Choose>
 
-  <ItemGroup Condition="'$(DiginsightCoreDirectImport)' == 'true'">
-    <ProjectReference Include="$(DiginsightCoreSolutionDirectory)Diginsight.Core\Diginsight.Core.csproj" />
-    <ProjectReference Include="$(DiginsightCoreSolutionDirectory)Diginsight.Diagnostics\Diginsight.Diagnostics.csproj">
-      <PrivateAssets>contentfiles; analyzers; build; compile</PrivateAssets>
-    </ProjectReference>
-  </ItemGroup>
+	<ItemGroup Condition="'$(DiginsightCoreDirectImport)' == 'true'">
+		<ProjectReference Include="$(DiginsightCoreSolutionDirectory)Diginsight.Core\Diginsight.Core.csproj" />
+		<ProjectReference Include="$(DiginsightCoreSolutionDirectory)Diginsight.Diagnostics\Diginsight.Diagnostics.csproj">
+			<PrivateAssets>contentfiles; analyzers; build; compile</PrivateAssets>
+		</ProjectReference>
+	</ItemGroup>
+
+	<ItemGroup Condition="'$(DiginsightCoreDirectImport)' != 'true'">
+		<PackageReference Include="Diginsight.Core" Version="$(DiginsightCoreVersion)" />
+		<PackageReference Include="Diginsight.Diagnostics" Version="$(DiginsightCoreVersion)">
+			<PrivateAssets>contentfiles; analyzers; build; compile</PrivateAssets>
+		</PackageReference>
+	</ItemGroup>
 
 </Project>

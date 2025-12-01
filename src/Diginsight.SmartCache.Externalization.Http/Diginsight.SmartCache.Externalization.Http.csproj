@@ -1,36 +1,43 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFrameworks>netstandard2.0;netstandard2.1;net6.0;net7.0;net8.0;net9.0</TargetFrameworks>
-    <Title>Diginsight SmartCache Externalization HTTP extensions</Title>
-    <PackageTags>$(PackageTags);externalization;http</PackageTags>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFrameworks>netstandard2.0;netstandard2.1;net6.0;net7.0;net8.0;net9.0;net10.0</TargetFrameworks>
+		<Title>Diginsight SmartCache Externalization HTTP extensions</Title>
+		<PackageTags>$(PackageTags);externalization;http</PackageTags>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Diginsight.Diagnostics" Version="$(DiginsightCoreVersion)">
-      <PrivateAssets>contentfiles; analyzers; build; compile</PrivateAssets>
-    </PackageReference>
-  </ItemGroup>
+	<ItemGroup Condition="'$(DiginsightCoreDirectImport)' == 'true'">
+		<ProjectReference Include="$(DiginsightCoreSolutionDirectory)Diginsight.Diagnostics\Diginsight.Diagnostics.csproj">
+			<PrivateAssets>contentfiles; analyzers; build; compile</PrivateAssets>
+		</ProjectReference>
+	</ItemGroup>
 
-  <Choose>
-    <When Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net8.0'))">
+	<ItemGroup Condition="'$(DiginsightCoreDirectImport)' != 'true'">
+		<PackageReference Include="Diginsight.Diagnostics" Version="$(DiginsightCoreVersion)">
+			<PrivateAssets>contentfiles; analyzers; build; compile</PrivateAssets>
+		</PackageReference>
+	</ItemGroup>
 
-      <ItemGroup>
-        <PackageReference Include="Microsoft.Extensions.Http" Version="9.*" />
-      </ItemGroup>
 
-    </When>
-    <Otherwise>
+	<Choose>
+		<When Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net8.0'))">
 
-      <ItemGroup>
-        <PackageReference Include="Microsoft.Extensions.Http" Version="8.*" />
-      </ItemGroup>
+			<ItemGroup>
+				<PackageReference Include="Microsoft.Extensions.Http" Version="9.*" />
+			</ItemGroup>
 
-    </Otherwise>
-  </Choose>
+		</When>
+		<Otherwise>
 
-  <ItemGroup>
-    <ProjectReference Include="..\Diginsight.SmartCache\Diginsight.SmartCache.csproj" />
-  </ItemGroup>
+			<ItemGroup>
+				<PackageReference Include="Microsoft.Extensions.Http" Version="8.*" />
+			</ItemGroup>
+
+		</Otherwise>
+	</Choose>
+
+	<ItemGroup>
+		<ProjectReference Include="..\Diginsight.SmartCache\Diginsight.SmartCache.csproj" />
+	</ItemGroup>
 
 </Project>
