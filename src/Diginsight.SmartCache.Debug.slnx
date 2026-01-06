@@ -14,13 +14,13 @@
     <File Path="global.json" />
   </Folder>
   <Folder Name="/_ext/">
-    <File Path="../../telemetry/src/Diginsight.Diagnostics.OpenTelemetry/Diginsight.Diagnostics.OpenTelemetry.csproj" />
     <Project Path="../../telemetry/src/Diginsight.AspNetCore/Diginsight.AspNetCore.csproj" />
     <Project Path="../../telemetry/src/Diginsight.Atomify/Diginsight.Atomify.csproj" />
     <Project Path="../../telemetry/src/Diginsight.Core/Diginsight.Core.csproj" />
     <Project Path="../../telemetry/src/Diginsight.Diagnostics.AspNetCore.OpenTelemetry/Diginsight.Diagnostics.AspNetCore.OpenTelemetry.csproj" />
     <Project Path="../../telemetry/src/Diginsight.Diagnostics.AspNetCore/Diginsight.Diagnostics.AspNetCore.csproj" />
     <Project Path="../../telemetry/src/Diginsight.Diagnostics.Log4Net/Diginsight.Diagnostics.Log4Net.csproj" />
+    <Project Path="../../telemetry/src/Diginsight.Diagnostics.OpenTelemetry/Diginsight.Diagnostics.OpenTelemetry.csproj" />
     <Project Path="../../telemetry/src/Diginsight.Diagnostics/Diginsight.Diagnostics.csproj" />
     <Project Path="../../telemetry/src/Diginsight.Json/Diginsight.Json.csproj" />
     <Project Path="../../telemetry/src/Diginsight.Polyfills/Diginsight.Polyfills.csproj" />
