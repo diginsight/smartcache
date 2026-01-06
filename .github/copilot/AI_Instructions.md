@@ -14,6 +14,7 @@ It is divided into:
 - '02. Advanced'
 - '03. Reference'
 - '05. About'
+- '10. ChangeLog'
 
 ## Structure of a reference page
 class reference pages should include the following mandatory sections:
