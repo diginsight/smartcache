@@ -26,8 +26,8 @@ internal sealed class SmartCache : ISmartCache
     private readonly IReadOnlyDictionary<string, PassiveCacheLocation> passiveLocations;
 
     private readonly IDictionary<object, ValueTuple> keys = new ConcurrentDictionary<object, ValueTuple>();
-    private readonly ExternalMissDictionary externalMissDictionary = new ();
-    private readonly ConcurrentDictionary<string, Latency> locationLatencies = new ();
+    private readonly ExternalMissDictionary externalMissDictionary = new();
+    private readonly ConcurrentDictionary<string, Latency> locationLatencies = new();
 
     private long memoryCacheSize = 0;
     private bool warnedModeDowngrade = false;
@@ -175,7 +175,7 @@ internal sealed class SmartCache : ISmartCache
             activity?.SetTag("cache.hit", 0);
 
             T value;
-            StrongBox<double> latencyMsecBox = new ();
+            StrongBox<double> latencyMsecBox = new();
             using (SmartCacheObservability.Instruments.FetchDuration.StartLap(latencyMsecBox, SmartCacheObservability.Tags.Type.Miss))
             {
                 value = await fetchAsync(cancellationToken);
@@ -198,13 +198,13 @@ internal sealed class SmartCache : ISmartCache
             {
                 logger.LogDebug("Key is also available and up-to-date in other locations: {LocationIds}", locationIds);
 
-                ConcurrentBag<string> invalidLocations = [ ];
+                ConcurrentBag<string> invalidLocations = [];
 
                 IReadOnlyDictionary<string, CacheLocation> locations = (await companion.GetActiveLocationsAsync(locationIds))
                     .Concat<CacheLocation>(passiveLocations.Values)
                     .ToDictionary(static x => x.Id);
 
-                IEnumerable<Func<CancellationToken, Task<(CacheLocationOutput<T>, KeyValuePair<string, object?>)?>>> taskFactories = locationIds
+                IEnumerable<Func<CancellationToken, Task<LocationResult<T>>>> taskFactories = locationIds
                     .GroupJoin(
                         locationLatencies,
                         static l => l,
@@ -213,18 +213,15 @@ internal sealed class SmartCache : ISmartCache
                     )
                     .OrderBy(static kv => kv.Latency)
                     .Select(static kv => kv.LocationId)
+                    .Where(locationId => locations.ContainsKey(locationId))
                     .Select(
-                        Func<CancellationToken, Task<(CacheLocationOutput<T>, KeyValuePair<string, object?>)?>> (locationId) =>
+                        Func<CancellationToken, Task<LocationResult<T>>> (locationId) =>
                         {
-                            if (!locations.TryGetValue(locationId, out CacheLocation? location))
-                            {
-                                return static _ => Task.FromResult<(CacheLocationOutput<T>, KeyValuePair<string, object?>)?>(null);
-                            }
+                            CacheLocation location = locations[locationId];
 
                             return async ct =>
                             {
-                                CacheLocationOutput<T>? maybeOutput =
-                                    await location.GetAsync<T>(keyHolder, minimumCreationDate, () => invalidLocations.Add(locationId), ct);
+                                CacheLocationOutput<T>? maybeOutput = await location.GetAsync<T>(keyHolder, minimumCreationDate, () => invalidLocations.Add(locationId), ct);
 
                                 if (maybeOutput is not { } output)
                                 {
@@ -233,34 +230,34 @@ internal sealed class SmartCache : ISmartCache
                                         locationLatencies.TryRemove(locationId, out _);
                                     }
 
-                                    return null;
+                                    return default;
                                 }
 
                                 Latency latency = locationLatencies.GetOrAdd(locationId, static _ => new Latency());
                                 latency.Add(output.LatencyMsec / output.ValueSerializedSize);
 
-                                return (output, location.MetricTag);
+                                return new LocationResult<T>(output, location.MetricTag);
                             };
                         }
                     )
                     .ToArray();
 
-                (CacheLocationOutput<T> Output, KeyValuePair<string, object?> MetricTag)? maybeOutputTagged;
+                LocationResult<T> maybeOutputTagged;
                 try
                 {
                     maybeOutputTagged = await TaskUtils.WhenAnyValid(
-                        taskFactories.ToArray(),
+                        taskFactories,
                         coreOptions.LocationPrefetchCount,
                         coreOptions.LocationMaxParallelism,
                         Expiration.Never,
                         // ReSharper disable once AsyncApostle.AsyncWait
-                        isValid: static t => new ValueTask<bool>(t.Status != TaskStatus.RanToCompletion || t.Result is not null),
+                        isValid: static t => new ValueTask<bool>(t.Status == TaskStatus.RanToCompletion && t.Result.HasValue),
                         cancellationToken: cancellationToken
                     );
                 }
                 catch (InvalidOperationException)
                 {
-                    maybeOutputTagged = null;
+                    maybeOutputTagged = default;
                 }
                 finally
                 {
@@ -270,16 +267,19 @@ internal sealed class SmartCache : ISmartCache
                     }
                 }
 
-                if (maybeOutputTagged is var ((item, valueSerializedSize, latencyMsec), metricTag))
+                if (maybeOutputTagged.HasValue)
                 {
-                    SmartCacheObservability.Instruments.KeySerializedSize.Record(keyHolder.GetAsBytes().LongLength, metricTag);
-                    SmartCacheObservability.Instruments.ValueSerializedSize.Record(valueSerializedSize, metricTag);
-                    SmartCacheObservability.Instruments.Sources.Add(1, metricTag);
-                    SmartCacheObservability.Instruments.CompanionFetchDuration.Underlying.Record(latencyMsec, metricTag);
-                    SmartCacheObservability.Instruments.CompanionFetchRelativeDuration.Record(latencyMsec / valueSerializedSize * 1000, metricTag);
+                    CacheLocationOutput<T> output = maybeOutputTagged.Output;
+                    KeyValuePair<string, object?> metricTag = maybeOutputTagged.MetricTag;
 
-                    SetValue(keyHolder, item, othersCreationDate, dynamicCoreOptions, absExpiration, sldExpiration);
-                    return item!;
+                    SmartCacheObservability.Instruments.KeySerializedSize.Record(keyHolder.GetAsBytes().LongLength, metricTag);
+                    SmartCacheObservability.Instruments.ValueSerializedSize.Record(output.ValueSerializedSize, metricTag);
+                    SmartCacheObservability.Instruments.Sources.Add(1, metricTag);
+                    SmartCacheObservability.Instruments.CompanionFetchDuration.Underlying.Record(output.LatencyMsec, metricTag);
+                    SmartCacheObservability.Instruments.CompanionFetchRelativeDuration.Record(output.LatencyMsec / output.ValueSerializedSize * 1000, metricTag);
+
+                    SetValue(keyHolder, output.Item, othersCreationDate, dynamicCoreOptions, absExpiration, sldExpiration);
+                    return output.Item!;
                 }
             }
             else
@@ -421,7 +421,7 @@ internal sealed class SmartCache : ISmartCache
             : size >= coreOptions.MidPrioritySizeThreshold ? CacheItemPriority.Normal
             : CacheItemPriority.High;
 
-        MemoryCacheEntryOptions entryOptions = new ()
+        MemoryCacheEntryOptions entryOptions = new()
         {
             AbsoluteExpirationRelativeToNow = finalAbsExpiration.IsNever ? null : finalAbsExpiration.Value,
             SlidingExpiration = finalSldExpiration.IsNever ? null : finalSldExpiration.Value,
@@ -574,8 +574,8 @@ internal sealed class SmartCache : ISmartCache
             return;
         }
 
-        CacheMissDescriptor descriptor = new (companion.SelfLocationId, keyHolder.Payload, creationDate, locationId, makeValueTuple?.Invoke());
-        CachePayloadHolder<CacheMissDescriptor> descriptorHolder = new (descriptor, SmartCacheObservability.Tags.Subject.Value);
+        CacheMissDescriptor descriptor = new(companion.SelfLocationId, keyHolder.Payload, creationDate, locationId, makeValueTuple?.Invoke());
+        CachePayloadHolder<CacheMissDescriptor> descriptorHolder = new(descriptor, SmartCacheObservability.Tags.Subject.Value);
 
         foreach (CacheEventNotifier eventNotifier in eventNotifiers)
         {
@@ -682,8 +682,8 @@ internal sealed class SmartCache : ISmartCache
                 return;
             }
 
-            InvalidationDescriptor descriptor = new (companion.SelfLocationId, invalidationRule);
-            CachePayloadHolder<InvalidationDescriptor> descriptorHolder = new (descriptor, SmartCacheObservability.Tags.Subject.Value);
+            InvalidationDescriptor descriptor = new(companion.SelfLocationId, invalidationRule);
+            CachePayloadHolder<InvalidationDescriptor> descriptorHolder = new(descriptor, SmartCacheObservability.Tags.Subject.Value);
             foreach (CacheEventNotifier eventNotifier in eventNotifiers)
             {
                 eventNotifier.NotifyInvalidationAndForget(descriptorHolder);
@@ -727,11 +727,11 @@ internal sealed class SmartCache : ISmartCache
 
     private sealed class ExternalMissDictionary
     {
-        private readonly ConcurrentDictionary<object, Entry> underlying = new ();
+        private readonly ConcurrentDictionary<object, Entry> underlying = new();
 
         public IEnumerable<object> Keys => underlying.Keys;
 
-        private readonly object lockObject = new ();
+        private readonly object lockObject = new();
 
         public Entry? Get(object key)
         {
@@ -741,7 +741,7 @@ internal sealed class SmartCache : ISmartCache
 
         public IEnumerable<string> Remove(object key)
         {
-            return underlying.TryRemove(key, out Entry? entry) ? entry.Locations : [ ];
+            return underlying.TryRemove(key, out Entry? entry) ? entry.Locations : [];
         }
 
         public void RemoveSub(object key, IEnumerable<string> locations)
@@ -774,7 +774,7 @@ internal sealed class SmartCache : ISmartCache
             {
                 if (!underlying.TryGetValue(key, out Entry? entry) || entry.Timestamp < timestamp)
                 {
-                    underlying[key] = new Entry(timestamp, [ location ]);
+                    underlying[key] = new Entry(timestamp, [location]);
                 }
                 else if (!(entry.Timestamp > timestamp))
                 {
@@ -805,5 +805,10 @@ internal sealed class SmartCache : ISmartCache
         }
 
         public int CompareTo(Latency? other) => average.CompareTo(other?.average ?? double.PositiveInfinity);
+    }
+
+    private readonly record struct LocationResult<T>(CacheLocationOutput<T> Output, KeyValuePair<string, object?> MetricTag)
+    {
+        public bool HasValue => Output.Item is not null;
     }
 }
