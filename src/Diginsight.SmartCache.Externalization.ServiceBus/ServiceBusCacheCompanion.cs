@@ -15,6 +15,8 @@ namespace Diginsight.SmartCache.Externalization.ServiceBus;
 
 internal sealed class ServiceBusCacheCompanion : BackgroundService, ICacheCompanion
 {
+    private static readonly Type TClass = typeof(ServiceBusCacheCompanion);
+
     private const string SourcePropertyName = "source";
     private const string DestinationPropertyName = "destination";
     private const string ChunkIndexPropertyName = "chunkIndex";
@@ -296,7 +298,7 @@ internal sealed class ServiceBusCacheCompanion : BackgroundService, ICacheCompan
 
     private async Task InstallAsync(CancellationToken cancellationToken)
     {
-        using Activity? activity = SmartCacheObservability.ActivitySource.StartMethodActivity(logger);
+        using Activity? activity = SmartCacheObservability.ActivitySource.StartMethodActivity(TClass, logger);
 
         string topicName = serviceBusOptions.TopicName;
         string subscriptionName = serviceBusOptions.SubscriptionName;
@@ -479,7 +481,7 @@ internal sealed class ServiceBusCacheCompanion : BackgroundService, ICacheCompan
 
     private async Task ProcessAsync(ServiceBusReceiver receiver, ServiceBusReceivedMessage receivedMessage, CancellationToken stoppingToken)
     {
-        using Activity? activity = SmartCacheObservability.ActivitySource.StartMethodActivity(logger);
+        using Activity? activity = SmartCacheObservability.ActivitySource.StartMethodActivity(TClass, logger);
 
         if (receivedMessage.ApplicationProperties.GetValueOrDefault(SourcePropertyName) is not string emitter)
         {
@@ -705,7 +707,7 @@ internal sealed class ServiceBusCacheCompanion : BackgroundService, ICacheCompan
 
     private async Task UninstallAsync()
     {
-        using Activity? activity = SmartCacheObservability.ActivitySource.StartMethodActivity(logger);
+        using Activity? activity = SmartCacheObservability.ActivitySource.StartMethodActivity(TClass, logger);
 
         try
         {
@@ -767,6 +769,8 @@ internal sealed class ServiceBusCacheCompanion : BackgroundService, ICacheCompan
 
     private sealed class ServiceBusCacheLocation : ActiveCacheLocation
     {
+        private static readonly Type TClass = typeof(ServiceBusCacheLocation);
+
         private readonly ILogger logger;
         private readonly ServiceBusCacheCompanion companion;
 
@@ -787,7 +791,7 @@ internal sealed class ServiceBusCacheCompanion : BackgroundService, ICacheCompan
             CachePayloadHolder<object> keyHolder, DateTimeOffset minimumCreationDate, Action markInvalid, CancellationToken cancellationToken
         )
         {
-            using Activity? activity = SmartCacheObservability.ActivitySource.StartMethodActivity(logger, () => new { key = keyHolder.Payload, minimumCreationDate });
+            using Activity? activity = SmartCacheObservability.ActivitySource.StartMethodActivity(TClass, logger, () => new { key = keyHolder.Payload, minimumCreationDate });
             logger.LogDebug("Sending message for get request to '{Destination}'", Id);
 
             using TimerLap lap = SmartCacheObservability.Instruments.FetchDuration.CreateLap(SmartCacheObservability.Tags.Type.Distributed);

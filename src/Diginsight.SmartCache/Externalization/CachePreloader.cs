@@ -7,6 +7,7 @@ namespace Diginsight.SmartCache.Externalization;
 
 public sealed class CachePreloader : ICachePreloader
 {
+    private static readonly Type TClass = typeof(CachePreloader);
 #if NET
     private static Random SharedRandom
     {
@@ -34,7 +35,7 @@ public sealed class CachePreloader : ICachePreloader
 
     public async Task PreloadAsync<T>(object key, Func<Task<T>> fetchAsync)
     {
-        using Activity? activity = SmartCacheObservability.ActivitySource.StartMethodActivity(logger, () => new { key });
+        using Activity? activity = SmartCacheObservability.ActivitySource.StartMethodActivity(TClass, logger, () => new { key });
 
         CachePayloadHolder<object> keyHolder = new CacheKeyHolder(key);
 
@@ -56,7 +57,7 @@ public sealed class CachePreloader : ICachePreloader
 
     private async Task NotifyAsync<TValue>(CachePayloadHolder<object> keyHolder, DateTimeOffset creationDate, TValue value)
     {
-        using Activity? activity = SmartCacheObservability.ActivitySource.StartMethodActivity(logger, () => new { key = keyHolder.Payload, creationDate });
+        using Activity? activity = SmartCacheObservability.ActivitySource.StartMethodActivity(TClass, logger, () => new { key = keyHolder.Payload, creationDate });
 
         IEnumerable<CacheEventNotifier> eventNotifiers = await companion.GetAllEventNotifiersAsync();
         if (!eventNotifiers.Any())
