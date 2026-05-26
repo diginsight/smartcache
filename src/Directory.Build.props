@@ -12,6 +12,7 @@
 
 	<PropertyGroup>
 		<DiginsightCoreVersion>3.7.*</DiginsightCoreVersion>
+		<!--<DiginsightCoreVersion>3.7.1.13</DiginsightCoreVersion>-->
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(GITHUB_ACTIONS)' != 'true'">
