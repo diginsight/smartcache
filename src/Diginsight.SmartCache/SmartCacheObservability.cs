@@ -6,7 +6,7 @@ namespace Diginsight.SmartCache;
 
 internal static class SmartCacheObservability
 {
-    public static readonly ActivitySource ActivitySource = new (typeof(SmartCacheObservability).Namespace!);
+    public static readonly ActivitySource ActivitySource = new(typeof(SmartCacheObservability).Namespace!);
 
     public static class Instruments
     {
@@ -27,7 +27,7 @@ internal static class SmartCacheObservability
 
         static Instruments()
         {
-            Meter meter = new (ActivitySource.Name);
+            Meter meter = new(ActivitySource.Name);
 
             FetchDuration = meter.CreateTimer("cache.fetch.duration");
             SerializationDuration = meter.CreateTimer("cache.serialization.duration");
@@ -50,39 +50,40 @@ internal static class SmartCacheObservability
     {
         public static class Found
         {
-            public static readonly KeyValuePair<string, object?> True = new ("found", true);
-            public static readonly KeyValuePair<string, object?> False = new ("found", false);
+            public static readonly KeyValuePair<string, object?> True = new("found", true);
+            public static readonly KeyValuePair<string, object?> False = new("found", false);
         }
 
         public static class Type
         {
-            public static readonly KeyValuePair<string, object?> Memory = new ("source_type", "memory");
-            public static readonly KeyValuePair<string, object?> Distributed = new ("source_type", "distributed");
-            public static readonly KeyValuePair<string, object?> Redis = new ("source_type", "redis");
-            public static readonly KeyValuePair<string, object?> Miss = new ("source_type", "miss");
-            public static readonly KeyValuePair<string, object?> Disabled = new ("source_type", "disabled");
-            public static readonly KeyValuePair<string, object?> Preload = new ("source_type", "preload");
-            public static readonly KeyValuePair<string, object?> Direct = new ("source_type", "direct");
+            public static readonly KeyValuePair<string, object?> Memory = new("source_type", "memory");
+            public static readonly KeyValuePair<string, object?> Distributed = new("source_type", "distributed");
+            public static readonly KeyValuePair<string, object?> Redis = new("source_type", "redis");
+            public static readonly KeyValuePair<string, object?> Miss = new("source_type", "miss");
+            public static readonly KeyValuePair<string, object?> Coalesced = new("source_type", "coalesced");
+            public static readonly KeyValuePair<string, object?> Disabled = new("source_type", "disabled");
+            public static readonly KeyValuePair<string, object?> Preload = new("source_type", "preload");
+            public static readonly KeyValuePair<string, object?> Direct = new("source_type", "direct");
         }
 
         public static class Eviction
         {
-            public static readonly KeyValuePair<string, object?> Expired = new ("eviction_reason", "expired");
-            public static readonly KeyValuePair<string, object?> Capacity = new ("eviction_reason", "capacity");
-            public static readonly KeyValuePair<string, object?> Removed = new ("eviction_reason", "removed");
-            public static readonly KeyValuePair<string, object?> Replaced = new ("eviction_reason", "replaced");
+            public static readonly KeyValuePair<string, object?> Expired = new("eviction_reason", "expired");
+            public static readonly KeyValuePair<string, object?> Capacity = new("eviction_reason", "capacity");
+            public static readonly KeyValuePair<string, object?> Removed = new("eviction_reason", "removed");
+            public static readonly KeyValuePair<string, object?> Replaced = new("eviction_reason", "replaced");
         }
 
         public static class Subject
         {
-            public static readonly KeyValuePair<string, object?> Key = new ("subject", "cache_key");
-            public static readonly KeyValuePair<string, object?> Value = new ("subject", "cache_value");
+            public static readonly KeyValuePair<string, object?> Key = new("subject", "cache_key");
+            public static readonly KeyValuePair<string, object?> Value = new("subject", "cache_value");
         }
 
         public static class Operation
         {
-            public static readonly KeyValuePair<string, object?> Serialization = new ("operation", "serialization");
-            public static readonly KeyValuePair<string, object?> Deserialization = new ("operation", "deserialization");
+            public static readonly KeyValuePair<string, object?> Serialization = new("operation", "serialization");
+            public static readonly KeyValuePair<string, object?> Deserialization = new("operation", "deserialization");
         }
     }
 }

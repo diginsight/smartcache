@@ -12,4 +12,7 @@ internal interface IDynamicSmartCacheCoreOptions
     Expiration? SlidingExpiration { get; }
 
     int? MissValueSizeThreshold { get; }
+
+    bool? CoalesceRacingCacheMisses { get; }
+    bool? CoalesceRacingCacheMissesAcrossNodes { get; }
 }

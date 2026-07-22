@@ -31,6 +31,10 @@ internal sealed class SmartCache : ISmartCache
     private readonly ExternalMissDictionary externalMissDictionary = new();
     private readonly ConcurrentDictionary<string, Latency> locationLatencies = new();
 
+    // Single-flight registry: coalesces concurrent racing misses for the same key onto one origin
+    // fetch (opt-in via SmartCacheOperationOptions.CoalesceRacingCacheMisses). Value boxed to object.
+    private readonly ConcurrentDictionary<object, TaskCompletionSource<object?>> inFlightFetches = new();
+
     private long memoryCacheSize = 0;
     private bool warnedModeDowngrade = false;
 
@@ -94,6 +98,18 @@ internal sealed class SmartCache : ISmartCache
 
         IDynamicSmartCacheCoreOptions dynamicCoreOptions = dynamicCoreOptionsMonitor.Get(finalCallerType);
 
+        // Cross-node coalescing implies in-memory coalescing; resolve both with the standard
+        // operation → class-aware → core precedence.
+        bool coalesceCrossNode =
+            finalOperationOptions.CoalesceRacingCacheMissesAcrossNodes
+            ?? dynamicCoreOptions.CoalesceRacingCacheMissesAcrossNodes
+            ?? coreOptions.CoalesceRacingCacheMissesAcrossNodes;
+        bool coalesce =
+            (finalOperationOptions.CoalesceRacingCacheMisses
+                ?? dynamicCoreOptions.CoalesceRacingCacheMisses
+                ?? coreOptions.CoalesceRacingCacheMisses)
+            || coalesceCrossNode;
+
         Expiration? maxAge = finalOperationOptions.MaxAge;
         DateTimeOffset timestamp = Truncate(timeProvider.GetUtcNow());
         DateTimeOffset minimumCreationDate = GetMinimumCreationDate(ref maxAge, timestamp, dynamicCoreOptions);
@@ -109,6 +125,7 @@ internal sealed class SmartCache : ISmartCache
                 finalOperationOptions.AbsoluteExpiration,
                 finalOperationOptions.SlidingExpiration,
                 dynamicCoreOptions,
+                coalesce,
                 cancellationToken
             );
         }
@@ -131,6 +148,29 @@ internal sealed class SmartCache : ISmartCache
         return minimumCreationDate;
     }
 
+    private static async Task<T> AwaitCoalescedAsync<T>(Task<T> task, CancellationToken cancellationToken)
+    {
+#if NET6_0_OR_GREATER
+        return await task.WaitAsync(cancellationToken);
+#else
+        if (!cancellationToken.CanBeCanceled || task.IsCompleted)
+        {
+            return await task;
+        }
+
+        TaskCompletionSource<bool> cancelTcs = new(TaskCreationOptions.RunContinuationsAsynchronously);
+        using (cancellationToken.Register(() => cancelTcs.TrySetResult(true)))
+        {
+            if (await Task.WhenAny(task, cancelTcs.Task).ConfigureAwait(false) != task)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+            }
+        }
+
+        return await task;
+#endif
+    }
+
     private async Task<T> GetAsync<T>(
         CachePayloadHolder<object> keyHolder,
         Func<CancellationToken, Task<T>> fetchAsync,
@@ -139,6 +179,7 @@ internal sealed class SmartCache : ISmartCache
         Expiration? absExpiration,
         Expiration? sldExpiration,
         IDynamicSmartCacheCoreOptions dynamicCoreOptions,
+        bool coalesce,
         CancellationToken cancellationToken
     )
     {
@@ -171,7 +212,8 @@ internal sealed class SmartCache : ISmartCache
             }
         }
 
-        async Task<T> FetchAndSetValueAsync([SuppressMessage("ReSharper", "VariableHidesOuterVariable")] Activity? activity)
+        async Task<T> CoreFetchAndSetAsync(
+            [SuppressMessage("ReSharper", "VariableHidesOuterVariable")] Activity? activity, CancellationToken fetchCancellationToken)
         {
             SmartCacheObservability.Instruments.Sources.Add(1, SmartCacheObservability.Tags.Type.Miss);
             activity?.SetTag("cache.hit", 0);
@@ -180,7 +222,7 @@ internal sealed class SmartCache : ISmartCache
             StrongBox<double> latencyMsecBox = new();
             using (SmartCacheObservability.Instruments.FetchDuration.StartLap(latencyMsecBox, SmartCacheObservability.Tags.Type.Miss))
             {
-                value = await fetchAsync(cancellationToken);
+                value = await fetchAsync(fetchCancellationToken);
             }
 
             long latencyMsec = (long)latencyMsecBox.Value;
@@ -189,6 +231,47 @@ internal sealed class SmartCache : ISmartCache
 
             SetValue(keyHolder, value, timestamp, dynamicCoreOptions, absExpiration, sldExpiration);
             return value;
+        }
+
+        async Task<T> FetchAndSetValueAsync([SuppressMessage("ReSharper", "VariableHidesOuterVariable")] Activity? activity)
+        {
+            if (!coalesce)
+            {
+                return await CoreFetchAndSetAsync(activity, cancellationToken);
+            }
+
+            // Single-flight: the first caller (leader) runs the shared fetch+store once; concurrent
+            // callers (joiners) await the leader's result under their own cancellation token, so one
+            // caller cancelling never aborts the shared fetch.
+            object payload = keyHolder.Payload;
+            TaskCompletionSource<object?> tcs = new(TaskCreationOptions.RunContinuationsAsynchronously);
+            TaskCompletionSource<object?> current = inFlightFetches.GetOrAdd(payload, tcs);
+
+            if (!ReferenceEquals(current, tcs))
+            {
+                SmartCacheObservability.Instruments.Sources.Add(1, SmartCacheObservability.Tags.Type.Coalesced);
+                activity?.SetTag("cache.coalesced", 1);
+                object? joined = await AwaitCoalescedAsync(current.Task, cancellationToken);
+                return (T)joined!;
+            }
+
+            try
+            {
+                T value = await CoreFetchAndSetAsync(activity, CancellationToken.None);
+                tcs.SetResult(value);
+                return value;
+            }
+            catch (Exception exception)
+            {
+                tcs.SetException(exception);
+                throw;
+            }
+            finally
+            {
+                // The entry for this key is always our own tcs until we remove it (GetOrAdd keeps
+                // returning it to joiners; no new leader can register until it is gone).
+                inFlightFetches.TryRemove(payload, out _);
+            }
         }
 
         DateTimeOffset? localCreationDate = localEntry?.CreationDate;

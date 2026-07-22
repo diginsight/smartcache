@@ -19,6 +19,9 @@ internal sealed class DynamicSmartCacheCoreOptions : IDynamicSmartCacheCoreOptio
 
     public int? MissValueSizeThreshold { get; private set; }
 
+    public bool? CoalesceRacingCacheMisses { get; private set; }
+    public bool? CoalesceRacingCacheMissesAcrossNodes { get; private set; }
+
     object IDynamicallyConfigurable.MakeFiller() => new Filler(this);
 
     [SuppressMessage("ReSharper", "UnusedMember.Local")]
@@ -78,6 +81,18 @@ internal sealed class DynamicSmartCacheCoreOptions : IDynamicSmartCacheCoreOptio
             get => filled.MissValueSizeThreshold;
             set => filled.MissValueSizeThreshold = value;
         }
+
+        public bool? CoalesceRacingCacheMisses
+        {
+            get => filled.CoalesceRacingCacheMisses;
+            set => filled.CoalesceRacingCacheMisses = value;
+        }
+
+        public bool? CoalesceRacingCacheMissesAcrossNodes
+        {
+            get => filled.CoalesceRacingCacheMissesAcrossNodes;
+            set => filled.CoalesceRacingCacheMissesAcrossNodes = value;
+        }
     }
 
     [TypeConverter(typeof(ExpirationForceableConverter))]
@@ -99,7 +114,7 @@ internal sealed class DynamicSmartCacheCoreOptions : IDynamicSmartCacheCoreOptio
 
         public override bool CanConvertFrom(ITypeDescriptorContext? context, Type sourceType)
         {
-            return sourceType == typeof (string) || base.CanConvertFrom(context, sourceType);
+            return sourceType == typeof(string) || base.CanConvertFrom(context, sourceType);
         }
 
 #if NET

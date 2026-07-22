@@ -11,6 +11,9 @@ public sealed class SmartCacheCoreOptions : ISmartCacheCoreOptions, IVolatilelyC
     public Expiration AbsoluteExpiration { get; set; } = Expiration.Never;
     public Expiration SlidingExpiration { get; set; } = Expiration.Never;
 
+    public bool CoalesceRacingCacheMisses { get; set; }
+    public bool CoalesceRacingCacheMissesAcrossNodes { get; set; }
+
     public int LocationPrefetchCount { get; set; } = 5;
     public int LocationMaxParallelism { get; set; } = 2;
 

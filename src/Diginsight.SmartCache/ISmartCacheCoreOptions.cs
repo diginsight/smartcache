@@ -18,4 +18,7 @@ public interface ISmartCacheCoreOptions
     long MidPrioritySizeThreshold { get; }
 
     TimeSpan LocalEntryTolerance { get; }
+
+    bool CoalesceRacingCacheMisses { get; }
+    bool CoalesceRacingCacheMissesAcrossNodes { get; }
 }
