@@ -321,9 +321,10 @@ planned.
 ### Why a second flag (not a mode enum)
 
 Rather than a `CoalesceScope` enum, cross-node is a **plain second boolean**
-(`CoalesceRacingCacheMissesAcrossNodes`) layered on Flag 1. This keeps each capability independently
-toggleable per call / per class / globally, matches the requested `SmartCacheOperationOptions` shape,
-and avoids encoding the rejected Redis mode in the type system.
+(`CoalesceRacingCacheMissesAcrossNodes`) that **implies** Flag 1. This keeps each capability
+toggleable per call / per class / globally (in-memory alone, or in-memory + cross-node), matches the
+requested `SmartCacheOperationOptions` shape, and avoids encoding the rejected Redis mode in the type
+system.
 
 ---
 
@@ -368,6 +369,8 @@ and avoids encoding the rejected Redis mode in the type system.
 - **Freshness:** joiner with a longer `MaxAge` accepts the leader value; `forceFetch` opt-out path (if
   enabled) bypasses the registry.
 - **Config resolution:** operation ⟶ dynamic(class-aware) ⟶ core default precedence honoured.
+- **Flag implication:** `CoalesceRacingCacheMissesAcrossNodes = true` with `CoalesceRacingCacheMisses`
+  unset/false still coalesces in-memory (Flag 1 forced on by the implication).
 - **Concurrency stress:** high-parallelism loop asserting registry returns to empty (no leaks).
 
 ---

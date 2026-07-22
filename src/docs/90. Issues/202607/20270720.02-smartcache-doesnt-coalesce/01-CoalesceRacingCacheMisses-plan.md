@@ -135,6 +135,8 @@ no behavioural change yet (v1 registry added in Phase 3).
   add a test for the chosen behaviour.
 - [ ] 5.5 Registry-leak stress test — high parallelism; assert `inFlightFetches` returns to empty.
 - [ ] 5.6 Config-precedence test — operation ⟶ dynamic ⟶ core.
+- [ ] 5.7 Implication test — `CoalesceRacingCacheMissesAcrossNodes = true` with
+  `CoalesceRacingCacheMisses` unset/false still coalesces in-memory (Flag 1 forced on).
 
 **Acceptance:** all edge-case tests green; registry provably drains.
 
