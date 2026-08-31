@@ -3,44 +3,43 @@
 SmartCache consumes Diginsight Telemetry packages from the upstream **GitHub Release** before they
 finish propagating to NuGet.org and the corporate proxy, and publishes its own packages the same way.
 
-`NuGet.Config` at the repository root stays corporate-proxy-only and is never modified. Local package
-priority comes from a generated, git-ignored `src/NuGet.config` overlay.
-
 ## Everyday developer flow
 
 ```powershell
-./eng/Restore-WithUpstream.ps1 -Mode Update
+./eng/Download-PackageRelease.ps1 https://github.com/diginsight/telemetry
+dotnet restore src/Diginsight.SmartCache.slnx --force-evaluate
 ```
 
-This downloads the exact release pinned in [upstream-releases.json](upstream-releases.json), verifies
-every asset, writes the overlay, and refreshes the lock files. Afterwards the solution builds normally
-in the CLI, Visual Studio, and VS Code — no extra flags — because NuGet discovers the overlay next to
-the projects and maps `Diginsight.*` to the verified local feed while everything else keeps coming
-from the corporate proxy.
+The first command resolves the GitHub Release matching the pinned `DiginsightCoreVersion`, verifies
+every asset against the release manifest and `SHA256SUMS`, and publishes the `.nupkg` files into
+`artifacts/packages`.
+
+That folder is declared as a package source in [../NuGet.Config](../NuGet.Config), so an ordinary
+`dotnet restore` — and an ordinary Visual Studio or VS Code build — picks the packages up with no
+extra arguments. Everything not in the folder still comes from the corporate proxy.
+
+## Bumping the upstream version
 
 ```powershell
-./eng/Restore-WithUpstream.ps1 -Mode Locked   # hermetic verification restore, used by CI
-./eng/Restore-WithUpstream.ps1 -Mode Clean    # remove overlay, feed, and isolated cache
+./eng/Download-PackageRelease.ps1 https://github.com/diginsight/telemetry -Version 3.8.0.2
 ```
 
-`Locked` restores with `--locked-mode`, `--no-http-cache`, and a tag-specific package cache under
-`artifacts/restore-cache/`, so a warm machine cache cannot mask a misconfigured source. Run `Clean`
-once the version is publicly available so nobody keeps building against a stale local feed.
+`-Version` repins `DiginsightCoreVersion` in [../src/Directory.Build.props](../src/Directory.Build.props)
+and downloads that release. Review the property change and the regenerated `packages.lock.json` files
+before committing.
 
-Every mode fails closed: if the pinned release is missing, incomplete, tampered with, or from the
-wrong repository, restore never starts and there is no silent fallback to the proxy.
+Tags are four-part (`v3.8.0.1`), while NuGet drops a **zero** fourth component — so `v3.8.0.0`
+publishes as `3.8.0`. The script tries both spellings and, if neither exists, lists the available
+releases.
 
-## Updating the pinned upstream version
+## Why artifacts/packages/.gitkeep is committed
 
-1. Set `sourceTag` and `packageVersion` in [upstream-releases.json](upstream-releases.json).
-2. Set `DiginsightCoreVersion` in [../src/Directory.Build.props](../src/Directory.Build.props) to the
-   same normalized version. The bootstrap refuses to run if the two disagree.
-3. Run `./eng/Restore-WithUpstream.ps1 -Mode Update`.
-4. Review and commit the regenerated `packages.lock.json` files.
+NuGet fails **every** restore with `NU1301` if a configured local source folder does not exist, even
+when the packages are available from the proxy. The error cannot be suppressed with `NoWarn`,
+`RestoreNoWarn`, or `WarningsNotAsErrors`. An *empty* folder is fine.
 
-Tags are four-part (`v3.8.0.1`); NuGet drops only a **zero** fourth component, so `v3.8.0.0` becomes
-`3.8.0` while `v3.8.0.1` stays `3.8.0.1`. Always take the value from
-`Publish-Packages.ps1 -Command ResolveVersion`.
+So the folder is committed and must stay: delete the marker and the repository stops restoring for
+everyone, including people who never use this tooling. Downloaded packages themselves are ignored.
 
 ## Publishing SmartCache
 
@@ -49,8 +48,8 @@ listed in [package-manifest.json](package-manifest.json), publishes and re-verif
 and only then pushes the same `.nupkg` bytes to NuGet.org. The `publish-nuget` job cannot start until
 `build-and-release` proves the remote release matches the staged bytes.
 
-Run the workflow manually to get a dry run: it stops after staging and validation, and never creates
-a release or publishes packages.
+Run the workflow manually for a dry run: it stops after staging and validation, and never creates a
+release or publishes packages.
 
 ## Reruns and recovery
 
@@ -61,18 +60,32 @@ release verifies but NuGet publication fails, rerun the same tag; pushes use `--
 Never replace assets or rebuild a published version — package versions are immutable. Ship a new
 version instead.
 
-## Local validation without a published release
+## If a build fails with NU1403
 
-`-FromDirectory` treats an already staged release directory as the upstream release, so the whole
-chain can be exercised before anything is pushed:
+`NU1403: Package content hash validation failed` means the global package cache holds different bytes
+for a version than the lock file expects. It happens when the same version was previously restored
+from somewhere else — typically a locally built copy of an upstream package.
+
+Purge just that version and restore again:
 
 ```powershell
-./eng/Restore-WithUpstream.ps1 -Mode Update -FromDirectory ../telemetry.02/artifacts/release/v3.8.0.1
+Remove-Item "$env:USERPROFILE\.nuget\packages\diginsight.*\<version>" -Recurse -Force
+dotnet restore src/Diginsight.SmartCache.slnx --force-evaluate
+```
+
+
+## Local validation without a published release
+
+`-FromDirectory` treats an already staged release directory as the release, so the whole chain can be
+exercised before anything is pushed:
+
+```powershell
+./eng/Download-PackageRelease.ps1 https://github.com/diginsight/telemetry -FromDirectory ../telemetry.02/artifacts/release/v3.8.0.1
 ```
 
 ## Tests
 
 ```powershell
 pwsh ./eng/tests/Publish-Packages.Tests.ps1
-pwsh ./eng/tests/Get-UpstreamPackages.Tests.ps1
+pwsh ./eng/tests/Download-PackageRelease.Tests.ps1
 ```

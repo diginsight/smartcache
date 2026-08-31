@@ -74,7 +74,7 @@ jobs:
         run: ./eng/tests/Publish-Packages.Tests.ps1
 
       - name: Test upstream bootstrap tooling
-        run: ./eng/tests/Get-UpstreamPackages.Tests.ps1
+        run: ./eng/tests/Download-PackageRelease.Tests.ps1
 
       - name: Remove previous Release outputs
         run: |
@@ -87,10 +87,13 @@ jobs:
               }
             }
 
-      - name: Bootstrap upstream release and restore
+      - name: Download upstream Diginsight release
         env:
           GH_TOKEN: ${{ github.token }}
-        run: ./eng/Restore-WithUpstream.ps1 -Mode Locked
+        run: ./eng/Download-PackageRelease.ps1 https://github.com/diginsight/telemetry
+
+      - name: Restore
+        run: dotnet restore $env:SOLUTION_SLN --locked-mode -v minimal
 
       - name: Verify working tree is unchanged
         run: |
