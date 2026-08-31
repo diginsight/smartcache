@@ -32,6 +32,20 @@ Tags are four-part (`v3.8.0.1`), while NuGet drops a **zero** fourth component â
 publishes as `3.8.0`. The script tries both spellings and, if neither exists, lists the available
 releases.
 
+## What a fresh clone gets
+
+A clone contains `artifacts/packages/.gitkeep` and nothing else under `artifacts/`, so the local
+source exists but is empty. That is a valid NuGet source and contributes no packages.
+
+| Situation | Plain `dotnet restore` |
+|-----------|------------------------|
+| The pinned version already reached the corporate proxy | Works with no extra steps |
+| The pinned version has **not** propagated yet | Fails with `NU1102` â€” run the download command above first |
+| Someone deleted `artifacts/packages/.gitkeep` | Fails with `NU1301`, always, for everyone |
+
+The second row is the propagation window this tooling exists for, and it is temporary: once the
+version appears on the proxy, the download step is no longer needed.
+
 ## Why artifacts/packages/.gitkeep is committed
 
 NuGet fails **every** restore with `NU1301` if a configured local source folder does not exist, even
