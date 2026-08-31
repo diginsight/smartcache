@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "repository": "diginsight/smartcache",
+  "solution": "src/Diginsight.SmartCache.slnx",
+  "stagingPath": "artifacts/release",
+  "packages": [
+    {
+      "id": "Diginsight.SmartCache",
+      "symbolsRequired": true
+    },
+    {
+      "id": "Diginsight.SmartCache.Externalization.AspNetCore",
+      "symbolsRequired": true
+    },
+    {
+      "id": "Diginsight.SmartCache.Externalization.Http",
+      "symbolsRequired": true
+    },
+    {
+      "id": "Diginsight.SmartCache.Externalization.Kubernetes",
+      "symbolsRequired": true
+    },
+    {
+      "id": "Diginsight.SmartCache.Externalization.Redis",
+      "symbolsRequired": true
+    },
+    {
+      "id": "Diginsight.SmartCache.Externalization.ServiceBus",
+      "symbolsRequired": true
+    }
+  ]
+}
