@@ -1,0 +1,7 @@
+This folder is the local NuGet package source declared in NuGet.Config.
+
+Keep this file committed. NuGet fails every restore with NU1301 if the folder does not exist,
+even when the packages it needs are available from the corporate proxy.
+
+Populate it with: ./eng/Download-PackageRelease.ps1 https://github.com/diginsight/telemetry
+Downloaded packages are ignored by git.
