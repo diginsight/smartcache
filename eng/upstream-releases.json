@@ -1,0 +1,9 @@
+{
+  "schemaVersion": 1,
+  "upstreams": [
+    {
+      "repository": "diginsight/telemetry",
+      "versionProperty": "DiginsightCoreVersion"
+    }
+  ]
+}
