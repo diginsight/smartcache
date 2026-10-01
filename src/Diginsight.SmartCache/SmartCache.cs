@@ -76,7 +76,7 @@ internal sealed class SmartCache : ISmartCache
         CancellationToken cancellationToken
     )
     {
-        using Activity? activity = SmartCacheObservability.ActivitySource.StartMethodActivity(TClass, logger, () => new { key, operationOptions, callerType });
+        using Activity? activity = SmartCacheObservability.ActivitySource.StartMethodActivity(logger, TClass, () => new { key, operationOptions, callerType });
 
         Type finalCallerType = callerType ?? RuntimeUtils.GetCallerType();
         SmartCacheOperationOptions finalOperationOptions = operationOptions ?? new SmartCacheOperationOptions();
@@ -184,7 +184,7 @@ internal sealed class SmartCache : ISmartCache
     )
     {
         using Activity? activity = SmartCacheObservability.ActivitySource.StartMethodActivity(
-            TClass, logger, () => new { key = keyHolder.Payload, timestamp, maybeMinimumCreationDate, absExpiration, sldExpiration }
+            logger, TClass, () => new { key = keyHolder.Payload, timestamp, maybeMinimumCreationDate, absExpiration, sldExpiration }
         );
 
         using TimerLap memoryLap = SmartCacheObservability.Instruments.FetchDuration.CreateLap(SmartCacheObservability.Tags.Type.Memory);
@@ -434,7 +434,7 @@ internal sealed class SmartCache : ISmartCache
     )
     {
         using Activity? activity = SmartCacheObservability.ActivitySource.StartMethodActivity(
-            TClass, logger, () => new { key = keyHolder.Payload, valueType, creationDate, absExpiration, sldExpiration, skipNotify }
+            logger, TClass, () => new { key = keyHolder.Payload, valueType, creationDate, absExpiration, sldExpiration, skipNotify }
         );
 
         object key = keyHolder.Payload;
@@ -590,7 +590,7 @@ internal sealed class SmartCache : ISmartCache
     private void OnEvicted(CachePayloadHolder<object> keyHolder, IValueEntry entry, EvictionReason reason, Expiration expiration)
     {
         using Activity? activity = SmartCacheObservability.ActivitySource.StartMethodActivity(
-            TClass, logger, () => new { key = keyHolder.Payload, reason, expiration }
+            logger, TClass, () => new { key = keyHolder.Payload, reason, expiration }
         );
 
         SmartCacheObservability.Instruments.Evictions.Add(
@@ -678,7 +678,7 @@ internal sealed class SmartCache : ISmartCache
 
     public bool TryGetDirectFromMemory(object key, [NotNullWhen(true)] out Type? type, out object? value)
     {
-        using Activity? activity = SmartCacheObservability.ActivitySource.StartMethodActivity(TClass, logger, () => new { key });
+        using Activity? activity = SmartCacheObservability.ActivitySource.StartMethodActivity(logger, TClass, () => new { key });
 
         if (memoryCache.Get<IValueEntry?>(key) is { } entry)
         {
@@ -711,7 +711,7 @@ internal sealed class SmartCache : ISmartCache
 
     private void Invalidate(IInvalidationRule invalidationRule, bool broadcast)
     {
-        using Activity? activity = SmartCacheObservability.ActivitySource.StartMethodActivity(TClass, logger, () => new { invalidationRule, broadcast });
+        using Activity? activity = SmartCacheObservability.ActivitySource.StartMethodActivity(logger, TClass, () => new { invalidationRule, broadcast });
 
         ICollection<Func<Task>> invalidationCallbacks = new List<Func<Task>>();
 

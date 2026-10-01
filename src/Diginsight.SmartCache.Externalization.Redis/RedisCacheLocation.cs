@@ -33,7 +33,9 @@ public sealed class RedisCacheLocation : PassiveCacheLocation
         CachePayloadHolder<object> keyHolder, DateTimeOffset minimumCreationDate, Action markInvalid, CancellationToken cancellationToken
     )
     {
-        using Activity? activity = SmartCacheObservability.ActivitySource.StartMethodActivity(TClass, logger, () => new { key = keyHolder.Payload, minimumCreationDate });
+        using Activity? activity = SmartCacheObservability.ActivitySource.StartMethodActivity(
+            logger, TClass, () => new { key = keyHolder.Payload, minimumCreationDate }
+        );
 
         if (redisDatabaseAccessor.Database is not { } redisDatabase)
         {
@@ -89,7 +91,7 @@ public sealed class RedisCacheLocation : PassiveCacheLocation
 
     protected override async Task<bool> TryWriteAsync(CachePayloadHolder<object> keyHolder, IValueEntry entry, Expiration expiration)
     {
-        using Activity? activity = SmartCacheObservability.ActivitySource.StartMethodActivity(TClass, logger, () => new { key = keyHolder.Payload, expiration });
+        using Activity? activity = SmartCacheObservability.ActivitySource.StartMethodActivity(logger, TClass, () => new { key = keyHolder.Payload, expiration });
 
         if (redisDatabaseAccessor.Database is not { } redisDatabase)
         {

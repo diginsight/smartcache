@@ -32,7 +32,9 @@ internal sealed class HttpCacheLocation : ActiveCacheLocation
         CachePayloadHolder<object> keyHolder, DateTimeOffset minimumCreationDate, Action markInvalid, CancellationToken cancellationToken
     )
     {
-        using Activity? activity = SmartCacheObservability.ActivitySource.StartMethodActivity(TClass, logger, () => new { key = keyHolder.Payload, minimumCreationDate });
+        using Activity? activity = SmartCacheObservability.ActivitySource.StartMethodActivity(
+            logger, TClass, () => new { key = keyHolder.Payload, minimumCreationDate }
+        );
         using TimerLap lap = SmartCacheObservability.Instruments.FetchDuration.CreateLap(SmartCacheObservability.Tags.Type.Distributed);
 
         try

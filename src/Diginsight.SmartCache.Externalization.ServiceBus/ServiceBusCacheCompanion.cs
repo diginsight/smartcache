@@ -298,7 +298,7 @@ internal sealed class ServiceBusCacheCompanion : BackgroundService, ICacheCompan
 
     private async Task InstallAsync(CancellationToken cancellationToken)
     {
-        using Activity? activity = SmartCacheObservability.ActivitySource.StartMethodActivity(TClass, logger);
+        using Activity? activity = SmartCacheObservability.ActivitySource.StartMethodActivity(logger, TClass);
 
         string topicName = serviceBusOptions.TopicName;
         string subscriptionName = serviceBusOptions.SubscriptionName;
@@ -481,7 +481,7 @@ internal sealed class ServiceBusCacheCompanion : BackgroundService, ICacheCompan
 
     private async Task ProcessAsync(ServiceBusReceiver receiver, ServiceBusReceivedMessage receivedMessage, CancellationToken stoppingToken)
     {
-        using Activity? activity = SmartCacheObservability.ActivitySource.StartMethodActivity(TClass, logger);
+        using Activity? activity = SmartCacheObservability.ActivitySource.StartMethodActivity(logger, TClass);
 
         if (receivedMessage.ApplicationProperties.GetValueOrDefault(SourcePropertyName) is not string emitter)
         {
@@ -707,7 +707,7 @@ internal sealed class ServiceBusCacheCompanion : BackgroundService, ICacheCompan
 
     private async Task UninstallAsync()
     {
-        using Activity? activity = SmartCacheObservability.ActivitySource.StartMethodActivity(TClass, logger);
+        using Activity? activity = SmartCacheObservability.ActivitySource.StartMethodActivity(logger, TClass);
 
         try
         {
@@ -791,7 +791,9 @@ internal sealed class ServiceBusCacheCompanion : BackgroundService, ICacheCompan
             CachePayloadHolder<object> keyHolder, DateTimeOffset minimumCreationDate, Action markInvalid, CancellationToken cancellationToken
         )
         {
-            using Activity? activity = SmartCacheObservability.ActivitySource.StartMethodActivity(TClass, logger, () => new { key = keyHolder.Payload, minimumCreationDate });
+            using Activity? activity = SmartCacheObservability.ActivitySource.StartMethodActivity(
+                logger, TClass, () => new { key = keyHolder.Payload, minimumCreationDate }
+            );
             logger.LogDebug("Sending message for get request to '{Destination}'", Id);
 
             using TimerLap lap = SmartCacheObservability.Instruments.FetchDuration.CreateLap(SmartCacheObservability.Tags.Type.Distributed);
